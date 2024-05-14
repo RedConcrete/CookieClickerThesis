@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
-[Serializable]
 public class Player : MonoBehaviour
 {
     public string Id = Guid.NewGuid().ToString();
@@ -17,8 +16,18 @@ public class Player : MonoBehaviour
     public int Chocolate;
     public int Milk;
 
+    public static Player _instance { get; private set; }
+
     private void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            _instance = this;
+        }
     }
 
     public void ProduceCookies()
