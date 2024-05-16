@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
+using Unity.VisualScripting;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,29 +10,21 @@ public class Player : MonoBehaviour
 {
     public string Id = Guid.NewGuid().ToString();
     public int Cookies = 100;
-    public int Sugar;
-    public int Flour;
-    public int Eggs;
-    public int Butter;
-    public int Chocolate;
-    public int Milk;
+    public int Sugar = 10;
+    public int Flour = 10;
+    public int Eggs = 10;
+    public int Butter = 10;
+    public int Chocolate = 10;
+    public int Milk = 10;
 
-    public static Player _instance { get; private set; }
+    public static Player _instance;
 
-    private void Awake()
+    public static Player GetInstance()
     {
-        if (_instance != null && _instance != this)
+        if (_instance == null)
         {
-            Destroy(this);
+            _instance = new Player();
         }
-        else
-        {
-            _instance = this;
-        }
-    }
-
-    public void ProduceCookies()
-    {
-        Cookies++;
+        return _instance;
     }
 }

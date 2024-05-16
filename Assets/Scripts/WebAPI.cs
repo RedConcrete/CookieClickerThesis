@@ -14,7 +14,7 @@ public class WebAPI : MonoBehaviour
 
     public WebAPI()
     {
-       
+
     }
 
     string baseUrl = "https://localhost:44392/api/server";
@@ -26,7 +26,7 @@ public class WebAPI : MonoBehaviour
         www.uploadHandler = new UploadHandlerRaw(playerData);
         www.SetRequestHeader("Content-Type", "application/json");
         yield return www.SendWebRequest();
-        
+
 
         if (www.result != UnityWebRequest.Result.Success)
         {
@@ -42,7 +42,6 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPlayer(string id)
     {
-        Debug.Log("GetPlayer");
         string url = baseUrl + "/getPlayer?id=" + id;
         UnityWebRequest www = new UnityWebRequest(url, "Get");
         yield return www.SendWebRequest();
@@ -54,7 +53,7 @@ public class WebAPI : MonoBehaviour
         else
         {
             Player player = JsonUtility.FromJson<Player>(www.downloadHandler.text);
-            Debug.Log(player);
+            Debug.Log(player.Cookies);
             Debug.Log(www.result + " while getting Player by ID");
         }
     }

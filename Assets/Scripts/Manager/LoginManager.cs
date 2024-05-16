@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 public class LoginManager : MonoBehaviour
 {
-    private Player p;
+
     private string pData;
     private WebAPI webAPI = new WebAPI();
     private OwnSceneManager ownSceneManager;
@@ -19,10 +19,9 @@ public class LoginManager : MonoBehaviour
         ownSceneManager = GetComponent<OwnSceneManager>();
     }
 
-   public void Login()
+    public void Login()
     {
-        Debug.Log(playerTextField.text);
-        if(playerTextField.text != "")
+        if (playerTextField.text != "")
         {
             StartCoroutine(webAPI.GetPlayer(playerTextField.text));
             ownSceneManager.SwitchScene(1);
@@ -34,9 +33,15 @@ public class LoginManager : MonoBehaviour
     }
     public void Register()
     {
-        p = new Player();
+        Player p = new Player();
         pData = JsonUtility.ToJson(p);
         StartCoroutine(webAPI.PostPlayer(pData));
         ownSceneManager.SwitchScene(1);
+    }
+
+    public void Logout() {
+    
+    
+    
     }
 }
