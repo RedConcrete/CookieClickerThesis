@@ -1,60 +1,130 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager.Requests;
 using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
+using UnityEngine.Experimental.AI;
 using UnityEngine.Networking;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class WebAPI : MonoBehaviour
 {
+    public static WebAPI Instance { get; private set; }
+    public string Id = Guid.NewGuid().ToString();
 
-    public WebAPI()
+    private Player player;
+    private OwnSceneManager ownSceneManager = new OwnSceneManager();
+    private string baseUrl = "https://localhost:44392/api/server";
+
+    private void Awake()
     {
-
-    }
-
-    string baseUrl = "https://localhost:44392/api/server";
-    public IEnumerator PostPlayer(string player)
-    {
-        string url = baseUrl + "/createPlayer";
-        byte[] playerData = Encoding.UTF8.GetBytes(player);
-        UnityWebRequest www = new UnityWebRequest(url, "Post");
-        www.uploadHandler = new UploadHandlerRaw(playerData);
-        www.SetRequestHeader("Content-Type", "application/json");
-        yield return www.SendWebRequest();
-
-
-        if (www.result != UnityWebRequest.Result.Success)
+        if (Instance != null)
         {
-            Debug.LogError(www.error + " while creating Player");
+            Debug.Log("Destroying duplicate WebAPI instance.");
+            Destroy(gameObject);
         }
         else
         {
-            Debug.Log(www.result + " while creating Player");
-            Debug.Log(player);
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-        www.Dispose();
+    }
+
+    public IEnumerator PostPlayer()
+    {
+        Debug.Log("PostPlayer");
+        string url = baseUrl + "/createPlayer";
+        byte[] playerData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(player = new Player()));
+
+        UnityWebRequest webRequest = new UnityWebRequest(url, "Post");
+        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(webRequest.error + " while creating Player");
+        }
+        else
+        {
+            Debug.Log(webRequest.result + " while creating Player");
+            ownSceneManager.SwitchScene(1);
+        }
+        webRequest.Dispose();
     }
 
     public IEnumerator GetPlayer(string id)
     {
+        Debug.Log("GetPlayer");
         string url = baseUrl + "/getPlayer?id=" + id;
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        {
+            yield return webRequest.SendWebRequest();
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                    Debug.LogError(String.Format("ERROR", webRequest.error));
+                    break;
+                case UnityWebRequest.Result.Success:
+                    string playerJsonData = webRequest.downloadHandler.text;
+                    Debug.Log(playerJsonData);
+                    JsonUtility.FromJsonOverwrite(playerJsonData, player = new Player());
+                    ownSceneManager.SwitchScene(1);
+                    break;
+            }
+        }
+    }
+
+    public IEnumerator UpdatePlayer(string player)
+    {
+        Debug.Log("UpdatePlayer");
+        string url = baseUrl + "/updatePlayer";
+        byte[] playerData = Encoding.UTF8.GetBytes(player);
+
+        UnityWebRequest webRequest = new UnityWebRequest(url, "Put");
+        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(webRequest.error + " while updating Player");
+        }
+        else
+        {
+            Debug.Log(webRequest.result + " while updating Player");
+            Debug.Log(player);
+        }
+        webRequest.Dispose();
+    }
+
+    public IEnumerator CheckServer()
+    {
+        Debug.Log("CheckServer");
+        string url = baseUrl + "/";
         UnityWebRequest www = new UnityWebRequest(url, "Get");
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError(www.error + " while getting Player by ID");
+            Debug.LogError(www.error + " No Connection to Server found!");
         }
         else
         {
-            Player player = JsonUtility.FromJson<Player>(www.downloadHandler.text);
-            Debug.Log(player.Cookies);
-            Debug.Log(www.result + " while getting Player by ID");
+            Debug.Log(www.result + " Server is Online!");
         }
+    }
+
+    public Player GetLoginPlayer()
+    {
+        return player;
     }
 }

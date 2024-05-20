@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
-public class Player : MonoBehaviour
+[System.Serializable]
+public class Player
 {
     public string Id = Guid.NewGuid().ToString();
     public int Cookies = 100;
@@ -16,15 +17,4 @@ public class Player : MonoBehaviour
     public int Butter = 10;
     public int Chocolate = 10;
     public int Milk = 10;
-
-    public static Player _instance;
-
-    public static Player GetInstance()
-    {
-        if (_instance == null)
-        {
-            _instance = new Player();
-        }
-        return _instance;
-    }
 }
