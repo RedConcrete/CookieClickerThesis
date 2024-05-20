@@ -30,13 +30,13 @@ public class GameManager : MonoBehaviour
 
     public void UpdateRecources()
     {
-        cookie_Text.text = p.Cookies.ToString();
-        sugar_Text.text = p.Sugar.ToString();
-        flour_Text.text = p.Flour.ToString();
-        eggs_Text.text = p.Eggs.ToString();
-        butter_Text.text = p.Butter.ToString();
-        chocolate_Text.text = p.Chocolate.ToString();
-        milk_Text.text = p.Milk.ToString();
+        cookie_Text.text = p.cookies.ToString();
+        sugar_Text.text = p.sugar.ToString();
+        flour_Text.text = p.flour.ToString();
+        eggs_Text.text = p.eggs.ToString();
+        butter_Text.text = p.butter.ToString();
+        chocolate_Text.text = p.chocolate.ToString();
+        milk_Text.text = p.milk.ToString();
     }
 
     public void UpdatePlayerData()
@@ -49,15 +49,15 @@ public class GameManager : MonoBehaviour
     {
         if (int.TryParse(amount_InputField.text, out int amount))
         {
-            if (p.Sugar >= 10 * amount && p.Flour >= 10 * amount && p.Eggs >= 10 * amount && p.Butter >= 10 * amount && p.Chocolate >= 10 * amount && p.Milk >= 10 * amount)
+            if (p.sugar >= 10 * amount && p.flour >= 10 * amount && p.eggs >= 10 * amount && p.butter >= 10 * amount && p.chocolate >= 10 * amount && p.milk >= 10 * amount)
             {
-                p.Cookies = p.Cookies + (100 * amount);
-                p.Sugar = p.Sugar - 10 * amount;
-                p.Flour = p.Flour - 10 * amount;
-                p.Eggs = p.Eggs - 10 * amount;
-                p.Butter = p.Butter - 10 * amount;
-                p.Chocolate = p.Chocolate - 10 * amount;
-                p.Milk = p.Milk - 10 * amount;
+                p.cookies = p.cookies + (100 * amount);
+                p.sugar = p.sugar - 10 * amount;
+                p.flour = p.flour - 10 * amount;
+                p.eggs = p.eggs - 10 * amount;
+                p.butter = p.butter - 10 * amount;
+                p.chocolate = p.chocolate - 10 * amount;
+                p.milk = p.milk - 10 * amount;
                 UpdateRecources();
                 UpdatePlayerData();
             }
