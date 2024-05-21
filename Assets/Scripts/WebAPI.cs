@@ -19,6 +19,7 @@ public class WebAPI : MonoBehaviour
     public string Id = Guid.NewGuid().ToString();
 
     private Player player;
+    private Market market;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
     private string baseUrl = "https://localhost:44392/api/server";
 
@@ -38,7 +39,6 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator PostPlayer()
     {
-        Debug.Log("PostPlayer");
         string url = baseUrl + "/createPlayer";
         byte[] playerData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(player = new Player()));
 
@@ -61,7 +61,6 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPlayer(string id)
     {
-        Debug.Log("GetPlayer");
         string url = baseUrl + "/getPlayer?id=" + id;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
@@ -85,7 +84,6 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator UpdatePlayer(string player)
     {
-        Debug.Log("UpdatePlayer");
         string url = baseUrl + "/updatePlayer";
         byte[] playerData = Encoding.UTF8.GetBytes(player);
 
@@ -100,7 +98,6 @@ public class WebAPI : MonoBehaviour
         }
         else
         {
-            Debug.Log(webRequest.result + " while updating Player");
             Debug.Log(player);
         }
         webRequest.Dispose();
@@ -120,6 +117,28 @@ public class WebAPI : MonoBehaviour
         else
         {
             Debug.Log(www.result + " Server is Online!");
+        }
+    }
+
+    public IEnumerator GetPrices()
+    {
+        string url = baseUrl + "/getMarket";
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        {
+            yield return webRequest.SendWebRequest();
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                    Debug.LogError(String.Format("ERROR", webRequest.error));
+                    break;
+                case UnityWebRequest.Result.Success:
+                    string marketJsonData = webRequest.downloadHandler.text;
+                    Debug.Log(marketJsonData);
+                    JsonUtility.FromJsonOverwrite(marketJsonData, market = new Market());
+                    break;
+            }
         }
     }
 

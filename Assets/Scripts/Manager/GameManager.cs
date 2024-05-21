@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Versioning;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Rendering;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,8 +17,23 @@ public class GameManager : MonoBehaviour
     public TMP_Text chocolate_Text;
     public TMP_Text milk_Text;
 
+    [Header("Timer:")]
+    public TMP_Text updateTime_Text;
+    public float updateTime = 60;
+    public float timeRemaining = 60;
+    public bool timerIsRunning = false;
+
+
     [Header("AmountField:")]
     public TMP_InputField amount_InputField;
+
+    [Header("ProduceAmount:")]
+    public int sugarIncreaseAmount = 1;
+    public int flourIncreaseAmount = 1;
+    public int eggsIncreaseAmount = 1;
+    public int butterIncreaseAmount = 1;
+    public int chocolateIncreaseAmount = 1;
+    public int milkIncreaseAmount = 1;
 
     private Player p;
     private string pData;
@@ -24,8 +41,35 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        timerIsRunning = true;
         p = WebAPI.Instance.GetLoginPlayer();
         UpdateRecources();
+    }
+
+    private void Update()
+    {
+        if (timerIsRunning)
+        {
+            if (timeRemaining > 0)
+            {
+                timeRemaining -= Time.deltaTime;
+                DisplayTime(timeRemaining);
+            }
+            else
+            {
+                timeRemaining = updateTime;
+                StartCoroutine(WebAPI.Instance.GetPrices());
+                UpdatePlayerData();
+            }
+        }
+    }
+
+    void DisplayTime(float timeToDisplay)
+    {
+        timeToDisplay += 1;
+        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
+        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+        updateTime_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
     public void UpdateRecources()
@@ -72,8 +116,45 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void MakeSugar()
+    {
+        p.sugar = p.sugar + sugarIncreaseAmount;
+        UpdateRecources();
+    }
+
+    public void MakeFlour()
+    {
+        p.flour = p.flour + flourIncreaseAmount;
+        UpdateRecources();
+    }
+
+    public void MakeEggs()
+    {
+        p.eggs = p.eggs + eggsIncreaseAmount;
+        UpdateRecources();
+    }
+
+    public void MakeButter()
+    {
+        p.butter = p.butter + butterIncreaseAmount;
+        UpdateRecources();
+    }
+
+    public void MakeChocolate()
+    {
+        p.chocolate = p.chocolate + chocolateIncreaseAmount;
+        UpdateRecources();
+    }
+
+    public void MakeMilk()
+    {
+        p.milk = p.milk + milkIncreaseAmount;
+        UpdateRecources();
+    }
+
     public void Logout()
     {
+        UpdatePlayerData();
         ownSceneManager.SwitchScene(0);
     }
 }

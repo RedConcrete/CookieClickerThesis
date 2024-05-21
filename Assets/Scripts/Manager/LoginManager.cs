@@ -30,4 +30,9 @@ public class LoginManager : MonoBehaviour
             Debug.LogError("WebAPI instance is not initialized!");
         }
     }
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }
