@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using TMPro;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
@@ -25,7 +26,9 @@ public class GameManager : MonoBehaviour
 
 
     [Header("AmountField:")]
-    public TMP_InputField amount_InputField;
+    public TMP_InputField amountCookies_InputField;
+    public TMP_InputField amountCookiesBuyAndSell_InputField;
+    public TMP_InputField amountRecBuyAndSell_InputField;
 
     [Header("ProduceAmount:")]
     public int sugarIncreaseAmount = 1;
@@ -37,10 +40,17 @@ public class GameManager : MonoBehaviour
 
     private Player p;
     private string pData;
+    private int initialAmount = 1;
+    private int currentCreateCookiesAmount = 1;
+    private int currentBuyAndSellCookiesAmount = 1;
+    private int currentBuyAndSellRecAmount = 1;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
 
     private void Start()
     {
+        amountCookies_InputField.text = initialAmount.ToString();
+        amountCookiesBuyAndSell_InputField.text = initialAmount.ToString();
+        amountRecBuyAndSell_InputField.text = initialAmount.ToString();
         timerIsRunning = true;
         p = WebAPI.Instance.GetLoginPlayer();
         UpdateRecources();
@@ -91,28 +101,21 @@ public class GameManager : MonoBehaviour
 
     public void ProduceCookies()
     {
-        if (int.TryParse(amount_InputField.text, out int amount))
+        if (p.sugar >= 10 * currentCreateCookiesAmount && p.flour >= 10 * currentCreateCookiesAmount && p.eggs >= 10 * currentCreateCookiesAmount && p.butter >= 10 * currentCreateCookiesAmount && p.chocolate >= 10 * currentCreateCookiesAmount && p.milk >= 10 * currentCreateCookiesAmount)
         {
-            if (p.sugar >= 10 * amount && p.flour >= 10 * amount && p.eggs >= 10 * amount && p.butter >= 10 * amount && p.chocolate >= 10 * amount && p.milk >= 10 * amount)
-            {
-                p.cookies = p.cookies + (100 * amount);
-                p.sugar = p.sugar - 10 * amount;
-                p.flour = p.flour - 10 * amount;
-                p.eggs = p.eggs - 10 * amount;
-                p.butter = p.butter - 10 * amount;
-                p.chocolate = p.chocolate - 10 * amount;
-                p.milk = p.milk - 10 * amount;
-                UpdateRecources();
-                UpdatePlayerData();
-            }
-            else
-            {
-                Debug.Log("Not enough Resources");
-            }
+            p.cookies = p.cookies + (100 * currentCreateCookiesAmount);
+            p.sugar = p.sugar - 10 * currentCreateCookiesAmount;
+            p.flour = p.flour - 10 * currentCreateCookiesAmount;
+            p.eggs = p.eggs - 10 * currentCreateCookiesAmount;
+            p.butter = p.butter - 10 * currentCreateCookiesAmount;
+            p.chocolate = p.chocolate - 10 * currentCreateCookiesAmount;
+            p.milk = p.milk - 10 * currentCreateCookiesAmount;
+            UpdateRecources();
+            UpdatePlayerData();
         }
         else
         {
-            Debug.LogError($"Attempted conversion of {amount_InputField.text} failed.");
+            Debug.Log("Not enough Resources");
         }
     }
 
@@ -157,4 +160,46 @@ public class GameManager : MonoBehaviour
         UpdatePlayerData();
         ownSceneManager.SwitchScene(0);
     }
+
+    public void AddAmountCreateCookies(int amount)
+    {
+        if (currentCreateCookiesAmount >= 0 && currentCreateCookiesAmount + amount >= 0)
+        {
+            currentCreateCookiesAmount += amount;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+        }
+        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+    }
+
+    public void AddAmountBuyAndSellCookies(int amount)
+    {
+        if (currentBuyAndSellCookiesAmount >= 0 && currentBuyAndSellCookiesAmount + amount >= 0)
+        {
+            currentBuyAndSellCookiesAmount += amount;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+        }
+        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+
+    }
+
+    public void AddAmountBuyAndSellRec(int amount)
+    {
+        if (currentBuyAndSellRecAmount >= 0 && currentBuyAndSellRecAmount + amount >= 0)
+        {
+            currentBuyAndSellRecAmount += amount;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+        }
+        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+    }
+
+    public void Buy()
+    {
+
+    }
+
+    public void Sell()
+    {
+
+    }
+
 }

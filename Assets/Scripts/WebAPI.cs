@@ -142,6 +142,31 @@ public class WebAPI : MonoBehaviour
         }
     }
 
+    public IEnumerator PostBuy()
+    {
+        string url = baseUrl + "/createPlayer";
+        byte[] playerData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(player = new Player()));
+
+        UnityWebRequest webRequest = new UnityWebRequest(url, "Post");
+        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        yield return webRequest.SendWebRequest();
+
+        webRequest.Dispose();
+    }
+    public IEnumerator PostSell()
+    {
+        string url = baseUrl + "/createPlayer";
+        byte[] playerData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(player = new Player()));
+
+        UnityWebRequest webRequest = new UnityWebRequest(url, "Post");
+        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        yield return webRequest.SendWebRequest();
+
+        webRequest.Dispose();
+    }
+
     public Player GetLoginPlayer()
     {
         return player;
