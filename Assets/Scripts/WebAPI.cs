@@ -1,17 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Net;
-using System.Runtime.Serialization.Json;
+using System.Net.NetworkInformation;
 using System.Text;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
-using UnityEngine.Experimental.AI;
 using UnityEngine.Networking;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
+
 
 public class WebAPI : MonoBehaviour
 {
@@ -19,7 +15,7 @@ public class WebAPI : MonoBehaviour
     public string Id = Guid.NewGuid().ToString();
 
     private Player player;
-    private Market market;
+    List<Market> marketList;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
     private string baseUrl = "https://localhost:44392/api/server";
 
@@ -53,7 +49,7 @@ public class WebAPI : MonoBehaviour
         }
         else
         {
-            Debug.Log(webRequest.result + " while creating Player");
+            //Debug.Log(webRequest.result + " while creating Player");
             ownSceneManager.SwitchScene(1);
         }
         webRequest.Dispose();
@@ -96,10 +92,6 @@ public class WebAPI : MonoBehaviour
         {
             Debug.LogError(webRequest.error + " while updating Player");
         }
-        else
-        {
-            Debug.Log(player);
-        }
         webRequest.Dispose();
     }
 
@@ -120,9 +112,9 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator GetPrices()
+    public IEnumerator GetPrices(int amount)
     {
-        string url = baseUrl + "/getMarket";
+        string url = baseUrl + "/getMarket?amountToGet=" + amount;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -135,8 +127,8 @@ public class WebAPI : MonoBehaviour
                     break;
                 case UnityWebRequest.Result.Success:
                     string marketJsonData = webRequest.downloadHandler.text;
-                    Debug.Log(marketJsonData);
-                    JsonUtility.FromJsonOverwrite(marketJsonData, market = new Market());
+                    marketList = null;
+                    marketList = JsonConvert.DeserializeObject<List<Market>>(marketJsonData);
                     break;
             }
         }
@@ -170,5 +162,10 @@ public class WebAPI : MonoBehaviour
     public Player GetLoginPlayer()
     {
         return player;
+    }
+
+    public List<Market> GetMarket()
+    {
+        return marketList;
     }
 }

@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Market
 {
+    public DateTime date;
     public int sugarPrice;
     public int flourPrice;
     public int eggsPrice;

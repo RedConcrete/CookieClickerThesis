@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Versioning;
+using System;
 using TMPro;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,8 +17,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Timer:")]
     public TMP_Text updateTime_Text;
-    public float updateTime = 60;
-    public float timeRemaining = 60;
+    public int updateTime = 10;
+    public float timeRemaining = -1;
     public bool timerIsRunning = false;
 
 
@@ -29,6 +26,7 @@ public class GameManager : MonoBehaviour
     public TMP_InputField amountCookies_InputField;
     public TMP_InputField amountCookiesBuyAndSell_InputField;
     public TMP_InputField amountRecBuyAndSell_InputField;
+    public int amountToGetGraph = 20;
 
     [Header("ProduceAmount:")]
     public int sugarIncreaseAmount = 1;
@@ -38,40 +36,65 @@ public class GameManager : MonoBehaviour
     public int chocolateIncreaseAmount = 1;
     public int milkIncreaseAmount = 1;
 
+    [Header("Objects:")]
+    public GraphManager graphManager;
     private Player p;
+
     private string pData;
     private int initialAmount = 1;
     private int currentCreateCookiesAmount = 1;
     private int currentBuyAndSellCookiesAmount = 1;
     private int currentBuyAndSellRecAmount = 1;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
+    private Scene scene;
+    private int idleScene = 2;
+    private int marketScene = 1;
+
 
     private void Start()
     {
-        amountCookies_InputField.text = initialAmount.ToString();
-        amountCookiesBuyAndSell_InputField.text = initialAmount.ToString();
-        amountRecBuyAndSell_InputField.text = initialAmount.ToString();
-        timerIsRunning = true;
+        scene = SceneManager.GetActiveScene();
+        if (scene.buildIndex == idleScene)
+        {
+            amountCookies_InputField.text = initialAmount.ToString();
+            amountCookiesBuyAndSell_InputField.text = initialAmount.ToString();
+            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
+        }
         p = WebAPI.Instance.GetLoginPlayer();
         UpdateRecources();
     }
 
     private void Update()
     {
-        if (timerIsRunning)
+        if (scene.buildIndex == marketScene)
         {
-            if (timeRemaining > 0)
+            if (timerIsRunning)
             {
                 timeRemaining -= Time.deltaTime;
                 DisplayTime(timeRemaining);
+
+                if (timeRemaining < 0)
+                {
+                    timeRemaining = updateTime;
+                    StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
+                    graphManager.UpdateGraph();
+                    UpdatePlayerData();
+                }
             }
-            else
+            if (timeRemaining >= -1.0 && timerIsRunning == false)
             {
-                timeRemaining = updateTime;
-                StartCoroutine(WebAPI.Instance.GetPrices());
-                UpdatePlayerData();
+                SyncTimer();
             }
         }
+    }
+
+    async void SyncTimer()
+    {
+        StartCoroutine(WebAPI.Instance.GetPrices(1));
+        while (WebAPI.Instance.GetMarket() == null) await Task.Delay(10);
+        TimeSpan timeSpan = DateTime.UtcNow - WebAPI.Instance.GetMarket()[0].date;
+        timeRemaining = timeSpan.Minutes / 60;
+        timerIsRunning = true;
     }
 
     void DisplayTime(float timeToDisplay)
@@ -153,6 +176,14 @@ public class GameManager : MonoBehaviour
     {
         p.milk = p.milk + milkIncreaseAmount;
         UpdateRecources();
+    }
+
+    public void SwitchScreen(int sceneIndex)
+    {
+        if (scene.buildIndex != sceneIndex)
+        {
+            ownSceneManager.SwitchScene(sceneIndex);
+        }
     }
 
     public void Logout()
