@@ -702,7 +702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -2.5025024, y: -52.49997}
+  m_AnchoredPosition: {x: 0, y: 52.50004}
   m_SizeDelta: {x: -5.0051, y: -105}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &105117444
@@ -1081,7 +1081,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -152.46, y: -143}
+  m_AnchoredPosition: {x: -156.92001, y: -23.999985}
   m_SizeDelta: {x: 304.93, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &232081765
@@ -1130,8 +1130,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: AddAmountBuyAndSellRec
-        m_Mode: 3
+        m_MethodName: Sell
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2050,7 +2050,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -113.14332, y: 26.750004}
+  m_AnchoredPosition: {x: -110.19, y: 38}
   m_SizeDelta: {x: 384.4684, y: 39.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &373610499
@@ -2972,8 +2972,8 @@ GameObject:
   - component: {fileID: 457935264}
   - component: {fileID: 457935263}
   m_Layer: 5
-  m_Name: CreateChocolateButton
-  m_TagString: Untagged
+  m_Name: chocolate
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2995,8 +2995,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0045166016, y: -62.14895}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -6.9999537, y: -87.99999}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &457935263
 MonoBehaviour:
@@ -3042,16 +3042,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeChocolate
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: chocolate
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &457935264
@@ -3067,7 +3067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3496,139 +3496,6 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 477921639}
-  m_CullTransparentMesh: 1
---- !u!1 &497725086
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 497725087}
-  - component: {fileID: 497725090}
-  - component: {fileID: 497725089}
-  - component: {fileID: 497725088}
-  m_Layer: 5
-  m_Name: CreateCookiesButton
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &497725087
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497725086}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1031172719}
-  m_Father: {fileID: 996035219}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.003967285, y: 2.850975}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &497725088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497725086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 497725089}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: ProduceCookies
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &497725089
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497725086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &497725090
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497725086}
   m_CullTransparentMesh: 1
 --- !u!1 &514862865
 GameObject:
@@ -5443,8 +5310,8 @@ GameObject:
   - component: {fileID: 990081020}
   - component: {fileID: 990081019}
   m_Layer: 5
-  m_Name: CreateFlourButton
-  m_TagString: Untagged
+  m_Name: flour
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5466,8 +5333,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0044555664, y: 61.849922}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -6.9999537, y: 81.99999}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &990081019
 MonoBehaviour:
@@ -5513,16 +5380,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeFlour
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: flour
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &990081020
@@ -5538,7 +5405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -5573,7 +5440,7 @@ GameObject:
   m_Component:
   - component: {fileID: 996035219}
   m_Layer: 5
-  m_Name: CreateButtonsRec
+  m_Name: MarketRec
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5591,7 +5458,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 497725087}
   - {fileID: 2132887712}
   - {fileID: 990081018}
   - {fileID: 1452228604}
@@ -5602,145 +5468,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: -270}
-  m_SizeDelta: {x: 219.88, y: 173.7}
+  m_AnchoredPosition: {x: 741, y: 165}
+  m_SizeDelta: {x: 58.6801, y: 361.7665}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1031172718
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1031172719}
-  - component: {fileID: 1031172721}
-  - component: {fileID: 1031172720}
-  m_Layer: 5
-  m_Name: Text (TMP)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1031172719
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1031172718}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 497725087}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1031172720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1031172718}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: 'C
-
-'
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 1
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &1031172721
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1031172718}
-  m_CullTransparentMesh: 1
 --- !u!1 &1064892234
 GameObject:
   m_ObjectHideFlags: 0
@@ -6007,7 +5737,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1165755149
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6513,7 +6243,7 @@ MonoBehaviour:
   amountCookies_InputField: {fileID: 0}
   amountCookiesBuyAndSell_InputField: {fileID: 1407287535}
   amountRecBuyAndSell_InputField: {fileID: 1433760347}
-  amountToGetGraph: 22
+  amountToGetGraph: 21
   sugarIncreaseAmount: 1
   flourIncreaseAmount: 1
   eggsIncreaseAmount: 1
@@ -7650,7 +7380,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 152.46, y: -143}
+  m_AnchoredPosition: {x: 148, y: -24}
   m_SizeDelta: {x: 304.92, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1445232995
@@ -7699,8 +7429,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: AddAmountBuyAndSellRec
-        m_Mode: 3
+        m_MethodName: Buy
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -7760,8 +7490,8 @@ GameObject:
   - component: {fileID: 1452228606}
   - component: {fileID: 1452228605}
   m_Layer: 5
-  m_Name: CreateEggsButton
-  m_TagString: Untagged
+  m_Name: eggs
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7783,8 +7513,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 85.00391, y: 52.850998}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -6.9999537, y: 23.999992}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1452228605
 MonoBehaviour:
@@ -7830,16 +7560,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeEggs
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: eggs
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1452228606
@@ -7855,7 +7585,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7995,8 +7725,8 @@ GameObject:
   - component: {fileID: 1537875893}
   - component: {fileID: 1537875892}
   m_Layer: 5
-  m_Name: CreateMilkButton
-  m_TagString: Untagged
+  m_Name: milk
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8018,8 +7748,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 85.00397, y: -47.14895}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -6.9999537, y: -144}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1537875892
 MonoBehaviour:
@@ -8065,16 +7795,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeMilk
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: milk
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1537875893
@@ -8090,7 +7820,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -9376,8 +9106,8 @@ GameObject:
   - component: {fileID: 2001029626}
   - component: {fileID: 2001029625}
   m_Layer: 5
-  m_Name: CreateButterButton
-  m_TagString: Untagged
+  m_Name: butter
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9399,8 +9129,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -84.99542, y: -47.14895}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -6.9999537, y: -32.000008}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2001029625
 MonoBehaviour:
@@ -9446,16 +9176,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeButter
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: butter
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2001029626
@@ -9471,7 +9201,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -9643,8 +9373,8 @@ GameObject:
   - component: {fileID: 2132887714}
   - component: {fileID: 2132887713}
   m_Layer: 5
-  m_Name: CreateSugarButton
-  m_TagString: Untagged
+  m_Name: sugar
+  m_TagString: RecTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9666,8 +9396,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -84.99536, y: 52.850998}
-  m_SizeDelta: {x: -170.00598, y: -123.70001}
+  m_AnchoredPosition: {x: -7, y: 140}
+  m_SizeDelta: {x: -8.806076, y: -311.76648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2132887713
 MonoBehaviour:
@@ -9713,16 +9443,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1230966323}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: MakeSugar
-        m_Mode: 1
+        m_MethodName: setRec
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: sugar
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2132887714
@@ -9738,7 +9468,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.87058824, b: 0.5058824, a: 1}
+  m_Color: {r: 0.64705884, g: 0.69411767, b: 0.7607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

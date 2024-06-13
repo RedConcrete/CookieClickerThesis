@@ -6,6 +6,7 @@ using UnityEngine;
 [System.Serializable]
 public class Market
 {
+    public string Id;
     public DateTime date;
     public int sugarPrice;
     public int flourPrice;

@@ -3,6 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
+using UnityEngine.UI;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +22,7 @@ public class GameManager : MonoBehaviour
     public int updateTime = 10;
     public float timeRemaining = -1;
     public bool timerIsRunning = false;
+    private float colorResetTime = 0.5f;
 
 
     [Header("AmountField:")]
@@ -38,7 +41,11 @@ public class GameManager : MonoBehaviour
 
     [Header("Objects:")]
     public GraphManager graphManager;
-    private Player p;
+    private Player currentPlayer;
+
+    [Header("MarketFields:")]
+    private string rec;
+    private GameObject[] recTag;
 
     private string pData;
     private int initialAmount = 1;
@@ -53,6 +60,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        recTag = GameObject.FindGameObjectsWithTag("RecTag");
         scene = SceneManager.GetActiveScene();
         if (scene.buildIndex == idleScene)
         {
@@ -60,7 +68,11 @@ public class GameManager : MonoBehaviour
             amountCookiesBuyAndSell_InputField.text = initialAmount.ToString();
             amountRecBuyAndSell_InputField.text = initialAmount.ToString();
         }
-        p = WebAPI.Instance.GetLoginPlayer();
+        if (scene.buildIndex == marketScene)
+        {
+            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
+        }
+        currentPlayer = WebAPI.Instance.GetLoginPlayer();
         UpdateRecources();
     }
 
@@ -84,6 +96,7 @@ public class GameManager : MonoBehaviour
             if (timeRemaining >= -1.0 && timerIsRunning == false)
             {
                 SyncTimer();
+                graphManager.UpdateGraph();
             }
         }
     }
@@ -107,32 +120,32 @@ public class GameManager : MonoBehaviour
 
     public void UpdateRecources()
     {
-        cookie_Text.text = p.cookies.ToString();
-        sugar_Text.text = p.sugar.ToString();
-        flour_Text.text = p.flour.ToString();
-        eggs_Text.text = p.eggs.ToString();
-        butter_Text.text = p.butter.ToString();
-        chocolate_Text.text = p.chocolate.ToString();
-        milk_Text.text = p.milk.ToString();
+        cookie_Text.text = currentPlayer.cookies.ToString();
+        sugar_Text.text = currentPlayer.sugar.ToString();
+        flour_Text.text = currentPlayer.flour.ToString();
+        eggs_Text.text = currentPlayer.eggs.ToString();
+        butter_Text.text = currentPlayer.butter.ToString();
+        chocolate_Text.text = currentPlayer.chocolate.ToString();
+        milk_Text.text = currentPlayer.milk.ToString();
     }
 
     public void UpdatePlayerData()
     {
-        pData = JsonUtility.ToJson(p);
+        pData = JsonUtility.ToJson(currentPlayer);
         StartCoroutine(WebAPI.Instance.UpdatePlayer(pData));
     }
 
-    public void ProduceCookies()
+    public void ProduceCookies() // Cookies preis anpassen!!
     {
-        if (p.sugar >= 10 * currentCreateCookiesAmount && p.flour >= 10 * currentCreateCookiesAmount && p.eggs >= 10 * currentCreateCookiesAmount && p.butter >= 10 * currentCreateCookiesAmount && p.chocolate >= 10 * currentCreateCookiesAmount && p.milk >= 10 * currentCreateCookiesAmount)
+        if (currentPlayer.sugar >= 10 * currentCreateCookiesAmount && currentPlayer.flour >= 10 * currentCreateCookiesAmount && currentPlayer.eggs >= 10 * currentCreateCookiesAmount && currentPlayer.butter >= 10 * currentCreateCookiesAmount && currentPlayer.chocolate >= 10 * currentCreateCookiesAmount && currentPlayer.milk >= 10 * currentCreateCookiesAmount)
         {
-            p.cookies = p.cookies + (100 * currentCreateCookiesAmount);
-            p.sugar = p.sugar - 10 * currentCreateCookiesAmount;
-            p.flour = p.flour - 10 * currentCreateCookiesAmount;
-            p.eggs = p.eggs - 10 * currentCreateCookiesAmount;
-            p.butter = p.butter - 10 * currentCreateCookiesAmount;
-            p.chocolate = p.chocolate - 10 * currentCreateCookiesAmount;
-            p.milk = p.milk - 10 * currentCreateCookiesAmount;
+            currentPlayer.cookies = currentPlayer.cookies + (100 * currentCreateCookiesAmount);
+            currentPlayer.sugar = currentPlayer.sugar - 10 * currentCreateCookiesAmount;
+            currentPlayer.flour = currentPlayer.flour - 10 * currentCreateCookiesAmount;
+            currentPlayer.eggs = currentPlayer.eggs - 10 * currentCreateCookiesAmount;
+            currentPlayer.butter = currentPlayer.butter - 10 * currentCreateCookiesAmount;
+            currentPlayer.chocolate = currentPlayer.chocolate - 10 * currentCreateCookiesAmount;
+            currentPlayer.milk = currentPlayer.milk - 10 * currentCreateCookiesAmount;
             UpdateRecources();
             UpdatePlayerData();
         }
@@ -144,37 +157,37 @@ public class GameManager : MonoBehaviour
 
     public void MakeSugar()
     {
-        p.sugar = p.sugar + sugarIncreaseAmount;
+        currentPlayer.sugar = currentPlayer.sugar + sugarIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeFlour()
     {
-        p.flour = p.flour + flourIncreaseAmount;
+        currentPlayer.flour = currentPlayer.flour + flourIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeEggs()
     {
-        p.eggs = p.eggs + eggsIncreaseAmount;
+        currentPlayer.eggs = currentPlayer.eggs + eggsIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeButter()
     {
-        p.butter = p.butter + butterIncreaseAmount;
+        currentPlayer.butter = currentPlayer.butter + butterIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeChocolate()
     {
-        p.chocolate = p.chocolate + chocolateIncreaseAmount;
+        currentPlayer.chocolate = currentPlayer.chocolate + chocolateIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeMilk()
     {
-        p.milk = p.milk + milkIncreaseAmount;
+        currentPlayer.milk = currentPlayer.milk + milkIncreaseAmount;
         UpdateRecources();
     }
 
@@ -199,7 +212,11 @@ public class GameManager : MonoBehaviour
             currentCreateCookiesAmount += amount;
             amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
         }
-        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+        else
+        {
+            currentCreateCookiesAmount = 0;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+        }
     }
 
     public void AddAmountBuyAndSellCookies(int amount)
@@ -209,7 +226,11 @@ public class GameManager : MonoBehaviour
             currentBuyAndSellCookiesAmount += amount;
             amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
         }
-        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+        else
+        {
+            currentBuyAndSellCookiesAmount = 0;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+        }
 
     }
 
@@ -220,17 +241,85 @@ public class GameManager : MonoBehaviour
             currentBuyAndSellRecAmount += amount;
             amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
         }
-        else { Debug.Log("GEHT NET SONST UNTER 0"); }
+        else
+        {
+            currentBuyAndSellRecAmount = 0;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+        }
     }
 
     public void Buy()
     {
-
+        if (currentPlayer != null)
+        {
+            if (rec != null)
+            {
+                StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+            }
+            else
+            {
+                for (int i = 0; i < this.recTag.Length; i++)
+                {
+                    recTag[i].GetComponent<Image>().color = Color.red;
+                }
+                StartCoroutine(ResetTagsAfterDelay(colorResetTime));
+            }
+        }
+        else
+        {
+            Debug.Log("Player: " + currentPlayer + "Recources: " + rec);
+        }
     }
 
     public void Sell()
     {
+        if (currentPlayer != null)
+        {
+            if (rec != null)
+            {
+                StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                UpdatePlayerData();
+            }
+            else
+            {
+                for (int i = 0; i < this.recTag.Length; i++)
+                {
+                    recTag[i].GetComponent<Image>().color = Color.red;
+                }
+                StartCoroutine(ResetTagsAfterDelay(2f));
+            }
+        }
+        else
+        {
+            Debug.Log("Player: " + currentPlayer + "Recources: " + rec);
+        }
+    }
 
+    public void setRec(string rec)
+    {
+        GameObject gameObject = GameObject.Find(rec);
+        if (rec != this.rec)
+        {
+            for (int i = 0; i < this.recTag.Length; i++)
+            {
+                recTag[i].GetComponent<Image>().color = Color.gray;
+            }
+            gameObject.GetComponent<Image>().color = Color.white;
+            this.rec = rec;
+        }
+        else
+        {
+            this.rec = rec;
+        }
+    }
+
+    private IEnumerator ResetTagsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        for (int i = 0; i < this.recTag.Length; i++)
+        {
+            recTag[i].GetComponent<Image>().color = Color.gray;
+        }
     }
 
 }

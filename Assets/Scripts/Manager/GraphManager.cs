@@ -1,8 +1,8 @@
 using CodeMonkey.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine;
 
 public class GraphManager : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class GraphManager : MonoBehaviour
         graphContainer = transform.Find("GraphContainer").GetComponent<RectTransform>();
     }
 
-    private GameObject CreateCircle(Vector2 anchoredPos, Color c)
+    private GameObject CreateCircle(Vector2 anchoredPos, Color c, int price)
     {
         GameObject circle = new GameObject("circle", typeof(Image));
         circle.transform.SetParent(graphContainer, false);
@@ -33,6 +33,19 @@ public class GraphManager : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(11,11);
         rectTransform.anchorMax = new Vector2(0,0);
         rectTransform.anchorMin = new Vector2(0,0);
+
+        GameObject textObject = new GameObject("circleText", typeof(Text));
+        textObject.transform.SetParent(circle.transform, false);
+        Text textComponent = textObject.GetComponent<Text>();
+        textComponent.text = price.ToString();
+        textComponent.fontSize = 14;
+        textComponent.color = Color.black;
+        textComponent.alignment = TextAnchor.MiddleCenter;
+        RectTransform textRectTransform = textObject.GetComponent<RectTransform>();
+        textRectTransform.anchoredPosition = new Vector2(0, -20); // Positioniert den Text unter dem Kreis
+        textRectTransform.sizeDelta = new Vector2(60, 20); // Größe des Textfeldes
+        textRectTransform.anchorMax = new Vector2(0.5f, 1);
+        textRectTransform.anchorMin = new Vector2(0.5f, 1);
         return circle;
     }
 
@@ -60,7 +73,7 @@ public class GraphManager : MonoBehaviour
             float xPos = xSize + graphSize + (pricesCount - 1 - i) * xSize;
 
             float yPosSugar = (marketList[i].sugarPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectSugar = CreateCircle(new Vector2(xPos, yPosSugar),sugarColor);
+            GameObject circleGameObjectSugar = CreateCircle(new Vector2(xPos, yPosSugar),sugarColor, marketList[i].sugarPrice);
             if (lastCircleGameObjectSugar != null)
             {
                 CreateDotConnection(lastCircleGameObjectSugar.GetComponent<RectTransform>().anchoredPosition,
@@ -70,7 +83,7 @@ public class GraphManager : MonoBehaviour
 
 
             float yPosFlour = (marketList[i].flourPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectFlour = CreateCircle(new Vector2(xPos, yPosFlour), flourColor);
+            GameObject circleGameObjectFlour = CreateCircle(new Vector2(xPos, yPosFlour), flourColor, marketList[i].flourPrice);
             if (lastCircleGameObjectFlour != null)
             {
                 CreateDotConnection(lastCircleGameObjectFlour.GetComponent<RectTransform>().anchoredPosition,
@@ -79,7 +92,7 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectFlour = circleGameObjectFlour;
 
             float yPosEggs = (marketList[i].eggsPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectEggs = CreateCircle(new Vector2(xPos, yPosEggs), eggsColor);
+            GameObject circleGameObjectEggs = CreateCircle(new Vector2(xPos, yPosEggs), eggsColor, marketList[i].eggsPrice);
             if (lastCircleGameObjectEggs != null)
             {
                 CreateDotConnection(lastCircleGameObjectEggs.GetComponent<RectTransform>().anchoredPosition,
@@ -88,7 +101,7 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectEggs = circleGameObjectEggs;
 
             float yPosButter = (marketList[i].butterPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectButter = CreateCircle(new Vector2(xPos, yPosButter), butterColor);
+            GameObject circleGameObjectButter = CreateCircle(new Vector2(xPos, yPosButter), butterColor, marketList[i].butterPrice);
             if (lastCircleGameObjectButter != null)
             {
                 CreateDotConnection(lastCircleGameObjectButter.GetComponent<RectTransform>().anchoredPosition,
@@ -97,7 +110,7 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectButter = circleGameObjectButter;
 
             float yPosChocolate = (marketList[i].chocolatePrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectChocolate = CreateCircle(new Vector2(xPos, yPosChocolate), chocolateColor);
+            GameObject circleGameObjectChocolate = CreateCircle(new Vector2(xPos, yPosChocolate), chocolateColor, marketList[i].chocolatePrice);
             if (lastCircleGameObjectChocolate != null)
             {
                 CreateDotConnection(lastCircleGameObjectChocolate.GetComponent<RectTransform>().anchoredPosition,
@@ -106,7 +119,7 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectChocolate = circleGameObjectChocolate;
 
             float yPosMilk = (marketList[i].milkPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectMilk = CreateCircle(new Vector2(xPos, yPosMilk), milkColor);
+            GameObject circleGameObjectMilk = CreateCircle(new Vector2(xPos, yPosMilk), milkColor, marketList[i].milkPrice);
             if (lastCircleGameObjectMilk != null)
             {
                 CreateDotConnection(lastCircleGameObjectMilk.GetComponent<RectTransform>().anchoredPosition,
