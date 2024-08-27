@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
 
 public class GameManager : MonoBehaviour
 {
@@ -24,9 +27,12 @@ public class GameManager : MonoBehaviour
     public bool timerIsRunning = false;
     private float colorResetTime = 0.5f;
 
+    [Header("PlayerIDField:")]
+    public TMP_InputField playerIDField;
 
     [Header("AmountField:")]
     public TMP_InputField amountCookies_InputField;
+    public TMP_InputField totalCostField;
     public TMP_InputField amountCookiesBuyAndSell_InputField;
     public TMP_InputField amountRecBuyAndSell_InputField;
     public int amountToGetGraph = 20;
@@ -53,32 +59,36 @@ public class GameManager : MonoBehaviour
     private int currentBuyAndSellCookiesAmount = 1;
     private int currentBuyAndSellRecAmount = 1;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
-    private Scene scene;
     private int idleScene = 2;
     private int marketScene = 1;
-
+    private int scene;
+    private List<Market> marketList;
+    int totalCost = 0;
 
     private void Start()
     {
-        recTag = GameObject.FindGameObjectsWithTag("RecTag");
-        scene = SceneManager.GetActiveScene();
-        if (scene.buildIndex == idleScene)
-        {
-            amountCookies_InputField.text = initialAmount.ToString();
-            amountCookiesBuyAndSell_InputField.text = initialAmount.ToString();
-            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
-        }
-        if (scene.buildIndex == marketScene)
-        {
-            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
-        }
+        scene = SceneManager.GetActiveScene().buildIndex;
         currentPlayer = WebAPI.Instance.GetLoginPlayer();
         UpdateRecources();
+
+        if (scene == idleScene)
+        {
+            amountCookies_InputField.text = initialAmount.ToString();
+        }
+
+        if (scene == marketScene)
+        {
+            recTag = GameObject.FindGameObjectsWithTag("RecTag");
+            GameObject graph = GameObject.Find("Graph");
+            graphManager = graph.GetComponent<GraphManager>();
+            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
+            UpdatePlayerID();
+        }
     }
 
     private void Update()
     {
-        if (scene.buildIndex == marketScene)
+        if (scene == marketScene)
         {
             if (timerIsRunning)
             {
@@ -89,7 +99,9 @@ public class GameManager : MonoBehaviour
                 {
                     timeRemaining = updateTime;
                     StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
+                    marketList = WebAPI.Instance.GetMarket();
                     graphManager.UpdateGraph();
+                    totalCostField.text = calcTotalCost().ToString();
                     UpdatePlayerData();
                 }
             }
@@ -103,7 +115,7 @@ public class GameManager : MonoBehaviour
 
     async void SyncTimer()
     {
-        StartCoroutine(WebAPI.Instance.GetPrices(1));
+        StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
         while (WebAPI.Instance.GetMarket() == null) await Task.Delay(10);
         TimeSpan timeSpan = DateTime.UtcNow - WebAPI.Instance.GetMarket()[0].date;
         timeRemaining = timeSpan.Minutes / 60;
@@ -129,30 +141,51 @@ public class GameManager : MonoBehaviour
         milk_Text.text = currentPlayer.milk.ToString();
     }
 
+    public void UpdatePlayerID()
+    {
+        playerIDField.text = currentPlayer.id.ToString();
+    }
+
     public void UpdatePlayerData()
     {
         pData = JsonUtility.ToJson(currentPlayer);
         StartCoroutine(WebAPI.Instance.UpdatePlayer(pData));
     }
 
-    public void ProduceCookies() // Cookies preis anpassen!!
+    public void ProduceCookies()
     {
-        if (currentPlayer.sugar >= 10 * currentCreateCookiesAmount && currentPlayer.flour >= 10 * currentCreateCookiesAmount && currentPlayer.eggs >= 10 * currentCreateCookiesAmount && currentPlayer.butter >= 10 * currentCreateCookiesAmount && currentPlayer.chocolate >= 10 * currentCreateCookiesAmount && currentPlayer.milk >= 10 * currentCreateCookiesAmount)
+        int requiredAmount = 10 * currentCreateCookiesAmount;
+        if (HasSufficientResources(requiredAmount))
         {
-            currentPlayer.cookies = currentPlayer.cookies + (100 * currentCreateCookiesAmount);
-            currentPlayer.sugar = currentPlayer.sugar - 10 * currentCreateCookiesAmount;
-            currentPlayer.flour = currentPlayer.flour - 10 * currentCreateCookiesAmount;
-            currentPlayer.eggs = currentPlayer.eggs - 10 * currentCreateCookiesAmount;
-            currentPlayer.butter = currentPlayer.butter - 10 * currentCreateCookiesAmount;
-            currentPlayer.chocolate = currentPlayer.chocolate - 10 * currentCreateCookiesAmount;
-            currentPlayer.milk = currentPlayer.milk - 10 * currentCreateCookiesAmount;
-            UpdateRecources();
+            currentPlayer.cookies += 100 * currentCreateCookiesAmount;
+            subtracRec(-requiredAmount);
             UpdatePlayerData();
+            UpdateRecources();
         }
         else
         {
             Debug.Log("Not enough Resources");
         }
+    }
+
+    private bool HasSufficientResources(int requiredAmount)
+    {
+        return currentPlayer.sugar >= requiredAmount
+            && currentPlayer.flour >= requiredAmount
+            && currentPlayer.eggs >= requiredAmount
+            && currentPlayer.butter >= requiredAmount
+            && currentPlayer.chocolate >= requiredAmount
+            && currentPlayer.milk >= requiredAmount;
+    }
+
+    private void subtracRec(int amountChange)
+    {
+        currentPlayer.sugar += amountChange;
+        currentPlayer.flour += amountChange;
+        currentPlayer.eggs += amountChange;
+        currentPlayer.butter += amountChange;
+        currentPlayer.chocolate += amountChange;
+        currentPlayer.milk += amountChange;
     }
 
     public void MakeSugar()
@@ -193,7 +226,7 @@ public class GameManager : MonoBehaviour
 
     public void SwitchScreen(int sceneIndex)
     {
-        if (scene.buildIndex != sceneIndex)
+        if (scene != sceneIndex)
         {
             ownSceneManager.SwitchScene(sceneIndex);
         }
@@ -225,6 +258,7 @@ public class GameManager : MonoBehaviour
         {
             currentBuyAndSellCookiesAmount += amount;
             amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+
         }
         else
         {
@@ -236,16 +270,47 @@ public class GameManager : MonoBehaviour
 
     public void AddAmountBuyAndSellRec(int amount)
     {
-        if (currentBuyAndSellRecAmount >= 0 && currentBuyAndSellRecAmount + amount >= 0)
+        if (currentBuyAndSellRecAmount + amount < 0)
         {
-            currentBuyAndSellRecAmount += amount;
+            totalCost = 0;
+            currentBuyAndSellRecAmount = 0;
             amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = totalCost.ToString();
         }
         else
         {
-            currentBuyAndSellRecAmount = 0;
+            currentBuyAndSellRecAmount += amount;
             amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = calcTotalCost().ToString();
         }
+    }
+    private int calcTotalCost()
+    {
+        totalCost = 0;
+        switch (rec)
+        {
+            case "sugar":
+                totalCost = (int)marketList.First().sugarPrice * currentBuyAndSellRecAmount;
+                break;
+            case "milk":
+                totalCost = (int)marketList.First().milkPrice * currentBuyAndSellRecAmount;
+                break;
+            case "flour":
+                totalCost = (int)marketList.First().flourPrice * currentBuyAndSellRecAmount;
+                break;
+            case "butter":
+                totalCost = (int)marketList.First().butterPrice * currentBuyAndSellRecAmount;
+                break;
+            case "chocolate":
+                totalCost = (int)marketList.First().chocolatePrice * currentBuyAndSellRecAmount;
+                break;
+            case "eggs":
+                totalCost = (int)marketList.First().eggsPrice * currentBuyAndSellRecAmount;
+                break;
+            default:
+                break;
+        }
+        return totalCost;
     }
 
     public void Buy()
@@ -254,7 +319,14 @@ public class GameManager : MonoBehaviour
         {
             if (rec != null)
             {
-                StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                if (currentPlayer.cookies >= totalCost)
+                {
+                    StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                }
+                else
+                {
+                    Debug.Log("Nicht genug Cookies!");
+                }
             }
             else
             {
@@ -322,4 +394,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void CopyToClip()
+    {
+        GUIUtility.systemCopyBuffer = playerIDField.text;
+    }
 }

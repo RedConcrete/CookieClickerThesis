@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.hwaet.projectcloner": {
+      "version": "file:C:/Users/Franz/Downloads/UnityProjectCloner-master/UnityProjectCloner-master",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "9.1.0",
       "depth": 1,

@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class OwnSceneManager : MonoBehaviour
 {
-    public void SwitchScene(int scene)
+    public void SwitchScene(int newScene)
     {
-        SceneManager.LoadScene(scene);
+        SceneManager.LoadScene(newScene);
     }
 }

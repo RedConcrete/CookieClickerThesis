@@ -3,11 +3,26 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using UnityEngine;
+using TMPro;
+using System.Linq;
 
 public class GraphManager : MonoBehaviour
 {
+    [Header("RectTransform:")]
+    public RectTransform graphContainer;
+    public RectTransform labelTempX;
+    public RectTransform labelTempY;
+    public RectTransform dashTempX;
+    public RectTransform dashTempY;
+
+    [Header("Sprites:")]
     [SerializeField] private Sprite circleSprite;
-    private RectTransform graphContainer;
+    [SerializeField] private Sprite sugarSprite;
+    [SerializeField] private Sprite flourSprite;
+    [SerializeField] private Sprite eggsSprite;
+    [SerializeField] private Sprite butterSprite;
+    [SerializeField] private Sprite chocolateSprite;
+    [SerializeField] private Sprite milkSprite;
 
     [Header("MarketColors:")]
     public Color sugarColor = Color.red;
@@ -17,35 +32,78 @@ public class GraphManager : MonoBehaviour
     public Color chocolateColor = Color.magenta;
     public Color milkColor = Color.cyan;
 
+    [Header("ResourcePrices:")]
+    public TMP_Text sugar_PriceText;
+    public TMP_Text flour_PriceText;
+    public TMP_Text eggs_PriceText;
+    public TMP_Text butter_PriceText;
+    public TMP_Text chocolate_PriceText;
+    public TMP_Text milk_PriceText;
+
+    float yMaximum = 1000f;
+    float xSize = 50f;
+    int graphSize = 1080 / 2;
+    int pricesCount = 10;
+
     private void Awake()
     {
-        graphContainer = transform.Find("GraphContainer").GetComponent<RectTransform>();
     }
 
-    private GameObject CreateCircle(Vector2 anchoredPos, Color c, int price)
+    private GameObject CreateIcon(Vector2 anchoredPos, int price, string rec, Sprite s)
+    {
+        GameObject icon = new GameObject("icon", typeof(Image));
+        icon.transform.SetParent(graphContainer, false);
+        Image iconImage = icon.GetComponent<Image>();
+        iconImage.sprite = s;
+
+        BoxCollider2D collider = icon.AddComponent<BoxCollider2D>();
+        collider.size = new Vector2(10, 10);
+
+        RectTransform rectTransform = icon.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = anchoredPos;
+        rectTransform.sizeDelta = new Vector2(40, 40);
+        rectTransform.anchorMax = new Vector2(0, 0);
+        rectTransform.anchorMin = new Vector2(0, 0);
+
+        GameObject textObject = new GameObject("text", typeof(TextMeshProUGUI));
+        textObject.transform.SetParent(icon.transform, false);
+        TextMeshProUGUI textComponent = textObject.GetComponent<TextMeshProUGUI>();
+        textComponent.text = price.ToString();
+        textComponent.fontSize = 12;
+        textComponent.color = Color.black;
+        textComponent.alignment = TextAlignmentOptions.Center;
+        RectTransform textTransform = textObject.GetComponent<RectTransform>();
+        textTransform.anchoredPosition = new Vector2(0, -15);
+
+        return icon;
+    }
+    private GameObject CreateCircle(Vector2 anchoredPos, Color c, int price, string rec)
     {
         GameObject circle = new GameObject("circle", typeof(Image));
         circle.transform.SetParent(graphContainer, false);
-        circle.GetComponent<Image>().sprite = circleSprite;
-        circle.GetComponent<Image>().color = c;
+        Image circleImage = circle.GetComponent<Image>();
+        circleImage.sprite = circleSprite;
+        circleImage.color = c;
+
+        BoxCollider2D collider = circle.AddComponent<BoxCollider2D>();
+        collider.size = new Vector2(10, 10);
+
         RectTransform rectTransform = circle.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = anchoredPos;
-        rectTransform.sizeDelta = new Vector2(11,11);
-        rectTransform.anchorMax = new Vector2(0,0);
-        rectTransform.anchorMin = new Vector2(0,0);
+        rectTransform.sizeDelta = new Vector2(10, 10);
+        rectTransform.anchorMax = new Vector2(0, 0);
+        rectTransform.anchorMin = new Vector2(0, 0);
 
-        GameObject textObject = new GameObject("circleText", typeof(Text));
+        GameObject textObject = new GameObject("text", typeof(TextMeshProUGUI));
         textObject.transform.SetParent(circle.transform, false);
-        Text textComponent = textObject.GetComponent<Text>();
+        TextMeshProUGUI textComponent = textObject.GetComponent<TextMeshProUGUI>();
         textComponent.text = price.ToString();
-        textComponent.fontSize = 14;
+        textComponent.fontSize = 12;
         textComponent.color = Color.black;
-        textComponent.alignment = TextAnchor.MiddleCenter;
-        RectTransform textRectTransform = textObject.GetComponent<RectTransform>();
-        textRectTransform.anchoredPosition = new Vector2(0, -20); // Positioniert den Text unter dem Kreis
-        textRectTransform.sizeDelta = new Vector2(60, 20); // Größe des Textfeldes
-        textRectTransform.anchorMax = new Vector2(0.5f, 1);
-        textRectTransform.anchorMin = new Vector2(0.5f, 1);
+        textComponent.alignment = TextAlignmentOptions.Center;
+        RectTransform textTransform = textObject.GetComponent<RectTransform>();
+        textTransform.anchoredPosition = new Vector2(0, -15);
+
         return circle;
     }
 
@@ -53,11 +111,9 @@ public class GraphManager : MonoBehaviour
     {
         while (WebAPI.Instance.GetMarket() == null) await Task.Delay(10);
         List<Market> marketList = WebAPI.Instance.GetMarket();
+
         float graphHeight = graphContainer.sizeDelta.y;
-        float yMaximum = 1000f;
-        float xSize = 50f;
-        int graphSize = 1080 / 2;
-        int pricesCount = 10;
+        float graphWidth = graphContainer.sizeDelta.x;
 
         GameObject lastCircleGameObjectSugar = null;
         GameObject lastCircleGameObjectFlour = null;
@@ -71,9 +127,22 @@ public class GraphManager : MonoBehaviour
         for (int i = 0; marketList.Count > i; i++)
         {
             float xPos = xSize + graphSize + (pricesCount - 1 - i) * xSize;
+            GameObject circleGameObjectSugar;
+            GameObject circleGameObjectFlour;
+            GameObject circleGameObjectEggs;
+            GameObject circleGameObjectButter;
+            GameObject circleGameObjectChocolate;
+            GameObject circleGameObjectMilk;
 
             float yPosSugar = (marketList[i].sugarPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectSugar = CreateCircle(new Vector2(xPos, yPosSugar),sugarColor, marketList[i].sugarPrice);
+            if (i == 0)
+            {
+                circleGameObjectSugar = CreateIcon(new Vector2(xPos, yPosSugar), (int)marketList[i].sugarPrice, "Sugar", sugarSprite);
+            }
+            else
+            {
+                circleGameObjectSugar = CreateCircle(new Vector2(xPos, yPosSugar), sugarColor, (int)marketList[i].sugarPrice, "Sugar");
+            }
             if (lastCircleGameObjectSugar != null)
             {
                 CreateDotConnection(lastCircleGameObjectSugar.GetComponent<RectTransform>().anchoredPosition,
@@ -83,7 +152,14 @@ public class GraphManager : MonoBehaviour
 
 
             float yPosFlour = (marketList[i].flourPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectFlour = CreateCircle(new Vector2(xPos, yPosFlour), flourColor, marketList[i].flourPrice);
+            if (i == 0)
+            {
+                circleGameObjectFlour = CreateIcon(new Vector2(xPos, yPosFlour), (int)marketList[i].flourPrice, "Flour", flourSprite);
+            }
+            else
+            {
+                circleGameObjectFlour = CreateCircle(new Vector2(xPos, yPosFlour), flourColor, (int)marketList[i].flourPrice, "Flour");
+            }
             if (lastCircleGameObjectFlour != null)
             {
                 CreateDotConnection(lastCircleGameObjectFlour.GetComponent<RectTransform>().anchoredPosition,
@@ -91,8 +167,16 @@ public class GraphManager : MonoBehaviour
             }
             lastCircleGameObjectFlour = circleGameObjectFlour;
 
+
             float yPosEggs = (marketList[i].eggsPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectEggs = CreateCircle(new Vector2(xPos, yPosEggs), eggsColor, marketList[i].eggsPrice);
+            if (i == 0)
+            {
+                circleGameObjectEggs = CreateIcon(new Vector2(xPos, yPosEggs), (int)marketList[i].eggsPrice, "Eggs", eggsSprite);
+            }
+            else
+            {
+                circleGameObjectEggs = CreateCircle(new Vector2(xPos, yPosEggs), eggsColor, (int)marketList[i].eggsPrice, "Eggs");
+            }
             if (lastCircleGameObjectEggs != null)
             {
                 CreateDotConnection(lastCircleGameObjectEggs.GetComponent<RectTransform>().anchoredPosition,
@@ -101,7 +185,14 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectEggs = circleGameObjectEggs;
 
             float yPosButter = (marketList[i].butterPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectButter = CreateCircle(new Vector2(xPos, yPosButter), butterColor, marketList[i].butterPrice);
+            if (i == 0)
+            {
+                circleGameObjectButter = CreateIcon(new Vector2(xPos, yPosButter), (int)marketList[i].butterPrice, "Butter", butterSprite);
+            }
+            else
+            {
+                circleGameObjectButter = CreateCircle(new Vector2(xPos, yPosButter), butterColor, (int)marketList[i].butterPrice, "Butter");
+            }
             if (lastCircleGameObjectButter != null)
             {
                 CreateDotConnection(lastCircleGameObjectButter.GetComponent<RectTransform>().anchoredPosition,
@@ -110,7 +201,14 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectButter = circleGameObjectButter;
 
             float yPosChocolate = (marketList[i].chocolatePrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectChocolate = CreateCircle(new Vector2(xPos, yPosChocolate), chocolateColor, marketList[i].chocolatePrice);
+            if (i == 0)
+            {
+                circleGameObjectChocolate = CreateIcon(new Vector2(xPos, yPosChocolate), (int)marketList[i].chocolatePrice, "Chocolate", chocolateSprite);
+            }
+            else
+            {
+                circleGameObjectChocolate = CreateCircle(new Vector2(xPos, yPosChocolate), chocolateColor, (int)marketList[i].chocolatePrice, "Chocolate");
+            }
             if (lastCircleGameObjectChocolate != null)
             {
                 CreateDotConnection(lastCircleGameObjectChocolate.GetComponent<RectTransform>().anchoredPosition,
@@ -119,13 +217,56 @@ public class GraphManager : MonoBehaviour
             lastCircleGameObjectChocolate = circleGameObjectChocolate;
 
             float yPosMilk = (marketList[i].milkPrice / yMaximum) * graphHeight;
-            GameObject circleGameObjectMilk = CreateCircle(new Vector2(xPos, yPosMilk), milkColor, marketList[i].milkPrice);
+            if (i == 0)
+            {
+                circleGameObjectMilk = CreateIcon(new Vector2(xPos, yPosMilk), (int)marketList[i].milkPrice, "Milk", milkSprite);
+            }
+            else
+            {
+                circleGameObjectMilk = CreateCircle(new Vector2(xPos, yPosMilk), milkColor, (int)marketList[i].milkPrice, "Milk");
+            }
             if (lastCircleGameObjectMilk != null)
             {
                 CreateDotConnection(lastCircleGameObjectMilk.GetComponent<RectTransform>().anchoredPosition,
                     circleGameObjectMilk.GetComponent<RectTransform>().anchoredPosition);
             }
             lastCircleGameObjectMilk = circleGameObjectMilk;
+
+            RectTransform labelX = Instantiate(labelTempX);
+            labelX.SetParent(graphContainer, false);
+            labelX.gameObject.SetActive(true);
+            labelX.anchoredPosition = new Vector2(xPos, -7f);
+            labelX.GetComponent<TextMeshProUGUI>().text = marketList[i].date.ToString("HH:mm");
+
+            RectTransform dashX = Instantiate(dashTempX);
+            dashX.SetParent(graphContainer, false);
+            dashX.gameObject.SetActive(true);
+            dashX.sizeDelta = new Vector2(1.5f, graphHeight);
+            dashX.anchoredPosition = new Vector2(xPos, -7f);
+        }
+
+        sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cokkies";
+        flour_PriceText.text = (int)marketList.First().flourPrice + " Cokkies";
+        eggs_PriceText.text = (int)marketList.First().eggsPrice + " Cokkies";
+        butter_PriceText.text = (int)marketList.First().butterPrice + " Cokkies";
+        chocolate_PriceText.text = (int)marketList.First().chocolatePrice + " Cokkies";
+        milk_PriceText.text = (int)marketList.First().milkPrice + " Cokkies";
+
+        int separatorCount = 10;
+        for (int i = 0; i <= separatorCount; i++)
+        {
+            RectTransform labelY = Instantiate(labelTempY);
+            labelY.SetParent(graphContainer, false);
+            labelY.gameObject.SetActive(true);
+            float norm = i * 1f / separatorCount;
+            labelY.anchoredPosition = new Vector2(graphWidth + 25f, norm * graphHeight);
+            labelY.GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt(norm * yMaximum).ToString();
+
+            RectTransform dashY = Instantiate(dashTempY);
+            dashY.SetParent(graphContainer, false);
+            dashY.gameObject.SetActive(true);
+            dashY.sizeDelta = new Vector2(graphWidth, 1.5f);
+            dashY.anchoredPosition = new Vector2(-4f, norm * graphHeight);
         }
     }
 
@@ -160,4 +301,4 @@ public class GraphManager : MonoBehaviour
         }
     }
 }
-        
+

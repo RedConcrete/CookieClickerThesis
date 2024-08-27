@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Market">
+    <Position X="7.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAACGAAAAAAABAAAAAAAAACAAAAAAAAAAAAAAQAAgAA=</HashCode>
+      <FileName>Assets\Scripts\Market.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Server.Data.MarketRequest">
+    <Position X="7.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAAAAAAAgAABAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\MarketRequest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Player">
+    <Position X="3.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAACAAAAAAAAAAIAAAAAAAAAAAEEAAAAAACgA=</HashCode>
+      <FileName>Assets\Scripts\Player.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WebAPI">
+    <Position X="0.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AFSCAAgAAAAABAAAEAEAAIAAAAACAAABQAAAIQEBIEA=</HashCode>
+      <FileName>Assets\Scripts\WebAPI.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CodeMonkey.Assets">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABQABAAAAQAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Assets\CodeMonkey\Assets.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CodeMonkey.CMDebug">
+    <Position X="13.25" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AEAAAgAAAAAAEIAAAAgBBAAAAEEADAAAAEAICAAAAAA=</HashCode>
+      <FileName>Assets\CodeMonkey\CMDebug.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameManager">
+    <Position X="18.5" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>Ah6Ci0AgACBsGQAwwCIBEYcBACEQAQCBABQkJAiCBEA=</HashCode>
+      <FileName>Assets\Scripts\Manager\GameManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GraphManager">
+    <Position X="16.5" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAYAAAAgCACACAAQAAAAgAQAAAAAAAAAIEABAAKAAEg=</HashCode>
+      <FileName>Assets\Scripts\Manager\GraphManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LoginManager">
+    <Position X="16.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAAABAAAAAAEQAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager\LoginManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OwnSceneManager">
+    <Position X="21.75" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager\OwnSceneManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
