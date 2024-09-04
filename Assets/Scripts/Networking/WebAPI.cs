@@ -17,7 +17,8 @@ public class WebAPI : MonoBehaviour
     private Player player;
     List<Market> marketList;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
-    private string baseUrl = "https://localhost:5000/api/server";
+    private string oldBaseUrl = "https://localhost:5000/api/server";
+    private string baseUrl = "http://localhost:5000";
     //private string baseUrl = "https://66ad-5-146-99-178.ngrok-free.app/api/server";
     private GameManager gameManager;
     private int loginScene = 0;
@@ -50,29 +51,39 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator PostPlayer()
     {
-        string url = baseUrl + "/createPlayer";
-        byte[] playerData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(player = new Player()));
+        string url = baseUrl + "/CreatePlayer";
 
-        UnityWebRequest webRequest = new UnityWebRequest(url, "Post");
-        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
+        UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
         webRequest.SetRequestHeader("Content-Type", "application/json");
+
         yield return webRequest.SendWebRequest();
 
         if (webRequest.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError(webRequest.error + " while creating Player");
+            Debug.LogError($"Error: {webRequest.error}");
+            Debug.LogError($"Response Code: {webRequest.responseCode}");
+            Debug.LogError($"Response: {webRequest.downloadHandler.text}");
         }
         else
         {
-            //Debug.Log(webRequest.result + " while creating Player");
-            ownSceneManager.SwitchScene(1);
+            string playerJsonData = webRequest.downloadHandler.text;
+            if (!string.IsNullOrEmpty(playerJsonData))
+            {
+                player = JsonConvert.DeserializeObject<Player>(playerJsonData);
+                ownSceneManager.SwitchScene(1);
+            }
+            else
+            {
+                Debug.LogError("Received empty response from the server");
+            }
         }
         webRequest.Dispose();
     }
 
     public IEnumerator GetPlayer(string id)
     {
-        string url = baseUrl + "/getPlayer?id=" + id;
+        string url = $"{baseUrl}/GetPlayer/{id}";
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -85,13 +96,19 @@ public class WebAPI : MonoBehaviour
                     break;
                 case UnityWebRequest.Result.Success:
                     string playerJsonData = webRequest.downloadHandler.text;
-                    Debug.Log(playerJsonData);
-                    JsonUtility.FromJsonOverwrite(playerJsonData, player = new Player());
+                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);
                     ownSceneManager.SwitchScene(1);
                     break;
             }
         }
     }
+
+    /**
+     * 
+     *  todo muss angepast werden so, dass der Server alle infos bekommt
+     *  die gemacht werden müssen und dann es auf derm Server durchgeführt wird
+     * 
+    **/
     public IEnumerator UpdatePlayer(string playerId)
     {
         string url = baseUrl + "/updatePlayer";

@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
                     marketList = WebAPI.Instance.GetMarket();
                     graphManager.UpdateGraph();
                     totalCostField.text = calcTotalCost().ToString();
-                    UpdatePlayerData();
+                    UpdatePlayerData(); //Todo GetPlayer da nur dem Spieler die aktuellen Rec benötigt werden
                 }
             }
             if (timeRemaining >= -1.0 && timerIsRunning == false)
@@ -152,14 +152,14 @@ public class GameManager : MonoBehaviour
         StartCoroutine(WebAPI.Instance.UpdatePlayer(pData));
     }
 
-    public void ProduceCookies()
+    public void ProduceCookies() //Todo anpassen das es nur das Rezept senden was verwendet werden soll
     {
         int requiredAmount = 10 * currentCreateCookiesAmount;
         if (HasSufficientResources(requiredAmount))
         {
             currentPlayer.cookies += 100 * currentCreateCookiesAmount;
             subtracRec(-requiredAmount);
-            UpdatePlayerData();
+            UpdatePlayerData();// Todo siehe oben
             UpdateRecources();
         }
         else
@@ -234,7 +234,7 @@ public class GameManager : MonoBehaviour
 
     public void Logout()
     {
-        UpdatePlayerData();
+        UpdatePlayerData(); //Todo überprüfen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler übernehemen
         ownSceneManager.SwitchScene(0);
     }
 
@@ -350,7 +350,7 @@ public class GameManager : MonoBehaviour
             if (rec != null)
             {
                 StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
-                UpdatePlayerData();
+                UpdatePlayerData(); // TODO Get Player reicht
             }
             else
             {
