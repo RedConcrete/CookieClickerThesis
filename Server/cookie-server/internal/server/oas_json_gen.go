@@ -26,14 +26,44 @@ func (s *User) encodeFields(e *jx.Encoder) {
 		e.Int(s.ID)
 	}
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
+		e.FieldStart("cookies")
+		e.Float64(s.Cookies)
+	}
+	{
+		e.FieldStart("sugar")
+		e.Float64(s.Sugar)
+	}
+	{
+		e.FieldStart("flour")
+		e.Float64(s.Flour)
+	}
+	{
+		e.FieldStart("eggs")
+		e.Float64(s.Eggs)
+	}
+	{
+		e.FieldStart("butter")
+		e.Float64(s.Butter)
+	}
+	{
+		e.FieldStart("chocolate")
+		e.Float64(s.Chocolate)
+	}
+	{
+		e.FieldStart("milk")
+		e.Float64(s.Milk)
 	}
 }
 
-var jsonFieldsNameOfUser = [2]string{
+var jsonFieldsNameOfUser = [8]string{
 	0: "id",
-	1: "name",
+	1: "cookies",
+	2: "sugar",
+	3: "flour",
+	4: "eggs",
+	5: "butter",
+	6: "chocolate",
+	7: "milk",
 }
 
 // Decode decodes User from json.
@@ -57,17 +87,89 @@ func (s *User) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "name":
+		case "cookies":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
+				v, err := d.Float64()
+				s.Cookies = float64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
+				return errors.Wrap(err, "decode field \"cookies\"")
+			}
+		case "sugar":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Float64()
+				s.Sugar = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sugar\"")
+			}
+		case "flour":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.Flour = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"flour\"")
+			}
+		case "eggs":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Float64()
+				s.Eggs = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"eggs\"")
+			}
+		case "butter":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Float64()
+				s.Butter = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"butter\"")
+			}
+		case "chocolate":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Float64()
+				s.Chocolate = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"chocolate\"")
+			}
+		case "milk":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Float64()
+				s.Milk = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"milk\"")
 			}
 		default:
 			return d.Skip()
@@ -79,7 +181,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

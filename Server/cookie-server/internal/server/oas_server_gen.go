@@ -14,6 +14,12 @@ type Handler interface {
 	//
 	// GET /users
 	UsersGet(ctx context.Context) ([]User, error)
+	// UsersPost implements POST /users operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /users
+	UsersPost(ctx context.Context) (*User, error)
 	// UsersUserIdGet implements GET /users/{userId} operation.
 	//
 	// Optional extended description in CommonMark or HTML.

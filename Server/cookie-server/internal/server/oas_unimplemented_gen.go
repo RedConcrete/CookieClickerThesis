@@ -22,6 +22,15 @@ func (UnimplementedHandler) UsersGet(ctx context.Context) (r []User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// UsersPost implements POST /users operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /users
+func (UnimplementedHandler) UsersPost(ctx context.Context) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UsersUserIdGet implements GET /users/{userId} operation.
 //
 // Optional extended description in CommonMark or HTML.

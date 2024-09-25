@@ -61,8 +61,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				switch r.Method {
 				case "GET":
 					s.handleUsersGetRequest([0]string{}, elemIsEscaped, w, r)
+				case "POST":
+					s.handleUsersPostRequest([0]string{}, elemIsEscaped, w, r)
 				default:
-					s.notAllowed(w, r, "GET")
+					s.notAllowed(w, r, "GET,POST")
 				}
 
 				return
@@ -191,6 +193,14 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				switch method {
 				case "GET":
 					r.name = "UsersGet"
+					r.summary = "Returns a list of users."
+					r.operationID = ""
+					r.pathPattern = "/users"
+					r.args = args
+					r.count = 0
+					return r, true
+				case "POST":
+					r.name = "UsersPost"
 					r.summary = "Returns a list of users."
 					r.operationID = ""
 					r.pathPattern = "/users"

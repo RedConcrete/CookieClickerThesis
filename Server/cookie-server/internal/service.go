@@ -14,11 +14,21 @@ type CookieServer struct {
 	mux   sync.Mutex
 }
 
+// UsersPost implements api.Handler.
+func (c *CookieServer) UsersPost(ctx context.Context) (*api.User, error) {
+	user := api.User{
+		ID: 1000,
+	}
+	// todo: read config and generate user out of it
+	// save it also in a database
+	return &user, nil
+}
+
 // UsersUserIdGet implements api.Handler.
 func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
 	var user *api.User
 	var err error
-	for i:=0; i<len(c.users) && user == nil; i++ {
+	for i := 0; i < len(c.users) && user == nil; i++ {
 		if c.users[i].ID == int(params.UserId) {
 			user = &c.users[i]
 		}
@@ -26,7 +36,7 @@ func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserI
 	if user == nil {
 		err = &api.ErrRespStatusCode{
 			StatusCode: http.StatusNotFound,
-			Response: fmt.Sprintf("player with id: %v not found", params.UserId),
+			Response:   fmt.Sprintf("player with id: %v not found", params.UserId),
 		}
 	}
 	return user, err
@@ -50,17 +60,14 @@ func (c *CookieServer) UsersGet(ctx context.Context) ([]api.User, error) {
 	return c.users, nil
 }
 
-
 func New() *CookieServer {
 	return &CookieServer{
 		users: []api.User{
-			api.User{
-				ID:   1,
-				Name: "Adolf",
+			{
+				ID: 1,
 			},
-			api.User{
-				ID:   2,
-				Name: "Adolfine",
+			{
+				ID: 2,
 			},
 		},
 	}

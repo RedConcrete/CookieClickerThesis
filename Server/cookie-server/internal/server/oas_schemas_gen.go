@@ -38,8 +38,14 @@ func (s *ErrRespStatusCode) SetResponse(val string) {
 
 // Ref: #/components/schemas/User
 type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID        int     `json:"id"`
+	Cookies   float64 `json:"cookies"`
+	Sugar     float64 `json:"sugar"`
+	Flour     float64 `json:"flour"`
+	Eggs      float64 `json:"eggs"`
+	Butter    float64 `json:"butter"`
+	Chocolate float64 `json:"chocolate"`
+	Milk      float64 `json:"milk"`
 }
 
 // GetID returns the value of ID.
@@ -47,9 +53,39 @@ func (s *User) GetID() int {
 	return s.ID
 }
 
-// GetName returns the value of Name.
-func (s *User) GetName() string {
-	return s.Name
+// GetCookies returns the value of Cookies.
+func (s *User) GetCookies() float64 {
+	return s.Cookies
+}
+
+// GetSugar returns the value of Sugar.
+func (s *User) GetSugar() float64 {
+	return s.Sugar
+}
+
+// GetFlour returns the value of Flour.
+func (s *User) GetFlour() float64 {
+	return s.Flour
+}
+
+// GetEggs returns the value of Eggs.
+func (s *User) GetEggs() float64 {
+	return s.Eggs
+}
+
+// GetButter returns the value of Butter.
+func (s *User) GetButter() float64 {
+	return s.Butter
+}
+
+// GetChocolate returns the value of Chocolate.
+func (s *User) GetChocolate() float64 {
+	return s.Chocolate
+}
+
+// GetMilk returns the value of Milk.
+func (s *User) GetMilk() float64 {
+	return s.Milk
 }
 
 // SetID sets the value of ID.
@@ -57,7 +93,37 @@ func (s *User) SetID(val int) {
 	s.ID = val
 }
 
-// SetName sets the value of Name.
-func (s *User) SetName(val string) {
-	s.Name = val
+// SetCookies sets the value of Cookies.
+func (s *User) SetCookies(val float64) {
+	s.Cookies = val
+}
+
+// SetSugar sets the value of Sugar.
+func (s *User) SetSugar(val float64) {
+	s.Sugar = val
+}
+
+// SetFlour sets the value of Flour.
+func (s *User) SetFlour(val float64) {
+	s.Flour = val
+}
+
+// SetEggs sets the value of Eggs.
+func (s *User) SetEggs(val float64) {
+	s.Eggs = val
+}
+
+// SetButter sets the value of Butter.
+func (s *User) SetButter(val float64) {
+	s.Butter = val
+}
+
+// SetChocolate sets the value of Chocolate.
+func (s *User) SetChocolate(val float64) {
+	s.Chocolate = val
+}
+
+// SetMilk sets the value of Milk.
+func (s *User) SetMilk(val float64) {
+	s.Milk = val
 }

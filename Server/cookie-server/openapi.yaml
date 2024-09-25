@@ -1,7 +1,7 @@
-openapi: '3.0.3'
+openapi: "3.0.3"
 info:
   title: API Title
-  version: '0.0.1'
+  version: "0.0.1"
 servers:
   - url: http://localhost:3000/v1
 
@@ -11,20 +11,37 @@ paths:
       summary: Returns a list of users.
       description: Optional extended description in CommonMark or HTML.
       responses:
-        '200':    # status code
+        "200": # status code
           description: A JSON array of user names
           content:
             application/json:
-              schema: 
+              schema:
                 type: array
-                items: 
-                  $ref: '#/components/schemas/User'
+                items:
+                  $ref: "#/components/schemas/User"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
                 type: string
+    post:
+      summary: Returns a list of users.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        "200": # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
   /users/{userId}:
     get:
       summary: Returns a user.
@@ -39,19 +56,18 @@ paths:
             format: int64
             minimum: 1
       responses:
-        '200':    # status code
+        "200": # status code
           description: A JSON array of user names
           content:
             application/json:
-              schema: 
-                $ref: '#/components/schemas/User'
+              schema:
+                $ref: "#/components/schemas/User"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
                 type: string
-
 
 components:
   schemas:
@@ -61,10 +77,33 @@ components:
         id:
           type: integer
           example: 4
-        name:
-          type: string
-          example: Arthur Dent
-      # Both properties are required
-      required:  
+        cookies:
+          type: number
+          example: 1.0
+        sugar:
+          type: number
+          example: 1.0
+        flour:
+          type: number
+          example: 1.0
+        eggs:
+          type: number
+          example: 1.0
+        butter:
+          type: number
+          example: 1.0
+        chocolate:
+          type: number
+          example: 1.0
+        milk:
+          type: number
+          example: 1.0
+      required:
         - id
-        - name
+        - cookies
+        - sugar
+        - flour
+        - eggs
+        - butter
+        - chocolate
+        - milk
