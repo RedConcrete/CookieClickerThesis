@@ -17,17 +17,12 @@ public class WebAPI : MonoBehaviour
     private Player player;
     List<Market> marketList;
     private OwnSceneManager ownSceneManager = new OwnSceneManager();
-    private string oldBaseUrl = "https://localhost:5000/api/server";
-    private string baseUrl = "http://localhost:5000";
-    //private string baseUrl = "https://66ad-5-146-99-178.ngrok-free.app/api/server";
+    private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
-    private int scene;
 
     private void Awake()
     {
-        scene = SceneManager.GetActiveScene().buildIndex;
-        Debug.Log(scene);
         if (Instance != null)
         {
             Debug.Log("Destroying duplicate WebAPI instance.");
@@ -42,16 +37,15 @@ public class WebAPI : MonoBehaviour
 
     private void Update()
     {
-        if (gameManager == null && scene != loginScene)
+        if (gameManager == null && SceneManager.GetActiveScene().buildIndex != loginScene)
         {
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         }
-        scene = SceneManager.GetActiveScene().buildIndex;
     }
 
     public IEnumerator PostPlayer()
     {
-        string url = baseUrl + "/CreatePlayer";
+        string url = baseUrl + "/users";
 
         UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
         webRequest.downloadHandler = new DownloadHandlerBuffer();
@@ -83,7 +77,7 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPlayer(string id)
     {
-        string url = $"{baseUrl}/GetPlayer/{id}";
+        string url = $"{baseUrl}/users/{id}";
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -128,7 +122,7 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPrices(int amount)
     {
-        string url = baseUrl + "/getMarket?amountToGet=" + amount;
+        string url = baseUrl + "/markets/" + amount;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {

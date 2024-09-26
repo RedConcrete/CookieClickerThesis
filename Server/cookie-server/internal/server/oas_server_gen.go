@@ -8,6 +8,18 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// MarketsAmountGet implements GET /markets/{amount} operation.
+	//
+	// Returns a list of Market Objects based on the given amount.
+	//
+	// GET /markets/{amount}
+	MarketsAmountGet(ctx context.Context, params MarketsAmountGetParams) ([]Market, error)
+	// MarketsGet implements GET /markets operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// GET /markets
+	MarketsGet(ctx context.Context) ([]Market, error)
 	// UsersGet implements GET /users operation.
 	//
 	// Optional extended description in CommonMark or HTML.

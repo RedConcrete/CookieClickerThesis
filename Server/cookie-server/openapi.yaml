@@ -52,9 +52,8 @@ paths:
           required: true
           description: The ID of the user to return.
           schema:
-            type: integer
-            format: int64
-            minimum: 1
+            type: string
+            format: uuid
       responses:
         "200": # status code
           description: A JSON array of user names
@@ -69,14 +68,60 @@ paths:
               schema:
                 type: string
 
+  /markets:
+    get:
+      summary: Returns a list of Market Objects.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        "200": # status code
+          description: A JSON array of Market Objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /markets/{amount}:
+    get:
+      summary: Returns a list of Market Objects based on the given amount.
+      parameters:
+        - name: amount
+          in: path
+          required: true
+          description: The Amount of the markets to be returned.
+          schema:
+            type: integer 
+      responses:
+        "200":
+          description: A JSON array of Markets objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market" 
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
 components:
   schemas:
     User:
       type: object
       properties:
         id:
-          type: integer
-          example: 4
+          type: string
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
         cookies:
           type: number
           example: 1.0
@@ -107,3 +152,40 @@ components:
         - butter
         - chocolate
         - milk
+    Market:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87404
+        date:
+          type: string
+          format: date-time
+          example: "2024-08-30T14:37:51.41408+02:00"
+        sugarPrice:
+          type: number
+          example: 1.0
+        flourPrice:
+          type: number
+          example: 1.0
+        eggsPrice:
+          type: number
+          example: 1.0
+        butterPrice:
+          type: number
+          example: 1.0
+        chocolatePrice:
+          type: number
+          example: 1.0
+        milkPrice:
+          type: number
+          example: 1.0
+      required:
+        - id
+        - date
+        - sugarPrice
+        - flourPrice
+        - eggsPrice
+        - butterPrice
+        - chocolatePrice
+        - milkPrice

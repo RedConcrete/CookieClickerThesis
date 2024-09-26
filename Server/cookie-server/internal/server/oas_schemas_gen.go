@@ -4,6 +4,7 @@ package api
 
 import (
 	"fmt"
+	"time"
 )
 
 func (s *ErrRespStatusCode) Error() string {
@@ -36,9 +37,101 @@ func (s *ErrRespStatusCode) SetResponse(val string) {
 	s.Response = val
 }
 
+// Ref: #/components/schemas/Market
+type Market struct {
+	ID             string    `json:"id"`
+	Date           time.Time `json:"date"`
+	SugarPrice     float64   `json:"sugarPrice"`
+	FlourPrice     float64   `json:"flourPrice"`
+	EggsPrice      float64   `json:"eggsPrice"`
+	ButterPrice    float64   `json:"butterPrice"`
+	ChocolatePrice float64   `json:"chocolatePrice"`
+	MilkPrice      float64   `json:"milkPrice"`
+}
+
+// GetID returns the value of ID.
+func (s *Market) GetID() string {
+	return s.ID
+}
+
+// GetDate returns the value of Date.
+func (s *Market) GetDate() time.Time {
+	return s.Date
+}
+
+// GetSugarPrice returns the value of SugarPrice.
+func (s *Market) GetSugarPrice() float64 {
+	return s.SugarPrice
+}
+
+// GetFlourPrice returns the value of FlourPrice.
+func (s *Market) GetFlourPrice() float64 {
+	return s.FlourPrice
+}
+
+// GetEggsPrice returns the value of EggsPrice.
+func (s *Market) GetEggsPrice() float64 {
+	return s.EggsPrice
+}
+
+// GetButterPrice returns the value of ButterPrice.
+func (s *Market) GetButterPrice() float64 {
+	return s.ButterPrice
+}
+
+// GetChocolatePrice returns the value of ChocolatePrice.
+func (s *Market) GetChocolatePrice() float64 {
+	return s.ChocolatePrice
+}
+
+// GetMilkPrice returns the value of MilkPrice.
+func (s *Market) GetMilkPrice() float64 {
+	return s.MilkPrice
+}
+
+// SetID sets the value of ID.
+func (s *Market) SetID(val string) {
+	s.ID = val
+}
+
+// SetDate sets the value of Date.
+func (s *Market) SetDate(val time.Time) {
+	s.Date = val
+}
+
+// SetSugarPrice sets the value of SugarPrice.
+func (s *Market) SetSugarPrice(val float64) {
+	s.SugarPrice = val
+}
+
+// SetFlourPrice sets the value of FlourPrice.
+func (s *Market) SetFlourPrice(val float64) {
+	s.FlourPrice = val
+}
+
+// SetEggsPrice sets the value of EggsPrice.
+func (s *Market) SetEggsPrice(val float64) {
+	s.EggsPrice = val
+}
+
+// SetButterPrice sets the value of ButterPrice.
+func (s *Market) SetButterPrice(val float64) {
+	s.ButterPrice = val
+}
+
+// SetChocolatePrice sets the value of ChocolatePrice.
+func (s *Market) SetChocolatePrice(val float64) {
+	s.ChocolatePrice = val
+}
+
+// SetMilkPrice sets the value of MilkPrice.
+func (s *Market) SetMilkPrice(val float64) {
+	s.MilkPrice = val
+}
+
 // Ref: #/components/schemas/User
 type User struct {
-	ID        int     `json:"id"`
+	ID        string  `json:"id"`
 	Cookies   float64 `json:"cookies"`
 	Sugar     float64 `json:"sugar"`
 	Flour     float64 `json:"flour"`
@@ -49,7 +142,7 @@ type User struct {
 }
 
 // GetID returns the value of ID.
-func (s *User) GetID() int {
+func (s *User) GetID() string {
 	return s.ID
 }
 
@@ -89,7 +182,7 @@ func (s *User) GetMilk() float64 {
 }
 
 // SetID sets the value of ID.
-func (s *User) SetID(val int) {
+func (s *User) SetID(val string) {
 	s.ID = val
 }
 

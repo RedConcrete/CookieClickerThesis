@@ -148,6 +148,11 @@ public class GameManager : MonoBehaviour
 
     public void UpdatePlayerData()
     {
+        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.id));
+    }
+
+    public void OverridePlayerDate()
+    {
         pData = JsonUtility.ToJson(currentPlayer);
         StartCoroutine(WebAPI.Instance.UpdatePlayer(pData));
     }
@@ -157,7 +162,7 @@ public class GameManager : MonoBehaviour
         int requiredAmount = 10 * currentCreateCookiesAmount;
         if (HasSufficientResources(requiredAmount))
         {
-            currentPlayer.cookies += 100 * currentCreateCookiesAmount;
+            currentPlayer.cookies += 100 * currentCreateCookiesAmount; //TODO
             subtracRec(-requiredAmount);
             UpdatePlayerData();// Todo siehe oben
             UpdateRecources();
@@ -234,7 +239,7 @@ public class GameManager : MonoBehaviour
 
     public void Logout()
     {
-        UpdatePlayerData(); //Todo überprüfen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler übernehemen
+        //Todo überprüfen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler übernehemen
         ownSceneManager.SwitchScene(0);
     }
 
@@ -350,7 +355,7 @@ public class GameManager : MonoBehaviour
             if (rec != null)
             {
                 StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
-                UpdatePlayerData(); // TODO Get Player reicht
+                UpdatePlayerData();
             }
             else
             {

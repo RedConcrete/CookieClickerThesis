@@ -13,6 +13,24 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// MarketsAmountGet implements GET /markets/{amount} operation.
+//
+// Returns a list of Market Objects based on the given amount.
+//
+// GET /markets/{amount}
+func (UnimplementedHandler) MarketsAmountGet(ctx context.Context, params MarketsAmountGetParams) (r []Market, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MarketsGet implements GET /markets operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// GET /markets
+func (UnimplementedHandler) MarketsGet(ctx context.Context) (r []Market, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UsersGet implements GET /users operation.
 //
 // Optional extended description in CommonMark or HTML.
