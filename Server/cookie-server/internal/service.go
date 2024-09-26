@@ -19,20 +19,78 @@ type CookieServer struct {
 	mux     sync.Mutex
 }
 
-// MarketsAmountGet implements api.Handler.
+// BuyPost implements api.Handler.
+/*
+func (c *CookieServer) BuyPost(ctx context.Context, req *api.MarketRequest) (*api.BuyPostOK, error) {
+	// Suchen des Benutzers anhand der ID
+	user, err := c.getUserByID(req.User.ID)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %v", err)
+	}
+
+	// Preis der Ressource vom Markt holen
+	market, err := c.getLatestMarket()
+	if err != nil {
+		return nil, fmt.Errorf("could not get market prices: %v", err)
+	}
+
+	// Überprüfen, ob der Benutzer genug Cookies hat, um den Kauf zu tätigen
+	price := c.getResourcePrice(market, req.Rec)
+	totalCost := float64(req.Amount) * price
+
+	if user.Cookies < totalCost {
+		return nil, fmt.Errorf("not enough cookies")
+	}
+
+	// Bestimmen, welches Gut gekauft wird und die entsprechenden Ressourcen zu reduzieren
+	switch req.Rec {
+	case "sugar":
+		user.Sugar += float64(req.Amount)
+	case "flour":
+		user.Flour += float64(req.Amount)
+	case "eggs":
+		user.Eggs += float64(req.Amount)
+	case "butter":
+		user.Butter += float64(req.Amount)
+	case "chocolate":
+		user.Chocolate += float64(req.Amount)
+	case "milk":
+		user.Milk += float64(req.Amount)
+	default:
+		return nil, fmt.Errorf("unknown resource: %s", req.Rec)
+	}
+
+	// Ziehe die Kosten von den Cookies des Benutzers ab
+	user.Cookies -= totalCost
+
+	// Benutzer in der Datenbank oder dem Speicher aktualisieren
+
+	// Rückgabe der Transaktionsdetails
+	response := &api.BuyPostOK{
+		Ingredient: req.Rec,
+		Amount:     req.Amount,
+		TotalPrice: totalCost,
+	}
+
+	return response, nil
+}
+*/
+
+// Gibt die gewünschte Anzahl der neuesten Märkte zurück
 func (c *CookieServer) MarketsAmountGet(ctx context.Context, params api.MarketsAmountGetParams) ([]api.Market, error) {
-	// Kopiere die Märkte, damit wir die Originalreihenfolge nicht verändern
+	// Eine Kopie der Märkte erstellen, um die Originalreihenfolge beizubehalten
 	marketsCopy := make([]api.Market, len(c.markets))
 	copy(marketsCopy, c.markets)
 
-	// Sortiere die Märkte nach dem Datum (neu nach alt)
+	// Märkte chronologisch sortieren (neueste zuerst)
 	sort.Slice(marketsCopy, func(i, j int) bool {
-		return marketsCopy[i].Date.After(marketsCopy[j].Date) // Sortieren nach Datum (neu nach alt)
+		return marketsCopy[i].Date.After(marketsCopy[j].Date) // Sortieren neu -> alt
 	})
 
 	var result []api.Market
+	// Märkte basierend auf der geforderten Anzahl zurückgeben
 	for _, market := range marketsCopy {
-		if len(result) >= params.Amount { // Überprüfen, ob die gewünschte Menge erreicht ist
+		if len(result) >= params.Amount {
 			break
 		}
 		result = append(result, market)
@@ -41,17 +99,16 @@ func (c *CookieServer) MarketsAmountGet(ctx context.Context, params api.MarketsA
 	return result, nil
 }
 
-// MarketsGet implements api.Handler.
+// Gibt alle verfügbaren Märkte zurück
 func (c *CookieServer) MarketsGet(ctx context.Context) ([]api.Market, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	log.Println("send all marktes")
+	log.Println("Sende alle Märkte")
 	return c.markets, nil
 }
 
-// UsersPost implements api.Handler.
+// Erstellt einen neuen Nutzer mit einer generierten UUID und Standardwerten für Zutaten
 func (c *CookieServer) UsersPost(ctx context.Context) (*api.User, error) {
-	// Generiere eine UUID für den User
 	userID := uuid.New().String()
 
 	user := api.User{
@@ -65,32 +122,27 @@ func (c *CookieServer) UsersPost(ctx context.Context) (*api.User, error) {
 		Milk:      10,
 	}
 
-	// Hier könntest du den User in der Datenbank speichern
-	// err := c.saveUserInDB(user)
-	// if err != nil {
-	//     return nil, err
-	// }
-
 	fmt.Printf("Neuer User erstellt: %+v\n", user)
 
 	return &user, nil
 }
 
-// UsersUserIdGet implements api.Handler.
+// Gibt Informationen zu einem bestimmten Nutzer basierend auf der User-ID zurück
 func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
 	var user *api.User
 	var err error
 
-	// Konvertiert params.UserId in einen String
+	// Umwandeln der User-ID in einen String
 	userIdStr := params.UserId.String()
 
+	// Suchen nach dem Nutzer mit der passenden ID
 	for i := 0; i < len(c.users) && user == nil; i++ {
 		if c.users[i].ID == userIdStr {
 			user = &c.users[i]
 		}
 	}
 
-	// Falls kein User gefunden wurde, einen Fehler zurückgeben
+	// Wenn kein User gefunden wurde, wird ein Fehler zurückgegeben
 	if user == nil {
 		err = &api.ErrRespStatusCode{
 			StatusCode: http.StatusNotFound,
@@ -100,24 +152,25 @@ func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserI
 	return user, err
 }
 
-// NewError implements api.Handler.
+// Gibt eine Standard-Fehlermeldung zurück
 func (c *CookieServer) NewError(ctx context.Context, err error) *api.ErrRespStatusCode {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	return &api.ErrRespStatusCode{
 		StatusCode: http.StatusInternalServerError,
-		Response:   "Mimimimi",
+		Response:   "Ein Fehler ist aufgetreten",
 	}
 }
 
-// UsersGet implements api.Handler.
+// Gibt eine Liste aller Nutzer zurück
 func (c *CookieServer) UsersGet(ctx context.Context) ([]api.User, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	log.Println("send all users")
+	log.Println("Sende alle Nutzer")
 	return c.users, nil
 }
 
+// Erstellt einen neuen Server mit voreingestellten Nutzern und Märkten
 func New() *CookieServer {
 	return &CookieServer{
 		users: []api.User{
