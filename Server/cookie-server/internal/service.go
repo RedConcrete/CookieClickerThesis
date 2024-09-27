@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	api "cookie-server/internal/server"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"sort"
 	"sync"
 	"time"
 
@@ -14,13 +14,15 @@ import (
 )
 
 type CookieServer struct {
+	db      *sql.DB
 	users   []api.User
 	markets []api.Market
 	mux     sync.Mutex
 }
 
-// BuyPost implements api.Handler.
 /*
+// BuyPost implements api.Handler.
+
 func (c *CookieServer) BuyPost(ctx context.Context, req *api.MarketRequest) (*api.BuyPostOK, error) {
 	// Suchen des Benutzers anhand der ID
 	user, err := c.getUserByID(req.User.ID)
@@ -78,33 +80,96 @@ func (c *CookieServer) BuyPost(ctx context.Context, req *api.MarketRequest) (*ap
 
 // Gibt die gewünschte Anzahl der neuesten Märkte zurück
 func (c *CookieServer) MarketsAmountGet(ctx context.Context, params api.MarketsAmountGetParams) ([]api.Market, error) {
-	// Eine Kopie der Märkte erstellen, um die Originalreihenfolge beizubehalten
-	marketsCopy := make([]api.Market, len(c.markets))
-	copy(marketsCopy, c.markets)
+	// SQL-Abfrage: Märkte nach Datum sortieren (neueste zuerst) und die gewünschte Anzahl zurückgeben
+	query := `SELECT "Id", "Date", "SugarPrice", "FlourPrice", "EggsPrice", "ButterPrice", "ChocolatePrice", "MilkPrice"
+	          FROM public."Markets"
+	          ORDER BY "Date" DESC
+	          LIMIT $1`
 
-	// Märkte chronologisch sortieren (neueste zuerst)
-	sort.Slice(marketsCopy, func(i, j int) bool {
-		return marketsCopy[i].Date.After(marketsCopy[j].Date) // Sortieren neu -> alt
-	})
+	// Abfrage mit Limit ausführen (params.Amount gibt die Anzahl der gewünschten Märkte an)
+	rows, err := c.db.QueryContext(ctx, query, params.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("Fehler beim Abrufen der Märkte: %v", err)
+	}
+	defer rows.Close()
 
-	var result []api.Market
-	// Märkte basierend auf der geforderten Anzahl zurückgeben
-	for _, market := range marketsCopy {
-		if len(result) >= params.Amount {
-			break
+	var markets []api.Market
+
+	// Ergebniszeilen durchlaufen und die Märkte in die Liste einfügen
+	for rows.Next() {
+		var market api.Market
+		err := rows.Scan(
+			&market.ID,
+			&market.Date,
+			&market.SugarPrice,
+			&market.FlourPrice,
+			&market.EggsPrice,
+			&market.ButterPrice,
+			&market.ChocolatePrice,
+			&market.MilkPrice,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Fehler beim Scannen des Marktes: %v", err)
 		}
-		result = append(result, market)
+		markets = append(markets, market)
 	}
 
-	return result, nil
+	// Fehler während der Iteration prüfen
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Fehler während der Zeileniteration: %v", err)
+	}
+
+	return markets, nil
 }
 
 // Gibt alle verfügbaren Märkte zurück
 func (c *CookieServer) MarketsGet(ctx context.Context) ([]api.Market, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	log.Println("Sende alle Märkte")
-	return c.markets, nil
+
+	// SQL-Abfrage zum Abrufen aller Märkte
+	query := `SELECT "Id", "Date", "SugarPrice", "FlourPrice", "EggsPrice", "ButterPrice", "ChocolatePrice", "MilkPrice"
+	          FROM public."Markets"`
+
+	// Abfrage ausführen
+	rows, err := c.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("Fehler beim Abrufen der Märkte: %v", err)
+	}
+	defer rows.Close()
+
+	var markets []api.Market
+
+	// Ergebniszeilen durchlaufen und die Märkte in die Liste einfügen
+	for rows.Next() {
+		var market api.Market
+		err := rows.Scan(
+			&market.ID,
+			&market.Date,
+			&market.SugarPrice,
+			&market.FlourPrice,
+			&market.EggsPrice,
+			&market.ButterPrice,
+			&market.ChocolatePrice,
+			&market.MilkPrice,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Fehler beim Scannen des Marktes: %v", err)
+		}
+		markets = append(markets, market)
+	}
+
+	// Fehler während der Iteration prüfen
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Fehler während der Zeileniteration: %v", err)
+	}
+
+	// Wenn keine Märkte gefunden wurden
+	if len(markets) == 0 {
+		log.Println("Keine Märkte in der Datenbank gefunden")
+	}
+
+	return markets, nil
 }
 
 // Erstellt einen neuen Nutzer mit einer generierten UUID und Standardwerten für Zutaten
@@ -129,27 +194,35 @@ func (c *CookieServer) UsersPost(ctx context.Context) (*api.User, error) {
 
 // Gibt Informationen zu einem bestimmten Nutzer basierend auf der User-ID zurück
 func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
-	var user *api.User
-	var err error
-
-	// Umwandeln der User-ID in einen String
+	var user api.User
 	userIdStr := params.UserId.String()
 
-	// Suchen nach dem Nutzer mit der passenden ID
-	for i := 0; i < len(c.users) && user == nil; i++ {
-		if c.users[i].ID == userIdStr {
-			user = &c.users[i]
+	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
+	query := `SELECT "Id", "Cookies", "Sugar", "Flour", "Eggs", "Butter", "Chocolate", "Milk" 
+	          FROM public."Players" 
+	          WHERE "Id" = $1`
+	err := c.db.QueryRowContext(ctx, query, userIdStr).Scan(
+		&user.ID,
+		&user.Cookies,
+		&user.Sugar,
+		&user.Flour,
+		&user.Eggs,
+		&user.Butter,
+		&user.Chocolate,
+		&user.Milk,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &api.ErrRespStatusCode{
+				StatusCode: http.StatusNotFound,
+				Response:   fmt.Sprintf("User mit ID: %v nicht gefunden", userIdStr),
+			}
 		}
+		return nil, fmt.Errorf("Fehler beim Abrufen des Benutzers: %v", err)
 	}
 
-	// Wenn kein User gefunden wurde, wird ein Fehler zurückgegeben
-	if user == nil {
-		err = &api.ErrRespStatusCode{
-			StatusCode: http.StatusNotFound,
-			Response:   fmt.Sprintf("User mit ID: %v nicht gefunden", userIdStr),
-		}
-	}
-	return user, err
+	return &user, nil
 }
 
 // Gibt eine Standard-Fehlermeldung zurück
@@ -166,12 +239,53 @@ func (c *CookieServer) NewError(ctx context.Context, err error) *api.ErrRespStat
 func (c *CookieServer) UsersGet(ctx context.Context) ([]api.User, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	log.Println("Sende alle Nutzer")
-	return c.users, nil
+
+	// Abfrage zum Abrufen aller Benutzer mit korrekt gesetzten Anführungszeichen
+	query := `SELECT "Id", "Cookies", "Sugar", "Flour", "Eggs", "Butter", "Chocolate", "Milk" 
+	          FROM public."Players"`
+
+	rows, err := c.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("Fehler beim Abrufen der Nutzer: %v", err)
+	}
+	defer rows.Close()
+
+	var users []api.User
+
+	// Durchlaufen der Ergebniszeilen und Hinzufügen der Benutzer zur Liste
+	for rows.Next() {
+		var user api.User
+		err := rows.Scan(
+			&user.ID,
+			&user.Cookies,
+			&user.Sugar,
+			&user.Flour,
+			&user.Eggs,
+			&user.Butter,
+			&user.Chocolate,
+			&user.Milk,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Fehler beim Scannen des Benutzers: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	// Überprüfen, ob ein Fehler während der Iteration aufgetreten ist
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Fehler während der Zeileniteration: %v", err)
+	}
+
+	// Wenn keine Benutzer gefunden wurden
+	if len(users) == 0 {
+		log.Println("Keine Benutzer in der Datenbank gefunden")
+	}
+
+	return users, nil
 }
 
 // Erstellt einen neuen Server mit voreingestellten Nutzern und Märkten
-func New() *CookieServer {
+func New(db *sql.DB) *CookieServer {
 	return &CookieServer{
 		users: []api.User{
 			{
@@ -704,6 +818,8 @@ func New() *CookieServer {
 				MilkPrice:      440,
 			},
 		},
+
+		db: db,
 	}
 }
 
