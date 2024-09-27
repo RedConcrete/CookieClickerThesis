@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	database, err := database.NewPostgresDatabase("localhost", 5423, "postgres", "1234", "CookieData")
+	database, err := database.NewPostgresDatabase("localhost", 5432, "postgres", "1234", "CookieData")
 	if err != nil {
 		log.Fatal(err.Error())
 	}

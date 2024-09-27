@@ -1,9 +1,10 @@
 package database
 
 import (
-	_"github.com/lib/pq"
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 type PostgresDatabase struct {
@@ -17,7 +18,7 @@ func (p *PostgresDatabase) NewTransaction() (Transaction, error) {
 		return nil, err
 	}
 	return &PostgresTransaction{
-		transaction: transaction,
+		transaction:         transaction,
 		isTransactionActive: true,
 	}, nil
 }
@@ -37,7 +38,7 @@ func NewPostgresDatabase(host string, port int, user string, password string, da
 	if err != nil {
 		return nil, err
 	}
-	defer database.Close()
+
 	return &PostgresDatabase{
 		database: database,
 	}, nil

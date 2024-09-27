@@ -4,6 +4,7 @@ import (
 	"context"
 	"cookie-server/internal/database"
 	api "cookie-server/internal/server"
+	"net/http"
 	"sync"
 )
 
@@ -38,27 +39,83 @@ func (c *CookieService) MarketsAmountGet(ctx context.Context, params api.Markets
 
 // MarketsGet implements api.Handler.
 func (c *CookieService) MarketsGet(ctx context.Context) ([]api.Market, error) {
-	panic("unimplemented")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	markets, err := transaction.GetMarkets()
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return markets, nil
 }
 
 // NewError implements api.Handler.
 func (c *CookieService) NewError(ctx context.Context, err error) *api.ErrRespStatusCode {
-	panic("unimplemented")
+	// Beispiel für eine mögliche Implementierung
+	return &api.ErrRespStatusCode{
+		StatusCode: http.StatusInternalServerError, // Beispiel: Statuscode 500 für interne Serverfehler
+		Response:   err.Error(),
+	}
 }
 
 // UsersGet implements api.Handler.
 func (c *CookieService) UsersGet(ctx context.Context) ([]api.User, error) {
-	panic("unimplemented")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	users, err := transaction.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // UsersPost implements api.Handler.
 func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
-	panic("unimplemented")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	user, err := transaction.CreateUser(api.User{})
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // UsersUserIdGet implements api.Handler.
 func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
-	panic("unimplemented")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	user, err := transaction.GetUser(params.UserId.String())
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 var _ api.Handler = (*CookieService)(nil)
