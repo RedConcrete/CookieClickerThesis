@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:14.3
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: CookieData
+    ports:
+      - 5423:5423
