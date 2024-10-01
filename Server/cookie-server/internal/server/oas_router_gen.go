@@ -334,7 +334,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						return r, true
 					case "POST":
 						r.name = "UsersPost"
-						r.summary = "Returns a list of users."
+						r.summary = "Creates a new user."
 						r.operationID = ""
 						r.pathPattern = "/users"
 						r.args = args

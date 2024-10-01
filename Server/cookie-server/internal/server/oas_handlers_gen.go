@@ -396,7 +396,7 @@ func (s *Server) handleUsersPostRequest(args [0]string, argsEscaped bool, w http
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    "UsersPost",
-			OperationSummary: "Returns a list of users.",
+			OperationSummary: "Creates a new user.",
 			OperationID:      "",
 			Body:             nil,
 			Params:           middleware.Parameters{},

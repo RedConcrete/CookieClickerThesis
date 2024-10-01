@@ -114,39 +114,39 @@ paths:
               schema:
                 type: string
 
-#/buy/:
-#  post:
-#    summary: Returns a transaction where a user bought something
-#    description: Optional extended description in CommonMark or HTML.
-#    requestBody:
-#      required: true
-#      content:
-#        application/json:
-#          schema:
-#            $ref: "#/components/schemas/MarketRequest"
-#    responses:
-#      "200":
-#        description: A JSON object with the details of the bought ingredient and its price.
-#        content:
-#          application/json:
-#            schema:
-#              type: object
-#              properties:
-#                ingredient:
-#                  type: string
-#                  example: "sugar"
-#                amount:
-#                  type: integer
-#                  example: 5
-#                totalPrice:
-#                  type: number
-#                  example: 10.5
-#      default:
-#        description: Unexpected error
-#        content:
-#          application/json:
-#            schema:
-#              type: string
+/buy/:
+  post:
+    summary: Returns a transaction where a user bought something
+    description: Optional extended description in CommonMark or HTML.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MarketRequest"
+    responses:
+      "200":
+        description: A JSON object with the details of the bought ingredient and its price.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ingredient:
+                  type: string
+                  example: "sugar"
+                amount:
+                  type: integer
+                  example: 5
+                totalPrice:
+                  type: number
+                  example: 10.5
+      default:
+        description: Unexpected error
+        content:
+          application/json:
+            schema:
+              type: string
 
 components:
   schemas:
@@ -223,18 +223,18 @@ components:
         - butterPrice
         - chocolatePrice
         - milkPrice
-#   MarketRequest:
-#   type: object
-#   properties:
-#     user:
-#       $ref: '#/components/schemas/User'  # Verweis auf das User-Schema
-#     amount:
-#       type: integer
-#       example: 1
-#     rec:
-#       type: string
-#       example: sugar
-#   required:
-#     - user
-#     - amount
-#     - rec
+  MarketRequest:
+  type: object
+  properties:
+    user:
+      $ref: "#/components/schemas/User" # Verweis auf das User-Schema
+    amount:
+      type: integer
+      example: 1
+    recourse:
+      type: string
+      example: sugar
+  required:
+    - user
+    - amount
+    - recourse
