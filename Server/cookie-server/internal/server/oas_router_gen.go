@@ -61,6 +61,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
+			case 'b': // Prefix: "buy/"
+				origElem := elem
+				if l := len("buy/"); len(elem) >= l && elem[0:l] == "buy/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "POST":
+						s.handleBuyPostRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
+
+				elem = origElem
 			case 'm': // Prefix: "markets"
 				origElem := elem
 				if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {
@@ -258,6 +279,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
+			case 'b': // Prefix: "buy/"
+				origElem := elem
+				if l := len("buy/"); len(elem) >= l && elem[0:l] == "buy/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "POST":
+						r.name = "BuyPost"
+						r.summary = "Returns a transaction where a user bought something"
+						r.operationID = ""
+						r.pathPattern = "/buy/"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+				elem = origElem
 			case 'm': // Prefix: "markets"
 				origElem := elem
 				if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {

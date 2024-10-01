@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// BuyPost implements POST /buy/ operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /buy/
+	BuyPost(ctx context.Context, req *MarketRequest) (*BuyPostOK, error)
 	// MarketsAmountGet implements GET /markets/{amount} operation.
 	//
 	// Returns a list of Market Objects based on the given amount.

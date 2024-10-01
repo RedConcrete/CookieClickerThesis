@@ -11,6 +11,42 @@ func (s *ErrRespStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+type BuyPostOK struct {
+	Ingredient OptString  `json:"ingredient"`
+	Amount     OptInt     `json:"amount"`
+	TotalPrice OptFloat64 `json:"totalPrice"`
+}
+
+// GetIngredient returns the value of Ingredient.
+func (s *BuyPostOK) GetIngredient() OptString {
+	return s.Ingredient
+}
+
+// GetAmount returns the value of Amount.
+func (s *BuyPostOK) GetAmount() OptInt {
+	return s.Amount
+}
+
+// GetTotalPrice returns the value of TotalPrice.
+func (s *BuyPostOK) GetTotalPrice() OptFloat64 {
+	return s.TotalPrice
+}
+
+// SetIngredient sets the value of Ingredient.
+func (s *BuyPostOK) SetIngredient(val OptString) {
+	s.Ingredient = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *BuyPostOK) SetAmount(val OptInt) {
+	s.Amount = val
+}
+
+// SetTotalPrice sets the value of TotalPrice.
+func (s *BuyPostOK) SetTotalPrice(val OptFloat64) {
+	s.TotalPrice = val
+}
+
 // ErrRespStatusCode wraps string with StatusCode.
 type ErrRespStatusCode struct {
 	StatusCode int
@@ -127,6 +163,181 @@ func (s *Market) SetChocolatePrice(val float64) {
 // SetMilkPrice sets the value of MilkPrice.
 func (s *Market) SetMilkPrice(val float64) {
 	s.MilkPrice = val
+}
+
+// Ref: #/components/schemas/MarketRequest
+type MarketRequest struct {
+	User     User   `json:"user"`
+	Amount   int    `json:"amount"`
+	Recourse string `json:"recourse"`
+}
+
+// GetUser returns the value of User.
+func (s *MarketRequest) GetUser() User {
+	return s.User
+}
+
+// GetAmount returns the value of Amount.
+func (s *MarketRequest) GetAmount() int {
+	return s.Amount
+}
+
+// GetRecourse returns the value of Recourse.
+func (s *MarketRequest) GetRecourse() string {
+	return s.Recourse
+}
+
+// SetUser sets the value of User.
+func (s *MarketRequest) SetUser(val User) {
+	s.User = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *MarketRequest) SetAmount(val int) {
+	s.Amount = val
+}
+
+// SetRecourse sets the value of Recourse.
+func (s *MarketRequest) SetRecourse(val string) {
+	s.Recourse = val
+}
+
+// NewOptFloat64 returns new OptFloat64 with value set to v.
+func NewOptFloat64(v float64) OptFloat64 {
+	return OptFloat64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFloat64 is optional float64.
+type OptFloat64 struct {
+	Value float64
+	Set   bool
+}
+
+// IsSet returns true if OptFloat64 was set.
+func (o OptFloat64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFloat64) Reset() {
+	var v float64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFloat64) SetTo(v float64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFloat64) Get() (v float64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFloat64) Or(d float64) float64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptString returns new OptString with value set to v.
+func NewOptString(v string) OptString {
+	return OptString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptString is optional string.
+type OptString struct {
+	Value string
+	Set   bool
+}
+
+// IsSet returns true if OptString was set.
+func (o OptString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptString) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptString) Get() (v string, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // Ref: #/components/schemas/User

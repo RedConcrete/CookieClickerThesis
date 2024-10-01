@@ -13,6 +13,11 @@ type CookieService struct {
 	mux      sync.Mutex
 }
 
+// BuyPost implements api.Handler.
+func (c *CookieService) BuyPost(ctx context.Context, req *api.MarketRequest) (*api.BuyPostOK, error) {
+	panic("unimplemented")
+}
+
 func NewCookieService(database database.Database) *CookieService {
 	return &CookieService{
 		database: database,

@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// BuyPost implements POST /buy/ operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /buy/
+func (UnimplementedHandler) BuyPost(ctx context.Context, req *MarketRequest) (r *BuyPostOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // MarketsAmountGet implements GET /markets/{amount} operation.
 //
 // Returns a list of Market Objects based on the given amount.
