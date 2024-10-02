@@ -13,9 +13,58 @@ type CookieService struct {
 	mux      sync.Mutex
 }
 
+// SellPost implements api.Handler.
+func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		transaction.Rollback() // Rollback im Fehlerfall
+		return nil, err
+	}
+
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+
+	// Rückgabe des users
+	return user, nil
+}
+
 // BuyPost implements api.Handler.
-func (c *CookieService) BuyPost(ctx context.Context, req *api.MarketRequest) (*api.BuyPostOK, error) {
-	panic("unimplemented")
+func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		transaction.Rollback() // Rollback im Fehlerfall
+		return nil, err
+	}
+
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+
+	// Rückgabe des users
+	return user, nil
 }
 
 func NewCookieService(database database.Database) *CookieService {

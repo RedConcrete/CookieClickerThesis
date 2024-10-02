@@ -130,17 +130,31 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ingredient:
-                    type: string
-                    example: "sugar"
-                  amount:
-                    type: integer
-                    example: 5
-                  totalPrice:
-                    type: number
-                    example: 10.5
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /sell/:
+    post:
+      summary: Returns a transaction where a user bought something
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketRequest"
+      responses:
+        "200":
+          description: A JSON object with the details of the sold ingredient and its price.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
         default:
           description: Unexpected error
           content:
@@ -226,8 +240,9 @@ components:
     MarketRequest:
       type: object
       properties:
-        user:
-          $ref: "#/components/schemas/User" # Verweis auf das User-Schema
+        userId:
+          type: string
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
         amount:
           type: integer
           example: 1

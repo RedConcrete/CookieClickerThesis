@@ -18,7 +18,7 @@ var _ Handler = UnimplementedHandler{}
 // Optional extended description in CommonMark or HTML.
 //
 // POST /buy/
-func (UnimplementedHandler) BuyPost(ctx context.Context, req *MarketRequest) (r *BuyPostOK, _ error) {
+func (UnimplementedHandler) BuyPost(ctx context.Context, req *MarketRequest) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -37,6 +37,15 @@ func (UnimplementedHandler) MarketsAmountGet(ctx context.Context, params Markets
 //
 // GET /markets
 func (UnimplementedHandler) MarketsGet(ctx context.Context) (r []Market, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SellPost implements POST /sell/ operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /sell/
+func (UnimplementedHandler) SellPost(ctx context.Context, req *MarketRequest) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

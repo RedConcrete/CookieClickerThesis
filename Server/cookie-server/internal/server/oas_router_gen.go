@@ -132,6 +132,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 's': // Prefix: "sell/"
+				origElem := elem
+				if l := len("sell/"); len(elem) >= l && elem[0:l] == "sell/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "POST":
+						s.handleSellPostRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
+
+				elem = origElem
 			case 'u': // Prefix: "users"
 				origElem := elem
 				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
@@ -357,6 +378,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
+				}
+
+				elem = origElem
+			case 's': // Prefix: "sell/"
+				origElem := elem
+				if l := len("sell/"); len(elem) >= l && elem[0:l] == "sell/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "POST":
+						r.name = "SellPost"
+						r.summary = "Returns a transaction where a user bought something"
+						r.operationID = ""
+						r.pathPattern = "/sell/"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
 				}
 
 				elem = origElem

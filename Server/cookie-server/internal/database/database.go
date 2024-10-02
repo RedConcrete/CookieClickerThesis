@@ -18,4 +18,7 @@ type Transaction interface {
 	CreateUser(user api.User) (*api.User, error)
 	GetUser(uuid string) (*api.User, error)
 	GetUsers() ([]api.User, error)
+	DoBuyTransaction(uuid string, recourse string, amount int) (*api.User, error)
+	DoSellTransaction(uuid string, recourse string, amount int) (*api.User, error)
+	UpdateUser(user *api.User) error
 }

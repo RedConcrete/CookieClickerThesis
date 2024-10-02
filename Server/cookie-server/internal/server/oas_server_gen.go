@@ -13,7 +13,7 @@ type Handler interface {
 	// Optional extended description in CommonMark or HTML.
 	//
 	// POST /buy/
-	BuyPost(ctx context.Context, req *MarketRequest) (*BuyPostOK, error)
+	BuyPost(ctx context.Context, req *MarketRequest) (*User, error)
 	// MarketsAmountGet implements GET /markets/{amount} operation.
 	//
 	// Returns a list of Market Objects based on the given amount.
@@ -26,6 +26,12 @@ type Handler interface {
 	//
 	// GET /markets
 	MarketsGet(ctx context.Context) ([]Market, error)
+	// SellPost implements POST /sell/ operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /sell/
+	SellPost(ctx context.Context, req *MarketRequest) (*User, error)
 	// UsersGet implements GET /users operation.
 	//
 	// Optional extended description in CommonMark or HTML.

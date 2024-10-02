@@ -27,7 +27,7 @@ type Invoker interface {
 	// Optional extended description in CommonMark or HTML.
 	//
 	// POST /buy/
-	BuyPost(ctx context.Context, request *MarketRequest) (*BuyPostOK, error)
+	BuyPost(ctx context.Context, request *MarketRequest) (*User, error)
 	// MarketsAmountGet invokes GET /markets/{amount} operation.
 	//
 	// Returns a list of Market Objects based on the given amount.
@@ -40,6 +40,12 @@ type Invoker interface {
 	//
 	// GET /markets
 	MarketsGet(ctx context.Context) ([]Market, error)
+	// SellPost invokes POST /sell/ operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /sell/
+	SellPost(ctx context.Context, request *MarketRequest) (*User, error)
 	// UsersGet invokes GET /users operation.
 	//
 	// Optional extended description in CommonMark or HTML.
@@ -117,12 +123,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Optional extended description in CommonMark or HTML.
 //
 // POST /buy/
-func (c *Client) BuyPost(ctx context.Context, request *MarketRequest) (*BuyPostOK, error) {
+func (c *Client) BuyPost(ctx context.Context, request *MarketRequest) (*User, error) {
 	res, err := c.sendBuyPost(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendBuyPost(ctx context.Context, request *MarketRequest) (res *BuyPostOK, err error) {
+func (c *Client) sendBuyPost(ctx context.Context, request *MarketRequest) (res *User, err error) {
 	otelAttrs := []attribute.KeyValue{
 		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/buy/"),
@@ -339,6 +345,80 @@ func (c *Client) sendMarketsGet(ctx context.Context) (res []Market, err error) {
 
 	stage = "DecodeResponse"
 	result, err := decodeMarketsGetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SellPost invokes POST /sell/ operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /sell/
+func (c *Client) SellPost(ctx context.Context, request *MarketRequest) (*User, error) {
+	res, err := c.sendSellPost(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendSellPost(ctx context.Context, request *MarketRequest) (res *User, err error) {
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/sell/"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "SellPost",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/sell/"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeSellPostRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeSellPostResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
