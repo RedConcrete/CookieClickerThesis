@@ -2,13 +2,46 @@ package database
 
 import (
 	"database/sql"
+	"embed"
+	"errors"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	//_ "github.com/lib/pq"
 )
 
 type PostgresDatabase struct {
 	database *sql.DB
+}
+
+//go:embed migrations/*
+var embeddedDatabaseMigrations embed.FS
+
+// RunMigrations implements Database.
+func (p *PostgresDatabase) RunMigrations() error {
+	migrationFiles, err := iofs.New(embeddedDatabaseMigrations, "migrations")
+	if err != nil {
+		return err
+	}
+	driver, err := postgres.WithInstance(p.database, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+	migrations, err := migrate.NewWithInstance(
+		"iofs",
+		migrationFiles,
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		return err
+	}
+	if err := migrations.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return err
+	}
+	return nil
 }
 
 // NewTransaction implements Database.

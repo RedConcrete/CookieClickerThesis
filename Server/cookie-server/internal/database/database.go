@@ -7,6 +7,7 @@ import (
 type Database interface {
 	NewTransaction() (Transaction, error)
 	Close() error
+	RunMigrations() error
 	// todo: migrations?
 }
 

@@ -15,6 +15,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	if err := database.RunMigrations(); err != nil {
+		log.Fatal(err.Error())
+	}
 	cookieService := service.NewCookieService(database)
 
 	// Erstelle einen neuen Kontext mit Abbruch
