@@ -4,6 +4,7 @@ import (
 	"context"
 	"cookie-server/internal/database"
 	api "cookie-server/internal/server"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -13,69 +14,63 @@ type CookieService struct {
 	mux      sync.Mutex
 }
 
-// SellPost implements api.Handler.
-func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
-	c.mux.Lock()
-	defer c.mux.Unlock()
-
-	// Erstelle eine neue Datenbanktransaktion
-	transaction, err := c.database.NewTransaction()
-	if err != nil {
-		return nil, err
-	}
-	defer transaction.Rollback() // Rollback im Fehlerfall
-
-	// Führe die Kauftransaktion durch
-	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	// Transaktion abschließen
-	if err := transaction.Commit(); err != nil {
-		return nil, err
-	}
-
-	// Rückgabe des users
-	return user, nil
-}
-
-// BuyPost implements api.Handler.
-func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
-	c.mux.Lock()
-	defer c.mux.Unlock()
-
-	// Erstelle eine neue Datenbanktransaktion
-	transaction, err := c.database.NewTransaction()
-	if err != nil {
-		return nil, err
-	}
-
-	defer transaction.Rollback() // Rollback im Fehlerfall
-
-	// Führe die Kauftransaktion durch
-	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	// Transaktion abschließen
-	if err := transaction.Commit(); err != nil {
-		return nil, err
-	}
-
-	// Rückgabe des users
-	return user, nil
-}
-
 func NewCookieService(database database.Database) *CookieService {
 	return &CookieService{
 		database: database,
 	}
 }
 
+// SellPost implements api.Handler.
+func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	log.Println("POST /sell/ called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback() // Rollback im Fehlerfall
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		return nil, err
+	}
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	// Rückgabe des users
+	return user, nil
+}
+
+// BuyPost implements api.Handler.
+func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	log.Println("POST /buy/ called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback() // Rollback im Fehlerfall
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		return nil, err
+	}
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	// Rückgabe des users
+	return user, nil
+}
+
 // MarketsAmountGet implements api.Handler.
 func (c *CookieService) MarketsAmountGet(ctx context.Context, params api.MarketsAmountGetParams) ([]api.Market, error) {
+	log.Println("GET /markets/{amount} called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -94,6 +89,7 @@ func (c *CookieService) MarketsAmountGet(ctx context.Context, params api.Markets
 
 // MarketsGet implements api.Handler.
 func (c *CookieService) MarketsGet(ctx context.Context) ([]api.Market, error) {
+	log.Println("GET /markets called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -121,6 +117,7 @@ func (c *CookieService) NewError(ctx context.Context, err error) *api.ErrRespSta
 
 // UsersGet implements api.Handler.
 func (c *CookieService) UsersGet(ctx context.Context) ([]api.User, error) {
+	log.Println("GET /users called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -139,6 +136,7 @@ func (c *CookieService) UsersGet(ctx context.Context) ([]api.User, error) {
 
 // UsersPost implements api.Handler.
 func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
+	log.Println("POST /users called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -159,6 +157,7 @@ func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
 
 // UsersUserIdGet implements api.Handler.
 func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
+	log.Println("GET /users/{userId} called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()

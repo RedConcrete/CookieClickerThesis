@@ -4,6 +4,7 @@ import (
 	api "cookie-server/internal/server"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -33,15 +34,14 @@ func (p *PostgresTransaction) Commit() error {
 
 // CreateUser implements Transaction.
 func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
+	log.Println("creating user")
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
 	query := `INSERT INTO "players" ("id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			  RETURNING "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
-
 	if user.ID == "" {
 		user.ID = uuid.New().String()
 	}
-
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
 	err := p.transaction.QueryRow(query, user.ID, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
@@ -56,37 +56,35 @@ func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &user, nil
 }
 
 // UpdateUser implements Transaction.
 func (p *PostgresTransaction) UpdateUser(user *api.User) error {
+	log.Println("updating user")
+	// SQL-Abfrage zum Aktualisieren des Benutzers in der "Players"-Tabelle
 	query := `UPDATE "players"
               SET "cookies" = $1, "sugar" = $2, "flour" = $3, "eggs" = $4,
                   "butter" = $5, "chocolate" = $6, "milk" = $7
               WHERE "id" = $8`
-
 	_, err := p.transaction.Exec(query, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk, user.ID)
 	return err
 }
 
 // GetUser implements Transaction.
 func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
+	log.Println("getting user")
 	var user api.User
-
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "id" = $1`
-
 	// Führt die Abfrage aus
 	rows, err := p.transaction.Query(query, uuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	// Wechsle zur ersten Zeile des Ergebnisses
 	if rows.Next() {
 		// Scannt die Werte in die entsprechende Benutzerstruktur
@@ -106,12 +104,12 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 		// Falls keine Zeile gefunden wurde
 		return nil, fmt.Errorf("user with id %s not found", uuid)
 	}
-
 	return &user, nil
 }
 
 // GetUsers implements Transaction.
 func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
+	log.Println("getting users")
 	var users []api.User
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"`
@@ -142,11 +140,11 @@ func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 
 // GetMarkets implements Transaction.
 func (p *PostgresTransaction) GetMarkets() ([]api.Market, error) {
+	log.Println("getting markets")
 	var marketsByAmount []api.Market
 	query := `SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
 	          FROM "markets"
 	          ORDER BY "date" DESC`
-
 	rows, err := p.transaction.Query(query)
 	if err != nil {
 		return nil, err
@@ -174,6 +172,7 @@ func (p *PostgresTransaction) GetMarkets() ([]api.Market, error) {
 
 // GetMarketsByAmount implements Transaction.
 func (p *PostgresTransaction) GetMarketsByAmount(amount int) ([]api.Market, error) {
+	log.Println("getting markets by amount")
 	var marketsByAmount []api.Market
 	query := `SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
 	          FROM "markets"
@@ -206,16 +205,14 @@ func (p *PostgresTransaction) GetMarketsByAmount(amount int) ([]api.Market, erro
 
 // DoBuyTransaction implements Transaction.
 func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int) (*api.User, error) {
+	log.Println("buying resources")
 	var user api.User
-
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "id" = $1`
-
 	// Führt die Abfrage aus
 	row := p.transaction.QueryRow(query, uuid)
-
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
 		&user.ID,
@@ -232,19 +229,15 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 		}
 		return nil, err
 	}
-
 	// Datenbankabfrage zum Abrufen des letzten Marktpreises
 	marketQuery := `SELECT "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
                     FROM "markets"
                     ORDER BY "date" DESC
                     LIMIT 1`
-
 	var sugarPrice, flourPrice, eggsPrice, butterPrice, chocolatePrice, milkPrice float64
-
 	if err := p.transaction.QueryRow(marketQuery).Scan(&sugarPrice, &flourPrice, &eggsPrice, &butterPrice, &chocolatePrice, &milkPrice); err != nil {
 		return nil, err
 	}
-
 	// Preis basierend auf der Ressource auswählen
 	var totalPrice float64
 	switch recourse {
@@ -269,35 +262,29 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 	default:
 		return nil, fmt.Errorf("recourse %s not found", recourse)
 	}
-
 	// Überprüfe, ob der Benutzer genügend Cookies hat
 	if user.Cookies < totalPrice {
 		return nil, fmt.Errorf("not enough cookies for purchase")
 	}
-
 	// Ziehe den Preis von den Cookies ab
 	user.Cookies -= totalPrice
-
 	// Aktualisiere den Benutzer in der Datenbank
 	if err := p.UpdateUser(&user); err != nil {
 		return nil, err
 	}
-
 	return &user, nil
 }
 
 // DoSellTransaction implements Transaction.
 func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, amount int) (*api.User, error) {
+	log.Println("selling resources")
 	var user api.User
-
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "id" = $1`
-
 	// Führt die Abfrage aus
 	row := p.transaction.QueryRow(query, uuid)
-
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
 		&user.ID,
@@ -314,19 +301,15 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 		}
 		return nil, err
 	}
-
 	// Datenbankabfrage zum Abrufen des letzten Marktpreises
 	marketQuery := `SELECT "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
                     FROM "markets"
                     ORDER BY "date" DESC
                     LIMIT 1`
-
 	var sugarPrice, flourPrice, eggsPrice, butterPrice, chocolatePrice, milkPrice float64
-
 	if err := p.transaction.QueryRow(marketQuery).Scan(&sugarPrice, &flourPrice, &eggsPrice, &butterPrice, &chocolatePrice, &milkPrice); err != nil {
 		return nil, err
 	}
-
 	// Preis basierend auf der Ressource auswählen
 	var totalPrice float64
 	switch recourse {
@@ -369,21 +352,18 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 	default:
 		return nil, fmt.Errorf("recourse %s not found", recourse)
 	}
-
 	// Füge den Erlös in Cookies hinzu
 	user.Cookies += totalPrice
-
 	// Aktualisiere den Benutzer in der Datenbank
 	if err := p.UpdateUser(&user); err != nil {
 		return nil, err
 	}
-
 	return &user, nil
 }
 
 // CreateMarket implements Transaction.
 func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
-
+	log.Println("creating market")
 	query := `INSERT INTO "markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
 			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
 			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`

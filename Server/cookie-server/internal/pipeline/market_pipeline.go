@@ -3,6 +3,7 @@ package internal
 import (
 	"cookie-server/internal/database"
 	api "cookie-server/internal/server"
+	"math/rand"
 	"time"
 )
 
@@ -22,12 +23,12 @@ func (mg *MarketGenerator) StartGenerator() error {
 	for {
 		// generate market
 		newMarket := api.Market{
-			SugarPrice:     1.0, // Beispielwert
-			FlourPrice:     2.0, // Beispielwert
-			EggsPrice:      3.0, // Beispielwert
-			ButterPrice:    4.0, // Beispielwert
-			ChocolatePrice: 5.0, // Beispielwert
-			MilkPrice:      6.0, // Beispielwert
+			SugarPrice:     rand.ExpFloat64(), // Beispielwert
+			FlourPrice:     rand.ExpFloat64(), // Beispielwert
+			EggsPrice:      rand.ExpFloat64(), // Beispielwert
+			ButterPrice:    rand.ExpFloat64(), // Beispielwert
+			ChocolatePrice: rand.ExpFloat64(), // Beispielwert
+			MilkPrice:      rand.ExpFloat64(), // Beispielwert
 		}
 
 		// save to database
