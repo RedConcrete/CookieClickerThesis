@@ -68,9 +68,9 @@ func MarketGenerator(ctx context.Context, out chan<- *Market, db database.Databa
 
 // saveMarketToDB speichert das Marktobjekt in der Datenbank
 func (p *PostgresTransaction) saveMarketToDB(db database.Database, market *Market) (*Market, error) {
-	query := `INSERT INTO public."Markets" ("Id", "Date", "SugarPrice", "FlourPrice", "EggsPrice", "ButterPrice", "ChocolatePrice", "MilkPrice") 
+	query := `INSERT INTO public."markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
 			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
-			  RETURNING "Id", "Date", "SugarPrice", "FlourPrice", "EggsPrice", "ButterPrice", "ChocolatePrice", "MilkPrice"`
+			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`
 
 	err := p.transaction.QueryRow(query,
 		market.SugarPrice,
