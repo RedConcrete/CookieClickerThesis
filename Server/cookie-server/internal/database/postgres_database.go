@@ -5,11 +5,12 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	//_ "github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type PostgresDatabase struct {
@@ -41,6 +42,7 @@ func (p *PostgresDatabase) RunMigrations() error {
 	if err := migrations.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
+	log.Println("migrations applied successfully")
 	return nil
 }
 

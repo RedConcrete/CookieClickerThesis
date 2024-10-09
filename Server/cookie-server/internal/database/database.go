@@ -8,7 +8,6 @@ type Database interface {
 	NewTransaction() (Transaction, error)
 	Close() error
 	RunMigrations() error
-	// todo: migrations?
 }
 
 type Transaction interface {
@@ -22,4 +21,5 @@ type Transaction interface {
 	DoBuyTransaction(uuid string, recourse string, amount int) (*api.User, error)
 	DoSellTransaction(uuid string, recourse string, amount int) (*api.User, error)
 	UpdateUser(user *api.User) error
+	CreateMarket(market *api.Market) error
 }

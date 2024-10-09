@@ -381,4 +381,21 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 	return &user, nil
 }
 
+// CreateMarket implements Transaction.
+func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
+
+	query := `INSERT INTO public."markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
+			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
+			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`
+
+	p.transaction.QueryRow(query,
+		market.SugarPrice,
+		market.FlourPrice,
+		market.EggsPrice,
+		market.ButterPrice,
+		market.ChocolatePrice,
+		market.MilkPrice)
+	return nil
+}
+
 var _ Transaction = (*PostgresTransaction)(nil)

@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS "kvn" (
     "milk_n" INTEGER NOT NULL DEFAULT 0
 );
 
+-- CREATE TABLE IF NOT EXISTS "transaction" (
+--     "id" TEXT PRIMARY KEY,
+--     "date" DATE NOT NULL,
+--     "resource" TEXT NOT NULL,
+--     "price" FLOAT NOT NULL DEFAULT 0.0,
+--     "amount" INTEGER NOT NULL DEFAULT 0,
+--     "total" FLOAT NOT NULL DEFAULT 0.0,
+--     "buy" BOOLEAN NOT NULL DEFAULT 1
+-- );
+
 CREATE TABLE IF NOT EXISTS "markets" (
     "id" TEXT PRIMARY KEY,
     "date" DATE NOT NULL,
