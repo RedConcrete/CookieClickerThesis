@@ -34,7 +34,7 @@ func (p *PostgresTransaction) Commit() error {
 // CreateUser implements Transaction.
 func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
-	query := `INSERT INTO public."players" ("id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
+	query := `INSERT INTO "players" ("id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			  RETURNING "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 
@@ -62,7 +62,7 @@ func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 
 // UpdateUser implements Transaction.
 func (p *PostgresTransaction) UpdateUser(user *api.User) error {
-	query := `UPDATE public."players"
+	query := `UPDATE "players"
               SET "cookies" = $1, "sugar" = $2, "flour" = $3, "eggs" = $4,
                   "butter" = $5, "chocolate" = $6, "milk" = $7
               WHERE "id" = $8`
@@ -77,7 +77,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
-	          FROM public."players"
+	          FROM "players"
 	          WHERE "id" = $1`
 
 	// Führt die Abfrage aus
@@ -114,7 +114,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 	var users []api.User
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
-	          FROM public."players"`
+	          FROM "players"`
 	rows, err := p.transaction.Query(query)
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 func (p *PostgresTransaction) GetMarkets() ([]api.Market, error) {
 	var marketsByAmount []api.Market
 	query := `SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
-	          FROM public."markets"
+	          FROM "markets"
 	          ORDER BY "date" DESC`
 
 	rows, err := p.transaction.Query(query)
@@ -176,8 +176,8 @@ func (p *PostgresTransaction) GetMarkets() ([]api.Market, error) {
 func (p *PostgresTransaction) GetMarketsByAmount(amount int) ([]api.Market, error) {
 	var marketsByAmount []api.Market
 	query := `SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
-	          FROM public."Markets"
-	          ORDER BY "Date" DESC
+	          FROM "markets"
+	          ORDER BY "date" DESC
 	          LIMIT $1`
 	rows, err := p.transaction.Query(query, amount)
 	if err != nil {
@@ -210,7 +210,7 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
-	          FROM public."players"
+	          FROM "players"
 	          WHERE "id" = $1`
 
 	// Führt die Abfrage aus
@@ -235,7 +235,7 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 
 	// Datenbankabfrage zum Abrufen des letzten Marktpreises
 	marketQuery := `SELECT "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
-                    FROM public."markets"
+                    FROM "markets"
                     ORDER BY "date" DESC
                     LIMIT 1`
 
@@ -292,7 +292,7 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
-	          FROM public."players"
+	          FROM "players"
 	          WHERE "id" = $1`
 
 	// Führt die Abfrage aus
@@ -317,7 +317,7 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 
 	// Datenbankabfrage zum Abrufen des letzten Marktpreises
 	marketQuery := `SELECT "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
-                    FROM public."markets"
+                    FROM "markets"
                     ORDER BY "date" DESC
                     LIMIT 1`
 
@@ -384,7 +384,7 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 // CreateMarket implements Transaction.
 func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
 
-	query := `INSERT INTO public."markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
+	query := `INSERT INTO "markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
 			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
 			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`
 

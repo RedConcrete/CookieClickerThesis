@@ -24,10 +24,12 @@ var embeddedDatabaseMigrations embed.FS
 func (p *PostgresDatabase) RunMigrations() error {
 	migrationFiles, err := iofs.New(embeddedDatabaseMigrations, "migrations")
 	if err != nil {
+		fmt.Errorf(err.Error())
 		return err
 	}
 	driver, err := postgres.WithInstance(p.database, &postgres.Config{})
 	if err != nil {
+		fmt.Errorf(err.Error())
 		return err
 	}
 	migrations, err := migrate.NewWithInstance(
@@ -37,9 +39,11 @@ func (p *PostgresDatabase) RunMigrations() error {
 		driver,
 	)
 	if err != nil {
+		fmt.Errorf(err.Error())
 		return err
 	}
 	if err := migrations.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		fmt.Errorf(err.Error())
 		return err
 	}
 	log.Println("migrations applied successfully")

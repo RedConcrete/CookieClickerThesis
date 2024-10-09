@@ -23,11 +23,11 @@ func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest)
 	if err != nil {
 		return nil, err
 	}
+	defer transaction.Rollback() // Rollback im Fehlerfall
 
 	// Führe die Kauftransaktion durch
 	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
 	if err != nil {
-		transaction.Rollback() // Rollback im Fehlerfall
 		return nil, err
 	}
 
@@ -51,10 +51,11 @@ func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) 
 		return nil, err
 	}
 
+	defer transaction.Rollback() // Rollback im Fehlerfall
+
 	// Führe die Kauftransaktion durch
 	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
 	if err != nil {
-		transaction.Rollback() // Rollback im Fehlerfall
 		return nil, err
 	}
 
@@ -144,6 +145,8 @@ func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer transaction.Rollback()
+
 	user, err := transaction.CreateUser(api.User{})
 	if err != nil {
 		return nil, err
