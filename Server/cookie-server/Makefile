@@ -1,3 +1,8 @@
+.PHONY: setup
+setup:
+	go mod tidy
+	go vet -v
+
 .PHONY: environment-up
 environment-up:
 	docker-compose up -d
@@ -7,5 +12,8 @@ environment-down:
 	docker-compose down
 
 .PHONY: run
-run: environment-up
+run: setup environment-up
 	go run main.go
+
+# .PHONY: docker-build
+# docker-build
