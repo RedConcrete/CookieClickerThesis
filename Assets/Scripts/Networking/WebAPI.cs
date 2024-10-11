@@ -73,9 +73,8 @@ public class WebAPI : MonoBehaviour
         webRequest.Dispose();
     }
 
-    public IEnumerator GetPlayer(string id)
+    public IEnumerator GetPlayer(string id, bool isLoggingIn)
     {
-        Debug.Log("Player login in with " + id);
         string url = $"{baseUrl}/users/{id}";
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
@@ -90,7 +89,10 @@ public class WebAPI : MonoBehaviour
                 case UnityWebRequest.Result.Success:
                     string playerJsonData = webRequest.downloadHandler.text;
                     player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
-                    SceneManager.LoadScene(1);
+                    if (isLoggingIn)
+                    {
+                        SceneManager.LoadScene(1);
+                    }
                     Debug.Log("Login successful" + id);
                     break;
             }

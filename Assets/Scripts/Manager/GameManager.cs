@@ -101,7 +101,7 @@ public class GameManager : MonoBehaviour
                 DisplayTime(timeRemaining);
 
                 // Überprüfen, ob der Timer abgelaufen ist
-                if (timeRemaining < 0)
+                if (timeRemaining <= 1)
                 {
                     // Timer zurücksetzen und Markt aktualisieren
                     timeRemaining = updateTime;
@@ -207,7 +207,7 @@ public class GameManager : MonoBehaviour
 
     public void UpdatePlayerData()
     {
-        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.id));
+        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.id, false));
     }
 
     public void OverridePlayerDate()

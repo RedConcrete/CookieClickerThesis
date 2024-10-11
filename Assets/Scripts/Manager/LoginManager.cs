@@ -9,7 +9,9 @@ public class LoginManager : MonoBehaviour
     {
         if (WebAPI.Instance != null)
         {
-            StartCoroutine(WebAPI.Instance.GetPlayer(playerTextField.text));
+            Debug.Log("Player login in with " + playerTextField.text);
+
+            StartCoroutine(WebAPI.Instance.GetPlayer(playerTextField.text, true));
         }
         else
         {
