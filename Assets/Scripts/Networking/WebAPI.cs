@@ -12,11 +12,9 @@ using UnityEngine.SceneManagement;
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
-    public string Id = Guid.NewGuid().ToString();
+    public static Player player;  // Statische Variable für den Player
 
-    private Player player;
     List<Market> marketList;
-    private OwnSceneManager ownSceneManager = new OwnSceneManager();
     private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
@@ -64,8 +62,8 @@ public class WebAPI : MonoBehaviour
             string playerJsonData = webRequest.downloadHandler.text;
             if (!string.IsNullOrEmpty(playerJsonData))
             {
-                player = JsonConvert.DeserializeObject<Player>(playerJsonData);
-                ownSceneManager.SwitchScene(1);
+                player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                SceneManager.LoadScene(1);
             }
             else
             {
@@ -77,6 +75,7 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPlayer(string id)
     {
+        Debug.Log("Player login in with " + id);
         string url = $"{baseUrl}/users/{id}";
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
@@ -90,8 +89,9 @@ public class WebAPI : MonoBehaviour
                     break;
                 case UnityWebRequest.Result.Success:
                     string playerJsonData = webRequest.downloadHandler.text;
-                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);
-                    ownSceneManager.SwitchScene(1);
+                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                    SceneManager.LoadScene(1);
+                    Debug.Log("Login successful" + id);
                     break;
             }
         }
@@ -141,7 +141,6 @@ public class WebAPI : MonoBehaviour
             }
         }
     }
-
 
     public IEnumerator PostBuy(string playerId, string rec, int amount)
     {
@@ -198,11 +197,6 @@ public class WebAPI : MonoBehaviour
                 gameManager.UpdatePlayerData();
             }
         }
-    }
-
-    public Player GetLoginPlayer()
-    {
-        return player;
     }
 
     public List<Market> GetMarket()

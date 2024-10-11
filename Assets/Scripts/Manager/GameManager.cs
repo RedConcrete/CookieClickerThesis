@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Timer:")]
     public TMP_Text updateTime_Text;
-    public int updateTime = 10;
+    public int updateTime = 11;
     public float timeRemaining = -1;
     public bool timerIsRunning = false;
     private float colorResetTime = 0.5f;
@@ -58,7 +58,6 @@ public class GameManager : MonoBehaviour
     private int currentCreateCookiesAmount = 1;
     private int currentBuyAndSellCookiesAmount = 1;
     private int currentBuyAndSellRecAmount = 1;
-    private OwnSceneManager ownSceneManager = new OwnSceneManager();
     private int idleScene = 2;
     private int marketScene = 1;
     private int scene;
@@ -68,16 +67,18 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         scene = SceneManager.GetActiveScene().buildIndex;
-        currentPlayer = WebAPI.Instance.GetLoginPlayer();
+        currentPlayer = WebAPI.player;
         UpdateRecources();
 
         if (scene == idleScene)
         {
+            Debug.Log("Idle Scene loaded");
             amountCookies_InputField.text = initialAmount.ToString();
         }
 
         if (scene == marketScene)
         {
+            Debug.Log("Idle Market loaded");
             recTag = GameObject.FindGameObjectsWithTag("RecTag");
             GameObject graph = GameObject.Find("Graph");
             graphManager = graph.GetComponent<GraphManager>();
@@ -90,45 +91,103 @@ public class GameManager : MonoBehaviour
     {
         if (scene == marketScene)
         {
+            // Prüfen, ob der Timer läuft
             if (timerIsRunning)
             {
+                // Zeit verringern
                 timeRemaining -= Time.deltaTime;
+
+                // Zeit anzeigen
                 DisplayTime(timeRemaining);
 
+                // Überprüfen, ob der Timer abgelaufen ist
                 if (timeRemaining < 0)
                 {
+                    // Timer zurücksetzen und Markt aktualisieren
                     timeRemaining = updateTime;
-                    StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
-                    marketList = WebAPI.Instance.GetMarket();
-                    graphManager.UpdateGraph();
-                    totalCostField.text = calcTotalCost().ToString();
-                    UpdatePlayerData(); //Todo GetPlayer da nur dem Spieler die aktuellen Rec benötigt werden
+                    UpdateMarketData();
                 }
             }
-            if (timeRemaining >= -1.0 && timerIsRunning == false)
+            else if (timeRemaining >= -1.0f && !timerIsRunning)
             {
+                // Timer synchronisieren, wenn er nicht läuft
                 SyncTimer();
-                graphManager.UpdateGraph();
             }
         }
     }
 
+    private void UpdateMarketData()
+    {
+        // Hole die Preise vom Server
+        StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
+
+        // Lade die Marktdaten in die Liste
+        List<Market> newMarketList = WebAPI.Instance.GetMarket();
+
+        // Überprüfe, ob sich die Marktdaten geändert haben, bevor du die UI aktualisierst
+        if (!AreMarketsEqual(marketList, newMarketList))
+        {
+            marketList = newMarketList;
+
+            // Aktualisiere den Graphen, wenn sich die Marktdaten geändert haben
+            graphManager.UpdateGraph();
+
+            // Aktualisiere andere UI-Elemente nur bei Änderungen
+            totalCostField.text = calcTotalCost().ToString();
+            UpdatePlayerData(); // Nur bei Änderungen aktualisieren
+        }
+    }
+
+    private bool AreMarketsEqual(List<Market> oldList, List<Market> newList)
+    {
+        if (oldList == null || newList == null || oldList.Count != newList.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < oldList.Count; i++)
+        {
+            if (!oldList[i].Equals(newList[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     async void SyncTimer()
     {
-        StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
-        while (WebAPI.Instance.GetMarket() == null) await Task.Delay(10);
-        TimeSpan timeSpan = DateTime.UtcNow - WebAPI.Instance.GetMarket()[0].date;
-        timeRemaining = timeSpan.Minutes / 60;
-        timerIsRunning = true;
+        if (!timerIsRunning)  // Verhindern, dass der Timer erneut gestartet wird
+        {
+            StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
+            while (WebAPI.Instance.GetMarket() == null)
+            {
+                await Task.Delay(10);
+            }
+
+            // Timer basierend auf der Differenz zur aktuellen Marktzeit synchronisieren
+            TimeSpan timeSpan = DateTime.UtcNow - WebAPI.Instance.GetMarket()[0].date;
+            timeRemaining = (float)timeSpan.TotalSeconds % updateTime;  // Berechne verbleibende Zeit
+            timerIsRunning = true;
+        }
     }
+
 
     void DisplayTime(float timeToDisplay)
     {
-        timeToDisplay += 1;
-        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
-        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+        if (timeToDisplay < 0)
+        {
+            timeToDisplay = 0;  // Zeit nicht negativ anzeigen
+        }
+
+        float minutes = Mathf.FloorToInt(timeToDisplay / 60);  // Minuten berechnen
+        float seconds = Mathf.FloorToInt(timeToDisplay % 60);  // Sekunden berechnen
+
+        // Zeit im Format mm:ss anzeigen
         updateTime_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
+
 
     public void UpdateRecources()
     {
@@ -233,14 +292,14 @@ public class GameManager : MonoBehaviour
     {
         if (scene != sceneIndex)
         {
-            ownSceneManager.SwitchScene(sceneIndex);
+            SceneManager.LoadScene(sceneIndex);
         }
     }
 
     public void Logout()
     {
         //Todo überprüfen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler übernehemen
-        ownSceneManager.SwitchScene(0);
+        SceneManager.LoadScene(0);
     }
 
     public void AddAmountCreateCookies(int amount)
