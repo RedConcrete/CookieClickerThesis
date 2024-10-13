@@ -23,12 +23,12 @@ func (mg *MarketGenerator) StartGenerator() error {
 	for {
 		// generate market
 		newMarket := api.Market{
-			SugarPrice:     rand.ExpFloat64(), // Beispielwert
-			FlourPrice:     rand.ExpFloat64(), // Beispielwert
-			EggsPrice:      rand.ExpFloat64(), // Beispielwert
-			ButterPrice:    rand.ExpFloat64(), // Beispielwert
-			ChocolatePrice: rand.ExpFloat64(), // Beispielwert
-			MilkPrice:      rand.ExpFloat64(), // Beispielwert
+			SugarPrice:     float64(rand.Intn(1000) + 1),
+			FlourPrice:     float64(rand.Intn(1000) + 1),
+			EggsPrice:      float64(rand.Intn(1000) + 1),
+			ButterPrice:    float64(rand.Intn(1000) + 1),
+			ChocolatePrice: float64(rand.Intn(1000) + 1),
+			MilkPrice:      float64(rand.Intn(1000) + 1),
 		}
 
 		// save to database
