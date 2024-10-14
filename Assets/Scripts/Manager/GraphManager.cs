@@ -245,12 +245,12 @@ public class GraphManager : MonoBehaviour
             dashX.anchoredPosition = new Vector2(xPos, -7f);
         }
 
-        sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cokkies";
-        flour_PriceText.text = (int)marketList.First().flourPrice + " Cokkies";
-        eggs_PriceText.text = (int)marketList.First().eggsPrice + " Cokkies";
-        butter_PriceText.text = (int)marketList.First().butterPrice + " Cokkies";
-        chocolate_PriceText.text = (int)marketList.First().chocolatePrice + " Cokkies";
-        milk_PriceText.text = (int)marketList.First().milkPrice + " Cokkies";
+        sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cookies";
+        flour_PriceText.text = (int)marketList.First().flourPrice + " Cookies";
+        eggs_PriceText.text = (int)marketList.First().eggsPrice + " Cookies";
+        butter_PriceText.text = (int)marketList.First().butterPrice + " Cookies";
+        chocolate_PriceText.text = (int)marketList.First().chocolatePrice + " Cookies";
+        milk_PriceText.text = (int)marketList.First().milkPrice + " Cookies";
 
         int separatorCount = 10;
         for (int i = 0; i <= separatorCount; i++)
