@@ -7,12 +7,18 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Server.Data;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
     public static Player player;  // Statische Variable für den Player
+    public static ulong SteamId;  // Statische Steam-ID des Players
+
+    private byte[] authTicket = new byte[1024];
+    private uint ticketSize;
+
 
     List<Market> marketList;
     private string baseUrl = "http://localhost:3000";
@@ -21,6 +27,19 @@ public class WebAPI : MonoBehaviour
 
     private void Awake()
     {
+
+        try
+        {
+            Steamworks.SteamClient.Init(2816100);
+            getSteamInfos();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e + " Steam Conection ERROR! ");
+        }
+
+        
+
         if (Instance != null)
         {
             Debug.Log("Destroying duplicate WebAPI instance.");
@@ -32,9 +51,20 @@ public class WebAPI : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
     }
+    private void getSteamInfos()
+    {
+        SteamId = Steamworks.SteamClient.SteamId;
+    }
+
+    private void OnApplicationQuit()
+    {
+        Steamworks.SteamClient.Shutdown();
+    }
 
     private void Update()
     {
+        Steamworks.SteamClient.RunCallbacks();
+
         if (gameManager == null && SceneManager.GetActiveScene().buildIndex != loginScene)
         {
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
