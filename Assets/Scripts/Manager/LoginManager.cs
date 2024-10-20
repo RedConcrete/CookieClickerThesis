@@ -5,6 +5,11 @@ public class LoginManager : MonoBehaviour
 {
     public TMP_InputField playerTextField;
 
+    private void Start()
+    {
+        MusicManager.Instance.PlayMusic("Main");
+    }
+
     public void Login()
     {
         if (WebAPI.Instance != null)
