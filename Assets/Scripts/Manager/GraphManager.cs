@@ -52,9 +52,6 @@ public class GraphManager : MonoBehaviour
 
     private void Awake()
     {
-        
-        
-        
     }
 
     private GameObject CreateIcon(Vector2 anchoredPos, int price, string rec, Sprite s)
@@ -250,7 +247,7 @@ public class GraphManager : MonoBehaviour
             lineX.SetParent(graphContainer, false);
             lineX.gameObject.SetActive(true);
             lineX.sizeDelta = new Vector2(1.5f, graphHeight);
-            lineX.anchoredPosition = new Vector2(xPos, -7f);
+            lineX.anchoredPosition = new Vector2(xPos, 0f);
         }
 
         sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cookies";
@@ -274,7 +271,7 @@ public class GraphManager : MonoBehaviour
             lineY.SetParent(graphContainer, false);
             lineY.gameObject.SetActive(true);
             lineY.sizeDelta = new Vector2(graphWidth, 1.5f);
-            lineY.anchoredPosition = new Vector2(-4f, norm * graphHeight);
+            lineY.anchoredPosition = new Vector2(0f, norm * graphHeight);
         }
     }
 
@@ -290,6 +287,9 @@ public class GraphManager : MonoBehaviour
     {
         GameObject line = new GameObject("___", typeof(Image));
         line.transform.SetParent(graphContainer, false);
+
+        line.transform.SetAsFirstSibling();
+
         RectTransform rectTransform = line.GetComponent<RectTransform>();
         Vector2 dir = (dotPosB - dotPosA).normalized;
         float distance = Vector2.Distance(dotPosA, dotPosB);
@@ -308,4 +308,5 @@ public class GraphManager : MonoBehaviour
             line.GetComponent<Image>().color = Color.green;
         }
     }
+
 }
