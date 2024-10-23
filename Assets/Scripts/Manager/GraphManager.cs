@@ -52,6 +52,7 @@ public class GraphManager : MonoBehaviour
 
     private void Awake()
     {
+        
     }
 
     private GameObject CreateIcon(Vector2 anchoredPos, int price, string rec, Sprite s)
@@ -245,6 +246,7 @@ public class GraphManager : MonoBehaviour
 
             RectTransform lineX = Instantiate(lineTempX);
             lineX.SetParent(graphContainer, false);
+            lineX.transform.SetAsFirstSibling();
             lineX.gameObject.SetActive(true);
             lineX.sizeDelta = new Vector2(1.5f, graphHeight);
             lineX.anchoredPosition = new Vector2(xPos, 0f);
@@ -269,6 +271,7 @@ public class GraphManager : MonoBehaviour
 
             RectTransform lineY = Instantiate(lineTempY);
             lineY.SetParent(graphContainer, false);
+            lineY.transform.SetAsFirstSibling();
             lineY.gameObject.SetActive(true);
             lineY.sizeDelta = new Vector2(graphWidth, 1.5f);
             lineY.anchoredPosition = new Vector2(0f, norm * graphHeight);

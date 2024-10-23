@@ -7,7 +7,10 @@ public class LoginManager : MonoBehaviour
 
     private void Start()
     {
-        MusicManager.Instance.PlayMusic("Main");
+        if (!MusicManager.Instance.IsTrackPlaying("Caketown 1"))
+        {
+            MusicManager.Instance.PlayMusic("Main");
+        }
     }
 
     public void Login()
@@ -15,8 +18,6 @@ public class LoginManager : MonoBehaviour
         if (WebAPI.Instance != null)
         {
             Debug.Log("Player login in with " + playerTextField.text);
-
-            StartCoroutine(WebAPI.Instance.GetPlayer(playerTextField.text, true));
         }
         else
         {

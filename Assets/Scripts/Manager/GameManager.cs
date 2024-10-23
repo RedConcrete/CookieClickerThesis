@@ -68,17 +68,29 @@ public class GameManager : MonoBehaviour
     {
         scene = SceneManager.GetActiveScene().buildIndex;
         currentPlayer = WebAPI.player;
-        UpdateRecources();
 
         if (scene == idleScene)
         {
-            Debug.Log("Idle Scene loaded");
+            MusicManager.Instance.MuffleCurrentTrack(0f);
+            Debug.Log("Idle loaded");
             amountCookies_InputField.text = initialAmount.ToString();
         }
 
         if (scene == marketScene)
         {
-            Debug.Log("Idle Market loaded");
+            UpdateRecources();
+            Debug.Log("Market loaded");
+
+            if (!MusicManager.Instance.IsTrackPlaying("ElevatorMusic"))
+            {
+                MusicManager.Instance.PlayMusic("Markt");
+            }
+
+            if (MusicManager.Instance.IsTrackMuffled())
+            {
+                MusicManager.Instance.UnmuffleCurrentTrack(0f);
+            }
+
             recTag = GameObject.FindGameObjectsWithTag("RecTag");
             GameObject graph = GameObject.Find("Graph");
             graphManager = graph.GetComponent<GraphManager>();

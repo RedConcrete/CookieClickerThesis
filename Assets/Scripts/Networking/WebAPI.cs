@@ -15,10 +15,7 @@ public class WebAPI : MonoBehaviour
     public static WebAPI Instance { get; private set; }
     public static Player player;  // Statische Variable für den Player
     public static ulong SteamId;  // Statische Steam-ID des Players
-
-    private byte[] authTicket = new byte[1024];
-    private uint ticketSize;
-
+    private AuthTicket authTicket;
 
     List<Market> marketList;
     private string baseUrl = "http://localhost:3000";
@@ -31,14 +28,14 @@ public class WebAPI : MonoBehaviour
         try
         {
             Steamworks.SteamClient.Init(2816100);
-            getSteamInfos();
+            StartCoroutine(AuthenticateUser());
         }
         catch (System.Exception e)
         {
             Debug.LogError(e + " Steam Conection ERROR! ");
         }
 
-        
+
 
         if (Instance != null)
         {
@@ -51,15 +48,6 @@ public class WebAPI : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
     }
-    private void getSteamInfos()
-    {
-        SteamId = Steamworks.SteamClient.SteamId;
-    }
-
-    private void OnApplicationQuit()
-    {
-        Steamworks.SteamClient.Shutdown();
-    }
 
     private void Update()
     {
@@ -71,9 +59,41 @@ public class WebAPI : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        if (authTicket != null)
+        {
+            Steamworks.SteamUser.EndAuthSession(Steamworks.SteamClient.SteamId);
+        }
+        Steamworks.SteamClient.Shutdown();
+    }
+
+    private IEnumerator AuthenticateUser()
+    {
+        // Holen eines Authentifizierungstickets
+        authTicket = Steamworks.SteamUser.GetAuthSessionTicket();
+
+        if (authTicket != null)
+        {
+            Debug.Log("Successfully created authentication ticket.");
+            byte[] ticketData = authTicket.Data;
+            string base64Ticket = Convert.ToBase64String(ticketData);
+
+            GetSteamID();
+            StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
+            StartCoroutine(WebAPI.Instance.PostPlayer());
+        }
+        else
+        {
+            Debug.LogError("Failed to create authentication ticket.");
+        }
+
+        yield return null;
+    }
+
     public IEnumerator PostPlayer()
     {
-        string url = baseUrl + "/users";
+        string url = $"{baseUrl}/users/{SteamId}";
 
         UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
         webRequest.downloadHandler = new DownloadHandlerBuffer();
@@ -122,8 +142,35 @@ public class WebAPI : MonoBehaviour
                     if (isLoggingIn)
                     {
                         SceneManager.LoadScene(1);
+                        Debug.Log("Login successful" + id);
                     }
-                    Debug.Log("Login successful" + id);
+                    break;
+            }
+        }
+    }
+
+
+    public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
+    {
+        string url = $"{baseUrl}/users/{id}";
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        {
+            yield return webRequest.SendWebRequest();
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                    Debug.LogError(String.Format("ERROR", webRequest.error));
+                    break;
+                case UnityWebRequest.Result.Success:
+                    string playerJsonData = webRequest.downloadHandler.text;
+                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                    if (isLoggingIn)
+                    {
+                        SceneManager.LoadScene(1);
+                        Debug.Log("Login successful" + id);
+                    }
                     break;
             }
         }
@@ -234,5 +281,9 @@ public class WebAPI : MonoBehaviour
     public List<Market> GetMarket()
     {
         return marketList;
+    }
+    private void GetSteamID()
+    {
+        SteamId = Steamworks.SteamClient.SteamId;
     }
 }
