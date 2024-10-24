@@ -50,6 +50,12 @@ type Handler interface {
 	//
 	// GET /users/{userId}
 	UsersUserIdGet(ctx context.Context, params UsersUserIdGetParams) (*User, error)
+	// UsersUserIdPost implements POST /users/{userId} operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /users/{userId}
+	UsersUserIdPost(ctx context.Context, params UsersUserIdPostParams) (*User, error)
 	// NewError creates *ErrRespStatusCode from error returned by handler.
 	//
 	// Used for common default response.

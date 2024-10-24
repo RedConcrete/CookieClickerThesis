@@ -14,6 +14,27 @@ type CookieService struct {
 	mux      sync.Mutex
 }
 
+// UsersUserIdPost implements api.Handler.
+func (c *CookieService) UsersUserIdPost(ctx context.Context, params api.UsersUserIdPostParams) (*api.User, error) {
+	log.Println("POST /users/{userId} called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback()
+
+	user, err := transaction.CreateUser(api.User{})
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func NewCookieService(database database.Database) *CookieService {
 	return &CookieService{
 		database: database,

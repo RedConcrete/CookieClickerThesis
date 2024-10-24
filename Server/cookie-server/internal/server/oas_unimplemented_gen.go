@@ -76,6 +76,15 @@ func (UnimplementedHandler) UsersUserIdGet(ctx context.Context, params UsersUser
 	return r, ht.ErrNotImplemented
 }
 
+// UsersUserIdPost implements POST /users/{userId} operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /users/{userId}
+func (UnimplementedHandler) UsersUserIdPost(ctx context.Context, params UsersUserIdPostParams) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // NewError creates *ErrRespStatusCode from error returned by handler.
 //
 // Used for common default response.

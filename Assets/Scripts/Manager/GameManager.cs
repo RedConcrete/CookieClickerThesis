@@ -304,6 +304,11 @@ public class GameManager : MonoBehaviour
     {
         if (scene != sceneIndex)
         {
+
+            if (scene == marketScene)
+            {
+                graphManager.UpdateGraph();
+            }
             SceneManager.LoadScene(sceneIndex);
         }
     }

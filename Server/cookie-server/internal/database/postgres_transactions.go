@@ -14,6 +14,33 @@ type PostgresTransaction struct {
 	isTransactionActive bool
 }
 
+// CreateUserWithID implements Transaction.
+func (p *PostgresTransaction) CreateUserWithID(user api.User, long string) (*api.User, error) {
+	log.Println("creating user wiht ID")
+	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
+	query := `INSERT INTO "players" ("id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  RETURNING "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
+	if user.ID == "" {
+		user.ID = uuid.New().String()
+	}
+	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
+	err := p.transaction.QueryRow(query, user.ID, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+		Scan(
+			&user.ID,
+			&user.Cookies,
+			&user.Sugar,
+			&user.Flour,
+			&user.Eggs,
+			&user.Butter,
+			&user.Chocolate,
+			&user.Milk)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Rollback implements Transaction.
 func (p *PostgresTransaction) Rollback() error {
 	if p.isTransactionActive {
