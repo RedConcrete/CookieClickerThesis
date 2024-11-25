@@ -31,7 +31,7 @@ public class WebAPI : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogError(e + " Steam Conection ERROR! ");
+            Debug.LogError(e + " Steam connection ERROR! ");
         }
 
         if (Instance != null)
@@ -122,7 +122,7 @@ public class WebAPI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("No Steam Conection");
+            Debug.LogError("No Steam connection");
         }
     }
 
@@ -155,10 +155,9 @@ public class WebAPI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("No Steam Conection");
+            Debug.LogError("No Steam connection");
         }
     }
-
 
     public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
     {
@@ -189,7 +188,7 @@ public class WebAPI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("No Steam Conection");
+            Debug.LogError("No Steam connection");
         }
 
     }
