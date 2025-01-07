@@ -1,7 +1,7 @@
-openapi: '3.0.3'
+openapi: "3.0.3"
 info:
   title: API Title
-  version: '0.0.1'
+  version: "0.0.1"
 servers:
   - url: http://localhost:3000/v1
 
@@ -11,20 +11,37 @@ paths:
       summary: Returns a list of users.
       description: Optional extended description in CommonMark or HTML.
       responses:
-        '200':    # status code
+        "200": # status code
           description: A JSON array of user names
           content:
             application/json:
-              schema: 
+              schema:
                 type: array
-                items: 
-                  $ref: '#/components/schemas/User'
+                items:
+                  $ref: "#/components/schemas/User"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
                 type: string
+    post:
+      summary: Creates a new user.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        "200": # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
   /users/{userId}:
     get:
       summary: Returns a user.
@@ -35,16 +52,39 @@ paths:
           required: true
           description: The ID of the user to return.
           schema:
-            type: integer
-            format: int64
-            minimum: 1
+            type: string
+            format: uuid
       responses:
-        '200':    # status code
+        "200": # status code
           description: A JSON array of user names
           content:
             application/json:
-              schema: 
-                $ref: '#/components/schemas/User'
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      summary: Creates a new user.
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description:
+          schema:
+            type: string
+            format: long
+      responses:
+        "200": # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
         default:
           description: Unexpected error
           content:
@@ -52,6 +92,99 @@ paths:
               schema:
                 type: string
 
+  /markets:
+    get:
+      summary: Returns a list of Market Objects.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        "200": # status code
+          description: A JSON array of Market Objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /markets/{amount}:
+    get:
+      summary: Returns a list of Market Objects based on the given amount.
+      parameters:
+        - name: amount
+          in: path
+          required: true
+          description: The Amount of the markets to be returned.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A JSON array of Markets objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /buy/:
+    post:
+      summary: Returns a transaction where a user bought something
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketRequest"
+      responses:
+        "200":
+          description: A JSON object with the details of the bought ingredient and its price.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /sell/:
+    post:
+      summary: Returns a transaction where a user bought something
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketRequest"
+      responses:
+        "200":
+          description: A JSON object with the details of the sold ingredient and its price.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
 
 components:
   schemas:
@@ -59,12 +192,88 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          example: 4
-        name:
           type: string
-          example: Arthur Dent
-      # Both properties are required
-      required:  
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
+        cookies:
+          type: number
+          example: 1.0
+        sugar:
+          type: number
+          example: 1.0
+        flour:
+          type: number
+          example: 1.0
+        eggs:
+          type: number
+          example: 1.0
+        butter:
+          type: number
+          example: 1.0
+        chocolate:
+          type: number
+          example: 1.0
+        milk:
+          type: number
+          example: 1.0
+      required:
         - id
-        - name
+        - cookies
+        - sugar
+        - flour
+        - eggs
+        - butter
+        - chocolate
+        - milk
+    Market:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87404
+        date:
+          type: string
+          format: date-time
+          example: "2024-08-30T14:37:51.41408+02:00"
+        sugarPrice:
+          type: number
+          example: 1.0
+        flourPrice:
+          type: number
+          example: 1.0
+        eggsPrice:
+          type: number
+          example: 1.0
+        butterPrice:
+          type: number
+          example: 1.0
+        chocolatePrice:
+          type: number
+          example: 1.0
+        milkPrice:
+          type: number
+          example: 1.0
+      required:
+        - id
+        - date
+        - sugarPrice
+        - flourPrice
+        - eggsPrice
+        - butterPrice
+        - chocolatePrice
+        - milkPrice
+    MarketRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
+        amount:
+          type: integer
+          example: 1
+        recourse:
+          type: string
+          example: sugar
+      required:
+        - user
+        - amount
+        - recourse

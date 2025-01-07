@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -7,11 +5,19 @@ public class LoginManager : MonoBehaviour
 {
     public TMP_InputField playerTextField;
 
+    private void Start()
+    {
+        if (!MusicManager.Instance.IsTrackPlaying("Caketown 1"))
+        {
+            MusicManager.Instance.PlayMusic("Main");
+        }
+    }
+
     public void Login()
     {
         if (WebAPI.Instance != null)
         {
-            StartCoroutine(WebAPI.Instance.GetPlayer(playerTextField.text));
+            Debug.Log("Player login in with " + playerTextField.text);
         }
         else
         {
@@ -33,6 +39,9 @@ public class LoginManager : MonoBehaviour
 
     public void ExitGame()
     {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
         Application.Quit();
     }
 }

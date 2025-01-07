@@ -13,6 +13,42 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// BuyPost implements POST /buy/ operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /buy/
+func (UnimplementedHandler) BuyPost(ctx context.Context, req *MarketRequest) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MarketsAmountGet implements GET /markets/{amount} operation.
+//
+// Returns a list of Market Objects based on the given amount.
+//
+// GET /markets/{amount}
+func (UnimplementedHandler) MarketsAmountGet(ctx context.Context, params MarketsAmountGetParams) (r []Market, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MarketsGet implements GET /markets operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// GET /markets
+func (UnimplementedHandler) MarketsGet(ctx context.Context) (r []Market, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SellPost implements POST /sell/ operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /sell/
+func (UnimplementedHandler) SellPost(ctx context.Context, req *MarketRequest) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UsersGet implements GET /users operation.
 //
 // Optional extended description in CommonMark or HTML.
@@ -22,12 +58,30 @@ func (UnimplementedHandler) UsersGet(ctx context.Context) (r []User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// UsersPost implements POST /users operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /users
+func (UnimplementedHandler) UsersPost(ctx context.Context) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UsersUserIdGet implements GET /users/{userId} operation.
 //
 // Optional extended description in CommonMark or HTML.
 //
 // GET /users/{userId}
 func (UnimplementedHandler) UsersUserIdGet(ctx context.Context, params UsersUserIdGetParams) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UsersUserIdPost implements POST /users/{userId} operation.
+//
+// Optional extended description in CommonMark or HTML.
+//
+// POST /users/{userId}
+func (UnimplementedHandler) UsersUserIdPost(ctx context.Context, params UsersUserIdPostParams) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

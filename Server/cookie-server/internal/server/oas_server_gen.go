@@ -8,18 +8,54 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// BuyPost implements POST /buy/ operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /buy/
+	BuyPost(ctx context.Context, req *MarketRequest) (*User, error)
+	// MarketsAmountGet implements GET /markets/{amount} operation.
+	//
+	// Returns a list of Market Objects based on the given amount.
+	//
+	// GET /markets/{amount}
+	MarketsAmountGet(ctx context.Context, params MarketsAmountGetParams) ([]Market, error)
+	// MarketsGet implements GET /markets operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// GET /markets
+	MarketsGet(ctx context.Context) ([]Market, error)
+	// SellPost implements POST /sell/ operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /sell/
+	SellPost(ctx context.Context, req *MarketRequest) (*User, error)
 	// UsersGet implements GET /users operation.
 	//
 	// Optional extended description in CommonMark or HTML.
 	//
 	// GET /users
 	UsersGet(ctx context.Context) ([]User, error)
+	// UsersPost implements POST /users operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /users
+	UsersPost(ctx context.Context) (*User, error)
 	// UsersUserIdGet implements GET /users/{userId} operation.
 	//
 	// Optional extended description in CommonMark or HTML.
 	//
 	// GET /users/{userId}
 	UsersUserIdGet(ctx context.Context, params UsersUserIdGetParams) (*User, error)
+	// UsersUserIdPost implements POST /users/{userId} operation.
+	//
+	// Optional extended description in CommonMark or HTML.
+	//
+	// POST /users/{userId}
+	UsersUserIdPost(ctx context.Context, params UsersUserIdPostParams) (*User, error)
 	// NewError creates *ErrRespStatusCode from error returned by handler.
 	//
 	// Used for common default response.

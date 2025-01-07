@@ -49,50 +49,163 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/users"
+		case '/': // Prefix: "/"
 			origElem := elem
-			if l := len("/users"); len(elem) >= l && elem[0:l] == "/users" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				switch r.Method {
-				case "GET":
-					s.handleUsersGetRequest([0]string{}, elemIsEscaped, w, r)
-				default:
-					s.notAllowed(w, r, "GET")
-				}
-
-				return
+				break
 			}
 			switch elem[0] {
-			case '/': // Prefix: "/"
+			case 'b': // Prefix: "buy/"
 				origElem := elem
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+				if l := len("buy/"); len(elem) >= l && elem[0:l] == "buy/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "userId"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
 				if len(elem) == 0 {
 					// Leaf node.
 					switch r.Method {
+					case "POST":
+						s.handleBuyPostRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
+
+				elem = origElem
+			case 'm': // Prefix: "markets"
+				origElem := elem
+				if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
 					case "GET":
-						s.handleUsersUserIdGetRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
+						s.handleMarketsGetRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "GET")
 					}
 
 					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "amount"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleMarketsAmountGetRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 's': // Prefix: "sell/"
+				origElem := elem
+				if l := len("sell/"); len(elem) >= l && elem[0:l] == "sell/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "POST":
+						s.handleSellPostRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
+
+				elem = origElem
+			case 'u': // Prefix: "users"
+				origElem := elem
+				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "GET":
+						s.handleUsersGetRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleUsersPostRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "userId"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleUsersUserIdGetRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleUsersUserIdPostRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem
@@ -179,56 +292,193 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/users"
+		case '/': // Prefix: "/"
 			origElem := elem
-			if l := len("/users"); len(elem) >= l && elem[0:l] == "/users" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				switch method {
-				case "GET":
-					r.name = "UsersGet"
-					r.summary = "Returns a list of users."
-					r.operationID = ""
-					r.pathPattern = "/users"
-					r.args = args
-					r.count = 0
-					return r, true
-				default:
-					return
-				}
+				break
 			}
 			switch elem[0] {
-			case '/': // Prefix: "/"
+			case 'b': // Prefix: "buy/"
 				origElem := elem
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+				if l := len("buy/"); len(elem) >= l && elem[0:l] == "buy/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "userId"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
 				if len(elem) == 0 {
 					// Leaf node.
 					switch method {
-					case "GET":
-						r.name = "UsersUserIdGet"
-						r.summary = "Returns a user."
+					case "POST":
+						r.name = "BuyPost"
+						r.summary = "Returns a transaction where a user bought something"
 						r.operationID = ""
-						r.pathPattern = "/users/{userId}"
+						r.pathPattern = "/buy/"
 						r.args = args
-						r.count = 1
+						r.count = 0
 						return r, true
 					default:
 						return
 					}
+				}
+
+				elem = origElem
+			case 'm': // Prefix: "markets"
+				origElem := elem
+				if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = "MarketsGet"
+						r.summary = "Returns a list of Market Objects."
+						r.operationID = ""
+						r.pathPattern = "/markets"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "amount"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = "MarketsAmountGet"
+							r.summary = "Returns a list of Market Objects based on the given amount."
+							r.operationID = ""
+							r.pathPattern = "/markets/{amount}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 's': // Prefix: "sell/"
+				origElem := elem
+				if l := len("sell/"); len(elem) >= l && elem[0:l] == "sell/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "POST":
+						r.name = "SellPost"
+						r.summary = "Returns a transaction where a user bought something"
+						r.operationID = ""
+						r.pathPattern = "/sell/"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+				elem = origElem
+			case 'u': // Prefix: "users"
+				origElem := elem
+				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = "UsersGet"
+						r.summary = "Returns a list of users."
+						r.operationID = ""
+						r.pathPattern = "/users"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = "UsersPost"
+						r.summary = "Creates a new user."
+						r.operationID = ""
+						r.pathPattern = "/users"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "userId"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = "UsersUserIdGet"
+							r.summary = "Returns a user."
+							r.operationID = ""
+							r.pathPattern = "/users/{userId}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "POST":
+							r.name = "UsersUserIdPost"
+							r.summary = "Creates a new user."
+							r.operationID = ""
+							r.pathPattern = "/users/{userId}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem

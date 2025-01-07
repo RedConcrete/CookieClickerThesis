@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using static CodeMonkey.Utils.UI_TextComplex;
 
 public class GraphManager : MonoBehaviour
 {
@@ -12,8 +13,12 @@ public class GraphManager : MonoBehaviour
     public RectTransform graphContainer;
     public RectTransform labelTempX;
     public RectTransform labelTempY;
-    public RectTransform dashTempX;
-    public RectTransform dashTempY;
+    public RectTransform lineTempX;
+    public RectTransform lineTempY;
+
+    private GameObject iconParent;
+    private GameObject lineParent;
+    private GameObject circleParent;
 
     [Header("Sprites:")]
     [SerializeField] private Sprite circleSprite;
@@ -47,11 +52,12 @@ public class GraphManager : MonoBehaviour
 
     private void Awake()
     {
+        
     }
 
     private GameObject CreateIcon(Vector2 anchoredPos, int price, string rec, Sprite s)
     {
-        GameObject icon = new GameObject("icon", typeof(Image));
+        GameObject icon = new GameObject(anchoredPos.x + " : " + anchoredPos.y, typeof(Image));
         icon.transform.SetParent(graphContainer, false);
         Image iconImage = icon.GetComponent<Image>();
         iconImage.sprite = s;
@@ -65,7 +71,7 @@ public class GraphManager : MonoBehaviour
         rectTransform.anchorMax = new Vector2(0, 0);
         rectTransform.anchorMin = new Vector2(0, 0);
 
-        GameObject textObject = new GameObject("text", typeof(TextMeshProUGUI));
+        GameObject textObject = new GameObject(rec, typeof(TextMeshProUGUI));
         textObject.transform.SetParent(icon.transform, false);
         TextMeshProUGUI textComponent = textObject.GetComponent<TextMeshProUGUI>();
         textComponent.text = price.ToString();
@@ -79,7 +85,7 @@ public class GraphManager : MonoBehaviour
     }
     private GameObject CreateCircle(Vector2 anchoredPos, Color c, int price, string rec)
     {
-        GameObject circle = new GameObject("circle", typeof(Image));
+        GameObject circle = new GameObject(anchoredPos.x + " : " + anchoredPos.y, typeof(Image));
         circle.transform.SetParent(graphContainer, false);
         Image circleImage = circle.GetComponent<Image>();
         circleImage.sprite = circleSprite;
@@ -94,7 +100,7 @@ public class GraphManager : MonoBehaviour
         rectTransform.anchorMax = new Vector2(0, 0);
         rectTransform.anchorMin = new Vector2(0, 0);
 
-        GameObject textObject = new GameObject("text", typeof(TextMeshProUGUI));
+        GameObject textObject = new GameObject(rec, typeof(TextMeshProUGUI));
         textObject.transform.SetParent(circle.transform, false);
         TextMeshProUGUI textComponent = textObject.GetComponent<TextMeshProUGUI>();
         textComponent.text = price.ToString();
@@ -238,19 +244,20 @@ public class GraphManager : MonoBehaviour
             labelX.anchoredPosition = new Vector2(xPos, -7f);
             labelX.GetComponent<TextMeshProUGUI>().text = marketList[i].date.ToString("HH:mm");
 
-            RectTransform dashX = Instantiate(dashTempX);
-            dashX.SetParent(graphContainer, false);
-            dashX.gameObject.SetActive(true);
-            dashX.sizeDelta = new Vector2(1.5f, graphHeight);
-            dashX.anchoredPosition = new Vector2(xPos, -7f);
+            RectTransform lineX = Instantiate(lineTempX);
+            lineX.SetParent(graphContainer, false);
+            lineX.transform.SetAsFirstSibling();
+            lineX.gameObject.SetActive(true);
+            lineX.sizeDelta = new Vector2(1.5f, graphHeight);
+            lineX.anchoredPosition = new Vector2(xPos, 0f);
         }
 
-        sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cokkies";
-        flour_PriceText.text = (int)marketList.First().flourPrice + " Cokkies";
-        eggs_PriceText.text = (int)marketList.First().eggsPrice + " Cokkies";
-        butter_PriceText.text = (int)marketList.First().butterPrice + " Cokkies";
-        chocolate_PriceText.text = (int)marketList.First().chocolatePrice + " Cokkies";
-        milk_PriceText.text = (int)marketList.First().milkPrice + " Cokkies";
+        sugar_PriceText.text = (int)marketList.First().sugarPrice + " Cookies";
+        flour_PriceText.text = (int)marketList.First().flourPrice + " Cookies";
+        eggs_PriceText.text = (int)marketList.First().eggsPrice + " Cookies";
+        butter_PriceText.text = (int)marketList.First().butterPrice + " Cookies";
+        chocolate_PriceText.text = (int)marketList.First().chocolatePrice + " Cookies";
+        milk_PriceText.text = (int)marketList.First().milkPrice + " Cookies";
 
         int separatorCount = 10;
         for (int i = 0; i <= separatorCount; i++)
@@ -262,11 +269,12 @@ public class GraphManager : MonoBehaviour
             labelY.anchoredPosition = new Vector2(graphWidth + 25f, norm * graphHeight);
             labelY.GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt(norm * yMaximum).ToString();
 
-            RectTransform dashY = Instantiate(dashTempY);
-            dashY.SetParent(graphContainer, false);
-            dashY.gameObject.SetActive(true);
-            dashY.sizeDelta = new Vector2(graphWidth, 1.5f);
-            dashY.anchoredPosition = new Vector2(-4f, norm * graphHeight);
+            RectTransform lineY = Instantiate(lineTempY);
+            lineY.SetParent(graphContainer, false);
+            lineY.transform.SetAsFirstSibling();
+            lineY.gameObject.SetActive(true);
+            lineY.sizeDelta = new Vector2(graphWidth, 1.5f);
+            lineY.anchoredPosition = new Vector2(0f, norm * graphHeight);
         }
     }
 
@@ -280,8 +288,11 @@ public class GraphManager : MonoBehaviour
 
     private void CreateDotConnection(Vector2 dotPosA, Vector2 dotPosB)
     {
-        GameObject line = new GameObject("dotConnection", typeof(Image));
+        GameObject line = new GameObject("___", typeof(Image));
         line.transform.SetParent(graphContainer, false);
+
+        line.transform.SetAsFirstSibling();
+
         RectTransform rectTransform = line.GetComponent<RectTransform>();
         Vector2 dir = (dotPosB - dotPosA).normalized;
         float distance = Vector2.Distance(dotPosA, dotPosB);
@@ -300,5 +311,5 @@ public class GraphManager : MonoBehaviour
             line.GetComponent<Image>().color = Color.green;
         }
     }
-}
 
+}

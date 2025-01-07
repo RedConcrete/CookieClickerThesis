@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:14.3
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: CookieData
+    ports:
+      - 5460:5432
+    profiles:
+      - basic
+  # for visualisation
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning/data_sources
+    profiles:
+      - analysis
+  # backend for logs
+  loki:
+    image: grafana/loki
+    restart: always
+    ports:
+      - 3100:3100
+    profiles:
+      - analysis
+  # backend for traces
+  tempo:
+    image: grafana/tempo
+    restart: always
+    ports:
+      - 3200:3200
+    profiles:
+      - analysis
+  # backend for metrics
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    profiles:
+      - analysis
+
+volumes:
+  grafana_config: {}
+# todo: connect backend with frontend and setup default dashboard

@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
@@ -15,10 +16,76 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// MarketsAmountGetParams is parameters of GET /markets/{amount} operation.
+type MarketsAmountGetParams struct {
+	// The Amount of the markets to be returned.
+	Amount int
+}
+
+func unpackMarketsAmountGetParams(packed middleware.Parameters) (params MarketsAmountGetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "amount",
+			In:   "path",
+		}
+		params.Amount = packed[key].(int)
+	}
+	return params
+}
+
+func decodeMarketsAmountGetParams(args [1]string, argsEscaped bool, r *http.Request) (params MarketsAmountGetParams, _ error) {
+	// Decode path: amount.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "amount",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt(val)
+				if err != nil {
+					return err
+				}
+
+				params.Amount = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "amount",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UsersUserIdGetParams is parameters of GET /users/{userId} operation.
 type UsersUserIdGetParams struct {
 	// The ID of the user to return.
-	UserId int64
+	UserId uuid.UUID
 }
 
 func unpackUsersUserIdGetParams(packed middleware.Parameters) (params UsersUserIdGetParams) {
@@ -27,7 +94,7 @@ func unpackUsersUserIdGetParams(packed middleware.Parameters) (params UsersUserI
 			Name: "userId",
 			In:   "path",
 		}
-		params.UserId = packed[key].(int64)
+		params.UserId = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -57,7 +124,7 @@ func decodeUsersUserIdGetParams(args [1]string, argsEscaped bool, r *http.Reques
 					return err
 				}
 
-				c, err := conv.ToInt64(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -67,19 +134,67 @@ func decodeUsersUserIdGetParams(args [1]string, argsEscaped bool, r *http.Reques
 			}(); err != nil {
 				return err
 			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UsersUserIdPostParams is parameters of POST /users/{userId} operation.
+type UsersUserIdPostParams struct {
+	UserId string
+}
+
+func unpackUsersUserIdPostParams(packed middleware.Parameters) (params UsersUserIdPostParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "userId",
+			In:   "path",
+		}
+		params.UserId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUsersUserIdPostParams(args [1]string, argsEscaped bool, r *http.Request) (params UsersUserIdPostParams, _ error) {
+	// Decode path: userId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "userId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
 			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        true,
-					Min:           1,
-					MaxSet:        false,
-					Max:           0,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(params.UserId)); err != nil {
-					return errors.Wrap(err, "int")
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
 				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserId = c
 				return nil
 			}(); err != nil {
 				return err

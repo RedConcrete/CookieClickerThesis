@@ -7,27 +7,33 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Server.Data;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
-    public string Id = Guid.NewGuid().ToString();
+    public static Player player;  // Statische Variable für den Player
+    public static ulong SteamId;  // Statische Steam-ID des Players
+    private AuthTicket authTicket;
 
-    private Player player;
     List<Market> marketList;
-    private OwnSceneManager ownSceneManager = new OwnSceneManager();
-    private string oldBaseUrl = "https://localhost:5000/api/server";
-    private string baseUrl = "http://localhost:5000";
-    //private string baseUrl = "https://66ad-5-146-99-178.ngrok-free.app/api/server";
+    private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
-    private int scene;
 
     private void Awake()
     {
-        scene = SceneManager.GetActiveScene().buildIndex;
-        Debug.Log(scene);
+        try
+        {
+            Steamworks.SteamClient.Init(2816100);
+            StartCoroutine(AuthenticateUser());
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e + " Steam connection ERROR! ");
+        }
+
         if (Instance != null)
         {
             Debug.Log("Destroying duplicate WebAPI instance.");
@@ -42,65 +48,149 @@ public class WebAPI : MonoBehaviour
 
     private void Update()
     {
-        if (gameManager == null && scene != loginScene)
+        Steamworks.SteamClient.RunCallbacks();
+
+        if (gameManager == null && SceneManager.GetActiveScene().buildIndex != loginScene)
         {
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         }
-        scene = SceneManager.GetActiveScene().buildIndex;
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (authTicket != null)
+        {
+            Steamworks.SteamUser.EndAuthSession(Steamworks.SteamClient.SteamId);
+        }
+        Steamworks.SteamClient.Shutdown();
+    }
+
+    private IEnumerator AuthenticateUser()
+    {
+        // Holen eines Authentifizierungstickets
+        authTicket = Steamworks.SteamUser.GetAuthSessionTicket();
+
+        if (authTicket != null)
+        {
+            Debug.Log("Successfully created authentication ticket.");
+            byte[] ticketData = authTicket.Data;
+            string base64Ticket = Convert.ToBase64String(ticketData);
+
+            GetSteamID();
+            //StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
+            //StartCoroutine(WebAPI.Instance.PostPlayer());
+        }
+        else
+        {
+            Debug.LogError("Failed to create authentication ticket.");
+        }
+        yield return null;
     }
 
     public IEnumerator PostPlayer()
     {
-        string url = baseUrl + "/CreatePlayer";
-
-        UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
-        webRequest.downloadHandler = new DownloadHandlerBuffer();
-        webRequest.SetRequestHeader("Content-Type", "application/json");
-
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        if (authTicket != null)
         {
-            Debug.LogError($"Error: {webRequest.error}");
-            Debug.LogError($"Response Code: {webRequest.responseCode}");
-            Debug.LogError($"Response: {webRequest.downloadHandler.text}");
-        }
-        else
-        {
-            string playerJsonData = webRequest.downloadHandler.text;
-            if (!string.IsNullOrEmpty(playerJsonData))
+            string url = $"{baseUrl}/users/{SteamId}";
+
+            UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                player = JsonConvert.DeserializeObject<Player>(playerJsonData);
-                ownSceneManager.SwitchScene(1);
+                Debug.LogError($"Error: {webRequest.error}");
+                Debug.LogError($"Response Code: {webRequest.responseCode}");
+                Debug.LogError($"Response: {webRequest.downloadHandler.text}");
             }
             else
             {
-                Debug.LogError("Received empty response from the server");
+                string playerJsonData = webRequest.downloadHandler.text;
+                if (!string.IsNullOrEmpty(playerJsonData))
+                {
+                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                    SceneManager.LoadScene(1);
+                }
+                else
+                {
+                    Debug.LogError("Received empty response from the server");
+                }
             }
+            webRequest.Dispose();
         }
-        webRequest.Dispose();
+        else
+        {
+            Debug.LogError("No Steam connection");
+        }
     }
 
-    public IEnumerator GetPlayer(string id)
+    public IEnumerator GetPlayer(string id, bool isLoggingIn)
     {
-        string url = $"{baseUrl}/GetPlayer/{id}";
-
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        if (authTicket != null)
         {
-            yield return webRequest.SendWebRequest();
-            switch (webRequest.result)
+            string url = $"{baseUrl}/users/{id}";
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
-                case UnityWebRequest.Result.ConnectionError:
-                case UnityWebRequest.Result.DataProcessingError:
-                    Debug.LogError(String.Format("ERROR", webRequest.error));
-                    break;
-                case UnityWebRequest.Result.Success:
-                    string playerJsonData = webRequest.downloadHandler.text;
-                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);
-                    ownSceneManager.SwitchScene(1);
-                    break;
+                yield return webRequest.SendWebRequest();
+                switch (webRequest.result)
+                {
+                    case UnityWebRequest.Result.ConnectionError:
+                    case UnityWebRequest.Result.DataProcessingError:
+                        Debug.LogError(String.Format("ERROR", webRequest.error));
+                        break;
+                    case UnityWebRequest.Result.Success:
+                        string playerJsonData = webRequest.downloadHandler.text;
+                        player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                        if (isLoggingIn)
+                        {
+                            SceneManager.LoadScene(1);
+                            Debug.Log("Login successful" + id);
+                        }
+                        break;
+                }
             }
         }
+        else
+        {
+            Debug.LogError("No Steam connection");
+        }
+    }
+
+    public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
+    {
+        if (authTicket != null)
+        {
+            string url = $"{baseUrl}/users/{id}";
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+            {
+                yield return webRequest.SendWebRequest();
+                switch (webRequest.result)
+                {
+                    case UnityWebRequest.Result.ConnectionError:
+                    case UnityWebRequest.Result.DataProcessingError:
+                        Debug.LogError(String.Format("ERROR", webRequest.error));
+                        break;
+                    case UnityWebRequest.Result.Success:
+                        string playerJsonData = webRequest.downloadHandler.text;
+                        player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                        if (isLoggingIn)
+                        {
+                            SceneManager.LoadScene(1);
+                            Debug.Log("Login successful" + id);
+                        }
+                        break;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("No Steam connection");
+        }
+
     }
 
     /**
@@ -128,7 +218,7 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPrices(int amount)
     {
-        string url = baseUrl + "/getMarket?amountToGet=" + amount;
+        string url = baseUrl + "/markets/" + amount;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -147,7 +237,6 @@ public class WebAPI : MonoBehaviour
             }
         }
     }
-
 
     public IEnumerator PostBuy(string playerId, string rec, int amount)
     {
@@ -206,13 +295,12 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public Player GetLoginPlayer()
-    {
-        return player;
-    }
-
     public List<Market> GetMarket()
     {
         return marketList;
+    }
+    private void GetSteamID()
+    {
+        SteamId = Steamworks.SteamClient.SteamId;
     }
 }

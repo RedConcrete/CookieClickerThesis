@@ -4,6 +4,7 @@ package api
 
 import (
 	"fmt"
+	"time"
 )
 
 func (s *ErrRespStatusCode) Error() string {
@@ -36,28 +37,269 @@ func (s *ErrRespStatusCode) SetResponse(val string) {
 	s.Response = val
 }
 
-// Ref: #/components/schemas/User
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+// Ref: #/components/schemas/Market
+type Market struct {
+	ID             string    `json:"id"`
+	Date           time.Time `json:"date"`
+	SugarPrice     float64   `json:"sugarPrice"`
+	FlourPrice     float64   `json:"flourPrice"`
+	EggsPrice      float64   `json:"eggsPrice"`
+	ButterPrice    float64   `json:"butterPrice"`
+	ChocolatePrice float64   `json:"chocolatePrice"`
+	MilkPrice      float64   `json:"milkPrice"`
 }
 
 // GetID returns the value of ID.
-func (s *User) GetID() int {
+func (s *Market) GetID() string {
 	return s.ID
 }
 
-// GetName returns the value of Name.
-func (s *User) GetName() string {
-	return s.Name
+// GetDate returns the value of Date.
+func (s *Market) GetDate() time.Time {
+	return s.Date
+}
+
+// GetSugarPrice returns the value of SugarPrice.
+func (s *Market) GetSugarPrice() float64 {
+	return s.SugarPrice
+}
+
+// GetFlourPrice returns the value of FlourPrice.
+func (s *Market) GetFlourPrice() float64 {
+	return s.FlourPrice
+}
+
+// GetEggsPrice returns the value of EggsPrice.
+func (s *Market) GetEggsPrice() float64 {
+	return s.EggsPrice
+}
+
+// GetButterPrice returns the value of ButterPrice.
+func (s *Market) GetButterPrice() float64 {
+	return s.ButterPrice
+}
+
+// GetChocolatePrice returns the value of ChocolatePrice.
+func (s *Market) GetChocolatePrice() float64 {
+	return s.ChocolatePrice
+}
+
+// GetMilkPrice returns the value of MilkPrice.
+func (s *Market) GetMilkPrice() float64 {
+	return s.MilkPrice
 }
 
 // SetID sets the value of ID.
-func (s *User) SetID(val int) {
+func (s *Market) SetID(val string) {
 	s.ID = val
 }
 
-// SetName sets the value of Name.
-func (s *User) SetName(val string) {
-	s.Name = val
+// SetDate sets the value of Date.
+func (s *Market) SetDate(val time.Time) {
+	s.Date = val
+}
+
+// SetSugarPrice sets the value of SugarPrice.
+func (s *Market) SetSugarPrice(val float64) {
+	s.SugarPrice = val
+}
+
+// SetFlourPrice sets the value of FlourPrice.
+func (s *Market) SetFlourPrice(val float64) {
+	s.FlourPrice = val
+}
+
+// SetEggsPrice sets the value of EggsPrice.
+func (s *Market) SetEggsPrice(val float64) {
+	s.EggsPrice = val
+}
+
+// SetButterPrice sets the value of ButterPrice.
+func (s *Market) SetButterPrice(val float64) {
+	s.ButterPrice = val
+}
+
+// SetChocolatePrice sets the value of ChocolatePrice.
+func (s *Market) SetChocolatePrice(val float64) {
+	s.ChocolatePrice = val
+}
+
+// SetMilkPrice sets the value of MilkPrice.
+func (s *Market) SetMilkPrice(val float64) {
+	s.MilkPrice = val
+}
+
+// Ref: #/components/schemas/MarketRequest
+type MarketRequest struct {
+	UserId   OptString `json:"userId"`
+	Amount   int       `json:"amount"`
+	Recourse string    `json:"recourse"`
+}
+
+// GetUserId returns the value of UserId.
+func (s *MarketRequest) GetUserId() OptString {
+	return s.UserId
+}
+
+// GetAmount returns the value of Amount.
+func (s *MarketRequest) GetAmount() int {
+	return s.Amount
+}
+
+// GetRecourse returns the value of Recourse.
+func (s *MarketRequest) GetRecourse() string {
+	return s.Recourse
+}
+
+// SetUserId sets the value of UserId.
+func (s *MarketRequest) SetUserId(val OptString) {
+	s.UserId = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *MarketRequest) SetAmount(val int) {
+	s.Amount = val
+}
+
+// SetRecourse sets the value of Recourse.
+func (s *MarketRequest) SetRecourse(val string) {
+	s.Recourse = val
+}
+
+// NewOptString returns new OptString with value set to v.
+func NewOptString(v string) OptString {
+	return OptString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptString is optional string.
+type OptString struct {
+	Value string
+	Set   bool
+}
+
+// IsSet returns true if OptString was set.
+func (o OptString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptString) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptString) Get() (v string, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// Ref: #/components/schemas/User
+type User struct {
+	ID        string  `json:"id"`
+	Cookies   float64 `json:"cookies"`
+	Sugar     float64 `json:"sugar"`
+	Flour     float64 `json:"flour"`
+	Eggs      float64 `json:"eggs"`
+	Butter    float64 `json:"butter"`
+	Chocolate float64 `json:"chocolate"`
+	Milk      float64 `json:"milk"`
+}
+
+// GetID returns the value of ID.
+func (s *User) GetID() string {
+	return s.ID
+}
+
+// GetCookies returns the value of Cookies.
+func (s *User) GetCookies() float64 {
+	return s.Cookies
+}
+
+// GetSugar returns the value of Sugar.
+func (s *User) GetSugar() float64 {
+	return s.Sugar
+}
+
+// GetFlour returns the value of Flour.
+func (s *User) GetFlour() float64 {
+	return s.Flour
+}
+
+// GetEggs returns the value of Eggs.
+func (s *User) GetEggs() float64 {
+	return s.Eggs
+}
+
+// GetButter returns the value of Butter.
+func (s *User) GetButter() float64 {
+	return s.Butter
+}
+
+// GetChocolate returns the value of Chocolate.
+func (s *User) GetChocolate() float64 {
+	return s.Chocolate
+}
+
+// GetMilk returns the value of Milk.
+func (s *User) GetMilk() float64 {
+	return s.Milk
+}
+
+// SetID sets the value of ID.
+func (s *User) SetID(val string) {
+	s.ID = val
+}
+
+// SetCookies sets the value of Cookies.
+func (s *User) SetCookies(val float64) {
+	s.Cookies = val
+}
+
+// SetSugar sets the value of Sugar.
+func (s *User) SetSugar(val float64) {
+	s.Sugar = val
+}
+
+// SetFlour sets the value of Flour.
+func (s *User) SetFlour(val float64) {
+	s.Flour = val
+}
+
+// SetEggs sets the value of Eggs.
+func (s *User) SetEggs(val float64) {
+	s.Eggs = val
+}
+
+// SetButter sets the value of Butter.
+func (s *User) SetButter(val float64) {
+	s.Butter = val
+}
+
+// SetChocolate sets the value of Chocolate.
+func (s *User) SetChocolate(val float64) {
+	s.Chocolate = val
+}
+
+// SetMilk sets the value of Milk.
+func (s *User) SetMilk(val float64) {
+	s.Milk = val
 }

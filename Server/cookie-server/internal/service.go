@@ -2,68 +2,197 @@ package service
 
 import (
 	"context"
+	"cookie-server/internal/database"
 	api "cookie-server/internal/server"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
 )
 
-type CookieServer struct {
-	users []api.User
-	mux   sync.Mutex
+type CookieService struct {
+	database database.Database
+	mux      sync.Mutex
 }
 
-// UsersUserIdGet implements api.Handler.
-func (c *CookieServer) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
-	var user *api.User
-	var err error
-	for i:=0; i<len(c.users) && user == nil; i++ {
-		if c.users[i].ID == int(params.UserId) {
-			user = &c.users[i]
-		}
+// UsersUserIdPost implements api.Handler.
+func (c *CookieService) UsersUserIdPost(ctx context.Context, params api.UsersUserIdPostParams) (*api.User, error) {
+	log.Println("POST /users/{userId} called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
 	}
-	if user == nil {
-		err = &api.ErrRespStatusCode{
-			StatusCode: http.StatusNotFound,
-			Response: fmt.Sprintf("player with id: %v not found", params.UserId),
-		}
+	defer transaction.Rollback()
+
+	user, err := transaction.CreateUser(api.User{})
+	if err != nil {
+		return nil, err
 	}
-	return user, err
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func NewCookieService(database database.Database) *CookieService {
+	return &CookieService{
+		database: database,
+	}
+}
+
+// SellPost implements api.Handler.
+func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	log.Println("POST /sell/ called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback() // Rollback im Fehlerfall
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		return nil, err
+	}
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	// Rückgabe des users
+	return user, nil
+}
+
+// BuyPost implements api.Handler.
+func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) (*api.User, error) {
+	log.Println("POST /buy/ called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	// Erstelle eine neue Datenbanktransaktion
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback() // Rollback im Fehlerfall
+	// Führe die Kauftransaktion durch
+	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	if err != nil {
+		return nil, err
+	}
+	// Transaktion abschließen
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	// Rückgabe des users
+	return user, nil
+}
+
+// MarketsAmountGet implements api.Handler.
+func (c *CookieService) MarketsAmountGet(ctx context.Context, params api.MarketsAmountGetParams) ([]api.Market, error) {
+	log.Println("GET /markets/{amount} called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	marketsByAmount, err := transaction.GetMarketsByAmount(params.Amount)
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return marketsByAmount, nil
+}
+
+// MarketsGet implements api.Handler.
+func (c *CookieService) MarketsGet(ctx context.Context) ([]api.Market, error) {
+	log.Println("GET /markets called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	markets, err := transaction.GetMarkets()
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return markets, nil
 }
 
 // NewError implements api.Handler.
-func (c *CookieServer) NewError(ctx context.Context, err error) *api.ErrRespStatusCode {
-	c.mux.Lock()
-	defer c.mux.Unlock()
+func (c *CookieService) NewError(ctx context.Context, err error) *api.ErrRespStatusCode {
+	// Beispiel für eine mögliche Implementierung
 	return &api.ErrRespStatusCode{
-		StatusCode: http.StatusInternalServerError,
-		Response:   "Mimimimi",
+		StatusCode: http.StatusInternalServerError, // Beispiel: Statuscode 500 für interne Serverfehler
+		Response:   err.Error(),
 	}
 }
 
 // UsersGet implements api.Handler.
-func (c *CookieServer) UsersGet(ctx context.Context) ([]api.User, error) {
+func (c *CookieService) UsersGet(ctx context.Context) ([]api.User, error) {
+	log.Println("GET /users called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	log.Println("yolo get users")
-	return c.users, nil
-}
-
-
-func New() *CookieServer {
-	return &CookieServer{
-		users: []api.User{
-			api.User{
-				ID:   1,
-				Name: "Adolf",
-			},
-			api.User{
-				ID:   2,
-				Name: "Adolfine",
-			},
-		},
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
 	}
+	users, err := transaction.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
-var _ api.Handler = (*CookieServer)(nil)
+// UsersPost implements api.Handler.
+func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
+	log.Println("POST /users called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer transaction.Rollback()
+
+	user, err := transaction.CreateUser(api.User{})
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// UsersUserIdGet implements api.Handler.
+func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
+	log.Println("GET /users/{userId} called")
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+	user, err := transaction.GetUser(params.UserId.String())
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+var _ api.Handler = (*CookieService)(nil)
