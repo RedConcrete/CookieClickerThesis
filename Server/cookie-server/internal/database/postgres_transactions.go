@@ -71,9 +71,10 @@ func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 		user.ID = uuid.New().String()
 	}
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-	err := p.transaction.QueryRow(query, user.ID, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+	err := p.transaction.QueryRow(query, user.ID, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
 			&user.ID,
+			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
 			&user.Flour,
@@ -104,7 +105,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 	log.Println("getting user")
 	var user api.User
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
-	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "id" = $1`
 	// Führt die Abfrage aus
@@ -118,6 +119,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 		// Scannt die Werte in die entsprechende Benutzerstruktur
 		err = rows.Scan(
 			&user.ID,
+			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
 			&user.Flour,
@@ -139,7 +141,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 	log.Println("getting users")
 	var users []api.User
-	query := `SELECT "id", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"`
 	rows, err := p.transaction.Query(query)
 	if err != nil {
@@ -150,6 +152,7 @@ func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 		var user api.User
 		err := rows.Scan(
 			&user.ID,
+			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
 			&user.Flour,
@@ -236,7 +239,7 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 	log.Println("buying resources")
 	var user api.User
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
-	query := `SELECT "id","steamid" "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "id","steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "id" = $1`
 	// Führt die Abfrage aus
@@ -244,7 +247,7 @@ func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
 		&user.ID,
-
+		&user.Steamid,
 		&user.Cookies,
 		&user.Sugar,
 		&user.Flour,
@@ -317,7 +320,7 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
 		&user.ID,
-
+		&user.Steamid,
 		&user.Cookies,
 		&user.Sugar,
 		&user.Flour,

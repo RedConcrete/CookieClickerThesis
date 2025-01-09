@@ -78,7 +78,7 @@ public class WebAPI : MonoBehaviour
 
             GetSteamID();
             Debug.Log("SteamID: "+ SteamId);
-            //StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
+            StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
             //StartCoroutine(WebAPI.Instance.PostPlayer());
         }
         else
@@ -162,6 +162,8 @@ public class WebAPI : MonoBehaviour
 
     public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
     {
+        Debug.Log("Loging with: " + SteamId);
+        
         if (authTicket != null)
         {
             string url = $"{baseUrl}/users/{id}";
