@@ -215,6 +215,7 @@ func (o OptString) Or(d string) string {
 // Ref: #/components/schemas/User
 type User struct {
 	ID        string  `json:"id"`
+	Steamid   string  `json:"steamid"`
 	Cookies   float64 `json:"cookies"`
 	Sugar     float64 `json:"sugar"`
 	Flour     float64 `json:"flour"`
@@ -227,6 +228,11 @@ type User struct {
 // GetID returns the value of ID.
 func (s *User) GetID() string {
 	return s.ID
+}
+
+// GetSteamid returns the value of Steamid.
+func (s *User) GetSteamid() string {
+	return s.Steamid
 }
 
 // GetCookies returns the value of Cookies.
@@ -267,6 +273,11 @@ func (s *User) GetMilk() float64 {
 // SetID sets the value of ID.
 func (s *User) SetID(val string) {
 	s.ID = val
+}
+
+// SetSteamid sets the value of Steamid.
+func (s *User) SetSteamid(val string) {
+	s.Steamid = val
 }
 
 // SetCookies sets the value of Cookies.

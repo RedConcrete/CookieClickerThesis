@@ -194,6 +194,9 @@ components:
         id:
           type: string
           example: 34a6e957-9c58-4eff-9861-c64b1bf87405
+        steamid:
+          type: string  
+          example: "76561198000000000"
         cookies:
           type: number
           example: 1.0
@@ -217,6 +220,7 @@ components:
           example: 1.0
       required:
         - id
+        - steamid
         - cookies
         - sugar
         - flour

@@ -13,7 +13,7 @@ using Steamworks;
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
-    public static Player player;  // Statische Variable für den Player
+    public static Player player;  // Statische Variable fï¿½r den Player
     public static ulong SteamId;  // Statische Steam-ID des Players
     private AuthTicket authTicket;
 
@@ -77,6 +77,7 @@ public class WebAPI : MonoBehaviour
             string base64Ticket = Convert.ToBase64String(ticketData);
 
             GetSteamID();
+            Debug.Log("SteamID: "+ SteamId);
             //StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
             //StartCoroutine(WebAPI.Instance.PostPlayer());
         }
@@ -196,7 +197,7 @@ public class WebAPI : MonoBehaviour
     /**
      * 
      *  todo muss angepast werden so, dass der Server alle infos bekommt
-     *  die gemacht werden müssen und dann es auf derm Server durchgeführt wird
+     *  die gemacht werden mï¿½ssen und dann es auf derm Server durchgefï¿½hrt wird
      * 
     **/
     public IEnumerator UpdatePlayer(string playerId)
