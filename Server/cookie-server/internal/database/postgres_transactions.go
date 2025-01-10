@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-
-	"github.com/lib/pq"
 )
 
 type PostgresTransaction struct {
@@ -15,14 +13,15 @@ type PostgresTransaction struct {
 }
 
 // CreateUserWithID implements Transaction.
-func (p *PostgresTransaction) CreateUserWithID(user api.User, steamid string) (*api.User, error) {
-	log.Println("GET /users/{" + steamid + "} called")
+func (p *PostgresTransaction) CreateUserWithID(user api.User) (*api.User, error) {
+	log.Println("POST /users/{" + user.Steamid + "} called")
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
 	query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  ON CONFLICT ("steamid") DO NOTHING
 			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-	err := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+	err := p.transaction.QueryRow(query, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
 			&user.Steamid,
 			&user.Cookies,
@@ -32,16 +31,7 @@ func (p *PostgresTransaction) CreateUserWithID(user api.User, steamid string) (*
 			&user.Butter,
 			&user.Chocolate,
 			&user.Milk)
-	// Fehler abfangen und spezifische Fehlercodes überprüfen
 	if err != nil {
-		// PostgreSQL Fehlercode für Unique Constraint Violation ist "23505"
-		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
-			log.Println("Player already exists")
-			return nil, fmt.Errorf("player already exists")
-		}
-
-		// Anderer Fehler
-		log.Println("Error inserting user:", err)
 		return nil, err
 	}
 
@@ -66,12 +56,13 @@ func (p *PostgresTransaction) Commit() error {
 	return nil
 }
 
-// CreateUser implements Transaction.
+// Nicht in nutzung !!!!!
 func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
-	log.Println("creating user")
+
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
 	query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  ON CONFLICT ("steamid") DO NOTHING
 			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
@@ -104,15 +95,15 @@ func (p *PostgresTransaction) UpdateUser(user *api.User) error {
 }
 
 // GetUser implements Transaction.
-func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
-	log.Println("GET /users/{" + steamid + "} called")
-	var user api.User
+func (p *PostgresTransaction) GetUser(user api.User) (*api.User, error) {
+	log.Println("GET /users/{" + user.Steamid + "} called")
+
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "steamid" = $1`
 	// Führt die Abfrage aus
-	rows, err := p.transaction.Query(query, steamid)
+	rows, err := p.transaction.Query(query, user.Steamid)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +125,7 @@ func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
 		}
 	} else {
 		// Falls keine Zeile gefunden wurde
-		return nil, fmt.Errorf("user with id %s not found", steamid)
+		return nil, fmt.Errorf("user with id %s not found", user.Steamid)
 	}
 	return &user, nil
 }
