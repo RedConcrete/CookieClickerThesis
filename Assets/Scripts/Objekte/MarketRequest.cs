@@ -4,11 +4,11 @@ namespace Server.Data
 {
     public class MarketRequest
     {
-        public string player;
+        public ulong player;
         public int amount;
         public string rec;
 
-        public MarketRequest(string playerId, string rec, int amount)
+        public MarketRequest(ulong playerId, string rec, int amount)
         {
             this.player = playerId;
             this.amount = amount;

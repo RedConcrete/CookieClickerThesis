@@ -8,6 +8,10 @@ using Newtonsoft.Json;
 using Server.Data;
 using UnityEngine.SceneManagement;
 using Steamworks;
+using Unity.VisualScripting;
+using UnityEngine.SocialPlatforms;
+using UnityEditor.PackageManager;
+using System.Security.Cryptography;
 
 
 public class WebAPI : MonoBehaviour
@@ -22,7 +26,7 @@ public class WebAPI : MonoBehaviour
     private GameManager gameManager;
     private int loginScene = 0;
 
-    private void Awake()
+    private void Start()
     {
         try
         {
@@ -76,15 +80,20 @@ public class WebAPI : MonoBehaviour
             byte[] ticketData = authTicket.Data;
             string base64Ticket = Convert.ToBase64String(ticketData);
 
-            GetSteamID();
-            Debug.Log("SteamID: "+ SteamId);
+            Debug.Log("SteamID: " + GetSteamID());
+            
+            // Warten für 1 Sekunde
+            yield return new WaitForSeconds(1);
+            
+            // Starten der Coroutine für die Webanfrage
             StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
-            //StartCoroutine(WebAPI.Instance.PostPlayer());
+            // StartCoroutine(WebAPI.Instance.PostPlayer());
         }
         else
         {
             Debug.LogError("Failed to create authentication ticket.");
         }
+
         yield return null;
     }
 
@@ -127,43 +136,8 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator GetPlayer(string id, bool isLoggingIn)
-    {
-        if (authTicket != null)
-        {
-            string url = $"{baseUrl}/users/{id}";
-
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
-            {
-                yield return webRequest.SendWebRequest();
-                switch (webRequest.result)
-                {
-                    case UnityWebRequest.Result.ConnectionError:
-                    case UnityWebRequest.Result.DataProcessingError:
-                        Debug.LogError(String.Format("ERROR", webRequest.error));
-                        break;
-                    case UnityWebRequest.Result.Success:
-                        string playerJsonData = webRequest.downloadHandler.text;
-                        player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
-                        if (isLoggingIn)
-                        {
-                            SceneManager.LoadScene(1);
-                            Debug.Log("Login successful" + id);
-                        }
-                        break;
-                }
-            }
-        }
-        else
-        {
-            Debug.LogError("No Steam connection");
-        }
-    }
-
     public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
     {
-        Debug.Log("Loging with: " + SteamId);
-        
         if (authTicket != null)
         {
             string url = $"{baseUrl}/users/{id}";
@@ -174,8 +148,13 @@ public class WebAPI : MonoBehaviour
                 switch (webRequest.result)
                 {
                     case UnityWebRequest.Result.ConnectionError:
+                    case UnityWebRequest.Result.ProtocolError:
+                        Debug.LogError(String.Format("ERROR" + webRequest.error));
+                        
+                        break;
                     case UnityWebRequest.Result.DataProcessingError:
-                        Debug.LogError(String.Format("ERROR", webRequest.error));
+                        Debug.LogError(String.Format("ERROR" + webRequest.error));
+                        
                         break;
                     case UnityWebRequest.Result.Success:
                         string playerJsonData = webRequest.downloadHandler.text;
@@ -193,7 +172,6 @@ public class WebAPI : MonoBehaviour
         {
             Debug.LogError("No Steam connection");
         }
-
     }
 
     /**
@@ -241,13 +219,13 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator PostBuy(string playerId, string rec, int amount)
+    public IEnumerator PostBuy(ulong playerId, string rec, int amount)
     {
         MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
         return DoMarketAction("buy", marketRequest);
     }
 
-    public IEnumerator PostSell(string playerId, string rec, int amount)
+    public IEnumerator PostSell(ulong playerId, string rec, int amount)
     {
         MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
         return DoMarketAction("sell", marketRequest);
@@ -302,8 +280,10 @@ public class WebAPI : MonoBehaviour
     {
         return marketList;
     }
-    private void GetSteamID()
+    public ulong GetSteamID()
     {
         SteamId = Steamworks.SteamClient.SteamId;
+        return SteamId;
     }
+
 }

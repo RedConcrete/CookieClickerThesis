@@ -238,9 +238,9 @@ func (s *MarketRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *MarketRequest) encodeFields(e *jx.Encoder) {
 	{
-		if s.UserId.Set {
-			e.FieldStart("userId")
-			s.UserId.Encode(e)
+		if s.Steamid.Set {
+			e.FieldStart("steamid")
+			s.Steamid.Encode(e)
 		}
 	}
 	{
@@ -254,7 +254,7 @@ func (s *MarketRequest) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfMarketRequest = [3]string{
-	0: "userId",
+	0: "steamid",
 	1: "amount",
 	2: "recourse",
 }
@@ -268,15 +268,15 @@ func (s *MarketRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "userId":
+		case "steamid":
 			if err := func() error {
-				s.UserId.Reset()
-				if err := s.UserId.Decode(d); err != nil {
+				s.Steamid.Reset()
+				if err := s.Steamid.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
+				return errors.Wrap(err, "decode field \"steamid\"")
 			}
 		case "amount":
 			requiredBitSet[0] |= 1 << 1
@@ -403,10 +403,6 @@ func (s *User) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *User) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		e.Str(s.ID)
-	}
-	{
 		e.FieldStart("steamid")
 		e.Str(s.Steamid)
 	}
@@ -440,16 +436,15 @@ func (s *User) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUser = [9]string{
-	0: "id",
-	1: "steamid",
-	2: "cookies",
-	3: "sugar",
-	4: "flour",
-	5: "eggs",
-	6: "butter",
-	7: "chocolate",
-	8: "milk",
+var jsonFieldsNameOfUser = [8]string{
+	0: "steamid",
+	1: "cookies",
+	2: "sugar",
+	3: "flour",
+	4: "eggs",
+	5: "butter",
+	6: "chocolate",
+	7: "milk",
 }
 
 // Decode decodes User from json.
@@ -457,24 +452,12 @@ func (s *User) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode User to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
 		case "steamid":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.Steamid = string(v)
@@ -486,7 +469,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"steamid\"")
 			}
 		case "cookies":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Float64()
 				s.Cookies = float64(v)
@@ -498,7 +481,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"cookies\"")
 			}
 		case "sugar":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Float64()
 				s.Sugar = float64(v)
@@ -510,7 +493,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sugar\"")
 			}
 		case "flour":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Float64()
 				s.Flour = float64(v)
@@ -522,7 +505,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"flour\"")
 			}
 		case "eggs":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Float64()
 				s.Eggs = float64(v)
@@ -534,7 +517,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"eggs\"")
 			}
 		case "butter":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Float64()
 				s.Butter = float64(v)
@@ -546,7 +529,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"butter\"")
 			}
 		case "chocolate":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Float64()
 				s.Chocolate = float64(v)
@@ -558,7 +541,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"chocolate\"")
 			}
 		case "milk":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Float64()
 				s.Milk = float64(v)
@@ -578,9 +561,8 @@ func (s *User) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [1]uint8{
 		0b11111111,
-		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

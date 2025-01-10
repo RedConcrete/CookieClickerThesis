@@ -6,6 +6,7 @@ import (
 	api "cookie-server/internal/server"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 )
 
@@ -16,7 +17,7 @@ type CookieService struct {
 
 // UsersUserIdPost implements api.Handler.
 func (c *CookieService) UsersUserIdPost(ctx context.Context, params api.UsersUserIdPostParams) (*api.User, error) {
-	log.Println("POST /users/{userId} called")
+	log.Println("POST /users/{" + params.UserId + "} called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -53,7 +54,7 @@ func (c *CookieService) SellPost(ctx context.Context, params *api.MarketRequest)
 	}
 	defer transaction.Rollback() // Rollback im Fehlerfall
 	// Führe die Kauftransaktion durch
-	user, err := transaction.DoSellTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	user, err := transaction.DoSellTransaction(params.Steamid.Value, params.Recourse, params.Amount)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) 
 	}
 	defer transaction.Rollback() // Rollback im Fehlerfall
 	// Führe die Kauftransaktion durch
-	user, err := transaction.DoBuyTransaction(params.UserId.Value, params.Recourse, params.Amount)
+	user, err := transaction.DoBuyTransaction(params.Steamid.Value, params.Recourse, params.Amount)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func (c *CookieService) BuyPost(ctx context.Context, params *api.MarketRequest) 
 
 // MarketsAmountGet implements api.Handler.
 func (c *CookieService) MarketsAmountGet(ctx context.Context, params api.MarketsAmountGetParams) ([]api.Market, error) {
-	log.Println("GET /markets/{amount} called")
+	log.Println("GET /markets/{" + strconv.Itoa(params.Amount) + "} called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
@@ -130,6 +131,8 @@ func (c *CookieService) MarketsGet(ctx context.Context) ([]api.Market, error) {
 // NewError implements api.Handler.
 func (c *CookieService) NewError(ctx context.Context, err error) *api.ErrRespStatusCode {
 	// Beispiel für eine mögliche Implementierung
+	println(err.Error())
+
 	return &api.ErrRespStatusCode{
 		StatusCode: http.StatusInternalServerError, // Beispiel: Statuscode 500 für interne Serverfehler
 		Response:   err.Error(),
@@ -178,14 +181,13 @@ func (c *CookieService) UsersPost(ctx context.Context) (*api.User, error) {
 
 // UsersUserIdGet implements api.Handler.
 func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUserIdGetParams) (*api.User, error) {
-	log.Println("GET /users/{userId} called")
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	transaction, err := c.database.NewTransaction()
 	if err != nil {
 		return nil, err
 	}
-	user, err := transaction.GetUser(params.UserId.String())
+	user, err := transaction.GetUser(params.UserId)
 	if err != nil {
 		return nil, err
 	}

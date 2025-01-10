@@ -4,7 +4,7 @@
 [System.Serializable]
 public class Player
 {
-    public string id;
+    public ulong id;
     public int cookies;
     public int sugar;
     public int flour;

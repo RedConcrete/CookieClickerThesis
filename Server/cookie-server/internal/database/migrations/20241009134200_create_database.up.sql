@@ -37,8 +37,7 @@ CREATE TABLE IF NOT EXISTS "markets" (
 );
 
 CREATE TABLE IF NOT EXISTS "players" (
-    "id" TEXT PRIMARY KEY,
-    "steamid" TEXT NOT NULL,
+    "steamid" TEXT PRIMARY KEY,
     "cookies" FLOAT NOT NULL DEFAULT 0.0,
     "sugar" FLOAT NOT NULL DEFAULT 0.0,
     "flour" FLOAT NOT NULL DEFAULT 0.0,

@@ -629,7 +629,7 @@ func (c *Client) sendUsersUserIdGet(ctx context.Context, params UsersUserIdGetPa
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.UserId))
+			return e.EncodeValue(conv.StringToString(params.UserId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

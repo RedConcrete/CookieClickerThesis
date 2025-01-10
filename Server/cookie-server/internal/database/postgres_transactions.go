@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type PostgresTransaction struct {
@@ -15,19 +15,15 @@ type PostgresTransaction struct {
 }
 
 // CreateUserWithID implements Transaction.
-func (p *PostgresTransaction) CreateUserWithID(user api.User, long string) (*api.User, error) {
-	log.Println("creating user wiht ID")
+func (p *PostgresTransaction) CreateUserWithID(user api.User, steamid string) (*api.User, error) {
+	log.Println("GET /users/{" + steamid + "} called")
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
-	query := `INSERT INTO "players" ("id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-			  RETURNING "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
-	if user.ID == "" {
-		user.ID = uuid.New().String()
-	}
+	query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-	err := p.transaction.QueryRow(query, user.ID, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+	err := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
-			&user.ID,
 			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
@@ -36,9 +32,19 @@ func (p *PostgresTransaction) CreateUserWithID(user api.User, long string) (*api
 			&user.Butter,
 			&user.Chocolate,
 			&user.Milk)
+	// Fehler abfangen und spezifische Fehlercodes überprüfen
 	if err != nil {
+		// PostgreSQL Fehlercode für Unique Constraint Violation ist "23505"
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			log.Println("Player already exists")
+			return nil, fmt.Errorf("player already exists")
+		}
+
+		// Anderer Fehler
+		log.Println("Error inserting user:", err)
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -64,16 +70,13 @@ func (p *PostgresTransaction) Commit() error {
 func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 	log.Println("creating user")
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
-	query := `INSERT INTO "players" ("id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-			  RETURNING "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
-	if user.ID == "" {
-		user.ID = uuid.New().String()
-	}
+	query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
+
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-	err := p.transaction.QueryRow(query, user.ID, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+	err := p.transaction.QueryRow(query, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
-			&user.ID,
 			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
@@ -96,20 +99,20 @@ func (p *PostgresTransaction) UpdateUser(user *api.User) error {
               SET "cookies" = $1, "sugar" = $2, "flour" = $3, "eggs" = $4,
                   "butter" = $5, "chocolate" = $6, "milk" = $7
               WHERE "id" = $8`
-	_, err := p.transaction.Exec(query, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk, user.ID)
+	_, err := p.transaction.Exec(query, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk, user.Steamid)
 	return err
 }
 
 // GetUser implements Transaction.
-func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
-	log.Println("getting user")
+func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
+	log.Println("GET /users/{" + steamid + "} called")
 	var user api.User
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
-	query := `SELECT "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
-	          WHERE "id" = $1`
+	          WHERE "steamid" = $1`
 	// Führt die Abfrage aus
-	rows, err := p.transaction.Query(query, uuid)
+	rows, err := p.transaction.Query(query, steamid)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +121,6 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 	if rows.Next() {
 		// Scannt die Werte in die entsprechende Benutzerstruktur
 		err = rows.Scan(
-			&user.ID,
 			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
@@ -132,7 +134,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 		}
 	} else {
 		// Falls keine Zeile gefunden wurde
-		return nil, fmt.Errorf("user with id %s not found", uuid)
+		return nil, fmt.Errorf("user with id %s not found", steamid)
 	}
 	return &user, nil
 }
@@ -141,7 +143,7 @@ func (p *PostgresTransaction) GetUser(uuid string) (*api.User, error) {
 func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 	log.Println("getting users")
 	var users []api.User
-	query := `SELECT "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"`
 	rows, err := p.transaction.Query(query)
 	if err != nil {
@@ -151,7 +153,6 @@ func (p *PostgresTransaction) GetUsers() ([]api.User, error) {
 	for rows.Next() {
 		var user api.User
 		err := rows.Scan(
-			&user.ID,
 			&user.Steamid,
 			&user.Cookies,
 			&user.Sugar,
@@ -235,18 +236,17 @@ func (p *PostgresTransaction) GetMarketsByAmount(amount int) ([]api.Market, erro
 }
 
 // DoBuyTransaction implements Transaction.
-func (p *PostgresTransaction) DoBuyTransaction(uuid, recourse string, amount int) (*api.User, error) {
+func (p *PostgresTransaction) DoBuyTransaction(uuid string, recourse string, amount int) (*api.User, error) {
 	log.Println("buying resources")
 	var user api.User
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
-	query := `SELECT "id","steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
-	          WHERE "id" = $1`
+	          WHERE "steamid" = $1`
 	// Führt die Abfrage aus
 	row := p.transaction.QueryRow(query, uuid)
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
-		&user.ID,
 		&user.Steamid,
 		&user.Cookies,
 		&user.Sugar,
@@ -312,14 +312,13 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 	log.Println("selling resources")
 	var user api.User
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
-	query := `SELECT "id", "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
-	          WHERE "id" = $1`
+	          WHERE "steamid" = $1`
 	// Führt die Abfrage aus
 	row := p.transaction.QueryRow(query, uuid)
 	// Scannt die Werte in die entsprechende Benutzerstruktur
 	err := row.Scan(
-		&user.ID,
 		&user.Steamid,
 		&user.Cookies,
 		&user.Sugar,
