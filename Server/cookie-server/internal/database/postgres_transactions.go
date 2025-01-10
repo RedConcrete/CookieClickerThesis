@@ -13,15 +13,16 @@ type PostgresTransaction struct {
 }
 
 // CreateUserWithID implements Transaction.
-func (p *PostgresTransaction) CreateUserWithID(user api.User) (*api.User, error) {
-	log.Println("POST /users/{" + user.Steamid + "} called")
+func (p *PostgresTransaction) CreateUserWithID(steamid string) (*api.User, error) {
+	log.Println("POST /users/{" + steamid + "} called")
+	var user api.User
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
 	query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			  ON CONFLICT ("steamid") DO NOTHING
 			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 	// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-	err := p.transaction.QueryRow(query, user.Steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+	err := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 		Scan(
 			&user.Steamid,
 			&user.Cookies,
@@ -95,19 +96,23 @@ func (p *PostgresTransaction) UpdateUser(user *api.User) error {
 }
 
 // GetUser implements Transaction.
-func (p *PostgresTransaction) GetUser(user api.User) (*api.User, error) {
-	log.Println("GET /users/{" + user.Steamid + "} called")
+func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
+	log.Println("GET /users/{" + steamid + "} called")
+
+	var user api.User
 
 	// Datenbankabfrage zum Abrufen des Benutzers anhand der ID
 	query := `SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
 	          FROM "players"
 	          WHERE "steamid" = $1`
 	// Führt die Abfrage aus
-	rows, err := p.transaction.Query(query, user.Steamid)
+	rows, err := p.transaction.Query(query, steamid)
+
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
 	// Wechsle zur ersten Zeile des Ergebnisses
 	if rows.Next() {
 		// Scannt die Werte in die entsprechende Benutzerstruktur
@@ -124,8 +129,27 @@ func (p *PostgresTransaction) GetUser(user api.User) (*api.User, error) {
 			return nil, err
 		}
 	} else {
-		// Falls keine Zeile gefunden wurde
-		return nil, fmt.Errorf("user with id %s not found", user.Steamid)
+		// Benutzer existiert nicht, erstelle ihn mit Standardwerten
+		query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
+		// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
+		err := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+			Scan(
+				&user.Steamid,
+				&user.Cookies,
+				&user.Sugar,
+				&user.Flour,
+				&user.Eggs,
+				&user.Butter,
+				&user.Chocolate,
+				&user.Milk)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create user with id %s: %w", steamid, err)
+		}
+
+		// Benutzer erneut abfragen, um die Daten zurückzugeben
+		return p.GetUser(steamid)
 	}
 	return &user, nil
 }

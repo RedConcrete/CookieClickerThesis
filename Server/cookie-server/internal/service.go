@@ -26,7 +26,7 @@ func (c *CookieService) UsersUserIdPost(ctx context.Context, params api.UsersUse
 	}
 	defer transaction.Rollback()
 
-	user, err := transaction.CreateUserWithID(api.User{})
+	user, err := transaction.CreateUserWithID(params.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUser
 	if err != nil {
 		return nil, err
 	}
-	user, err := transaction.GetUser(api.User{})
+	user, err := transaction.GetUser(params.UserId)
 	if err != nil {
 		return nil, err
 	}
