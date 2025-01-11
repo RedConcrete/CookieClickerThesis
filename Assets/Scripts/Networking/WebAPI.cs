@@ -26,16 +26,22 @@ public class WebAPI : MonoBehaviour
     private GameManager gameManager;
     private int loginScene = 0;
 
-    private void Start()
+    private void Awake()
     {
         try
         {
             Steamworks.SteamClient.Init(2816100);
+            
             StartCoroutine(AuthenticateUser());
+            
         }
         catch (System.Exception e)
         {
             Debug.LogError(e + " Steam connection ERROR! ");
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+            Application.Quit();
         }
 
         if (Instance != null)
@@ -84,10 +90,7 @@ public class WebAPI : MonoBehaviour
             
             // Warten für 1 Sekunde
             yield return new WaitForSeconds(1);
-            
-            // Starten der Coroutine für die Webanfrage
-            StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
-            // StartCoroutine(WebAPI.Instance.PostPlayer());
+            StartCoroutine(WebAPI.Instance.GetPlayer(SteamId.ToString(), true));
         }
         else
         {
@@ -136,11 +139,11 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
+    public IEnumerator GetPlayer(string steamid, bool isLoggingIn)
     {
         if (authTicket != null)
         {
-            string url = $"{baseUrl}/users/{id}";
+            string url = $"{baseUrl}/users/{steamid}";
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
@@ -162,7 +165,7 @@ public class WebAPI : MonoBehaviour
                         if (isLoggingIn)
                         {
                             SceneManager.LoadScene(1);
-                            Debug.Log("Login successful" + id);
+                            Debug.Log("Login successful wiht: " + steamid);
                         }
                         break;
                 }
@@ -219,13 +222,13 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator PostBuy(ulong playerId, string rec, int amount)
+    public IEnumerator PostBuy(string playerId, string rec, int amount)
     {
         MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
         return DoMarketAction("buy", marketRequest);
     }
 
-    public IEnumerator PostSell(ulong playerId, string rec, int amount)
+    public IEnumerator PostSell(string playerId, string rec, int amount)
     {
         MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
         return DoMarketAction("sell", marketRequest);
@@ -270,7 +273,7 @@ public class WebAPI : MonoBehaviour
                         }
                         break;
                 }
-                Debug.Log(player.cookies);
+                Debug.Log("Player has: " + player.cookies + " Cookies");
                 gameManager.UpdatePlayerData();
             }
         }
@@ -280,6 +283,7 @@ public class WebAPI : MonoBehaviour
     {
         return marketList;
     }
+
     public ulong GetSteamID()
     {
         SteamId = Steamworks.SteamClient.SteamId;

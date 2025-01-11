@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour
     {
         if (scene == marketScene)
         {
-            // Prüfen, ob der Timer läuft
+            // Prï¿½fen, ob der Timer lï¿½uft
             if (timerIsRunning)
             {
                 // Zeit verringern
@@ -112,17 +112,17 @@ public class GameManager : MonoBehaviour
                 // Zeit anzeigen
                 DisplayTime(timeRemaining);
 
-                // Überprüfen, ob der Timer abgelaufen ist
+                // ï¿½berprï¿½fen, ob der Timer abgelaufen ist
                 if (timeRemaining <= 1)
                 {
-                    // Timer zurücksetzen und Markt aktualisieren
+                    // Timer zurï¿½cksetzen und Markt aktualisieren
                     timeRemaining = updateTime;
                     UpdateMarketData();
                 }
             }
             else if (timeRemaining >= -1.0f && !timerIsRunning)
             {
-                // Timer synchronisieren, wenn er nicht läuft
+                // Timer synchronisieren, wenn er nicht lï¿½uft
                 SyncTimer();
             }
         }
@@ -136,17 +136,17 @@ public class GameManager : MonoBehaviour
         // Lade die Marktdaten in die Liste
         List<Market> newMarketList = WebAPI.Instance.GetMarket();
 
-        // Überprüfe, ob sich die Marktdaten geändert haben, bevor du die UI aktualisierst
+        // ï¿½berprï¿½fe, ob sich die Marktdaten geï¿½ndert haben, bevor du die UI aktualisierst
         if (!AreMarketsEqual(marketList, newMarketList))
         {
             marketList = newMarketList;
 
-            // Aktualisiere den Graphen, wenn sich die Marktdaten geändert haben
+            // Aktualisiere den Graphen, wenn sich die Marktdaten geï¿½ndert haben
             graphManager.UpdateGraph();
 
-            // Aktualisiere andere UI-Elemente nur bei Änderungen
+            // Aktualisiere andere UI-Elemente nur bei ï¿½nderungen
             totalCostField.text = calcTotalCost().ToString();
-            UpdatePlayerData(); // Nur bei Änderungen aktualisieren
+            UpdatePlayerData(); // Nur bei ï¿½nderungen aktualisieren
         }
     }
 
@@ -214,12 +214,13 @@ public class GameManager : MonoBehaviour
 
     public void UpdatePlayerID()
     {
-        playerIDField.text = currentPlayer.id.ToString();
+        playerIDField.text = currentPlayer.steamid;
     }
 
     public void UpdatePlayerData()
     {
-        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.id, false));
+        
+        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.steamid, false));
     }
 
     public void OverridePlayerDate()
@@ -315,8 +316,12 @@ public class GameManager : MonoBehaviour
 
     public void Logout()
     {
-        //Todo überprüfen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler übernehemen
-        SceneManager.LoadScene(0);
+        //Todo ï¿½berprï¿½fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler ï¿½bernehemen
+
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+    #endif
+        Application.Quit();
     }
 
     public void AddAmountCreateCookies(int amount)
@@ -365,6 +370,7 @@ public class GameManager : MonoBehaviour
             totalCostField.text = calcTotalCost().ToString();
         }
     }
+
     private int calcTotalCost()
     {
         totalCost = 0;
@@ -402,7 +408,7 @@ public class GameManager : MonoBehaviour
             {
                 if (currentPlayer.cookies >= totalCost)
                 {
-                    StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                    StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
                 }
                 else
                 {
@@ -430,7 +436,7 @@ public class GameManager : MonoBehaviour
         {
             if (rec != null)
             {
-                StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.id, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
                 UpdatePlayerData();
             }
             else

@@ -410,7 +410,9 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 
 // CreateMarket implements Transaction.
 func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
-	log.Println("creating market")
+
+	//log.Println("creating market")
+
 	query := `INSERT INTO "markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
 			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
 			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`
