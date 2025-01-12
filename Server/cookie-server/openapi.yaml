@@ -53,7 +53,6 @@ paths:
           description: The ID of the user to return.
           schema:
             type: string
-            format: uuid
       responses:
         "200": # status code
           description: A JSON array of user names
@@ -77,7 +76,6 @@ paths:
           description:
           schema:
             type: string
-            format: long
       responses:
         "200": # status code
           description: A JSON array of user names
@@ -191,9 +189,9 @@ components:
     User:
       type: object
       properties:
-        id:
+        steamid:
           type: string
-          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
+          example: "76561198126098129"
         cookies:
           type: number
           example: 1.0
@@ -216,7 +214,7 @@ components:
           type: number
           example: 1.0
       required:
-        - id
+        - steamid
         - cookies
         - sugar
         - flour
@@ -264,9 +262,9 @@ components:
     MarketRequest:
       type: object
       properties:
-        userId:
+        steamid:
           type: string
-          example: 34a6e957-9c58-4eff-9861-c64b1bf87405
+          example: "76561198126098129"
         amount:
           type: integer
           example: 1

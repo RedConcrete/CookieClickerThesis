@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
-	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
@@ -85,7 +84,7 @@ func decodeMarketsAmountGetParams(args [1]string, argsEscaped bool, r *http.Requ
 // UsersUserIdGetParams is parameters of GET /users/{userId} operation.
 type UsersUserIdGetParams struct {
 	// The ID of the user to return.
-	UserId uuid.UUID
+	UserId string
 }
 
 func unpackUsersUserIdGetParams(packed middleware.Parameters) (params UsersUserIdGetParams) {
@@ -94,7 +93,7 @@ func unpackUsersUserIdGetParams(packed middleware.Parameters) (params UsersUserI
 			Name: "userId",
 			In:   "path",
 		}
-		params.UserId = packed[key].(uuid.UUID)
+		params.UserId = packed[key].(string)
 	}
 	return params
 }
@@ -124,7 +123,7 @@ func decodeUsersUserIdGetParams(args [1]string, argsEscaped bool, r *http.Reques
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}

@@ -18,6 +18,7 @@ public class LoginManager : MonoBehaviour
         if (WebAPI.Instance != null)
         {
             Debug.Log("Player login in with " + playerTextField.text);
+            StartCoroutine(WebAPI.Instance.GetPlayer(WebAPI.Instance.GetSteamID().ToString(), true));
         }
         else
         {

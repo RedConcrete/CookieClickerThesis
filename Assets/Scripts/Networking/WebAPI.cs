@@ -8,12 +8,16 @@ using Newtonsoft.Json;
 using Server.Data;
 using UnityEngine.SceneManagement;
 using Steamworks;
+using Unity.VisualScripting;
+using UnityEngine.SocialPlatforms;
+using UnityEditor.PackageManager;
+using System.Security.Cryptography;
 
 
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
-    public static Player player;  // Statische Variable für den Player
+    public static Player player;  // Statische Variable fï¿½r den Player
     public static ulong SteamId;  // Statische Steam-ID des Players
     private AuthTicket authTicket;
 
@@ -21,17 +25,24 @@ public class WebAPI : MonoBehaviour
     private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
+    private int loginLoadTime = 5;
 
     private void Awake()
     {
         try
         {
             Steamworks.SteamClient.Init(2816100);
+            
             StartCoroutine(AuthenticateUser());
+            
         }
         catch (System.Exception e)
         {
             Debug.LogError(e + " Steam connection ERROR! ");
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+            Application.Quit();
         }
 
         if (Instance != null)
@@ -76,14 +87,17 @@ public class WebAPI : MonoBehaviour
             byte[] ticketData = authTicket.Data;
             string base64Ticket = Convert.ToBase64String(ticketData);
 
-            GetSteamID();
-            //StartCoroutine(WebAPI.Instance.GetPlayer(SteamId, true));
-            //StartCoroutine(WebAPI.Instance.PostPlayer());
+            Debug.Log("SteamID: " + GetSteamID());
+            
+            // Warten fÃ¼r 1 Sekunde
+            yield return new WaitForSeconds(loginLoadTime);
+            StartCoroutine(WebAPI.Instance.GetPlayer(SteamId.ToString(), true));
         }
         else
         {
             Debug.LogError("Failed to create authentication ticket.");
         }
+
         yield return null;
     }
 
@@ -126,11 +140,11 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator GetPlayer(string id, bool isLoggingIn)
+    public IEnumerator GetPlayer(string steamid, bool isLoggingIn)
     {
         if (authTicket != null)
         {
-            string url = $"{baseUrl}/users/{id}";
+            string url = $"{baseUrl}/users/{steamid}";
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
@@ -138,8 +152,19 @@ public class WebAPI : MonoBehaviour
                 switch (webRequest.result)
                 {
                     case UnityWebRequest.Result.ConnectionError:
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
+        #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+                        Application.Quit();
+                        break;
+                    case UnityWebRequest.Result.ProtocolError:
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
+                        
+                        break;
                     case UnityWebRequest.Result.DataProcessingError:
-                        Debug.LogError(String.Format("ERROR", webRequest.error));
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
+                        
                         break;
                     case UnityWebRequest.Result.Success:
                         string playerJsonData = webRequest.downloadHandler.text;
@@ -147,7 +172,7 @@ public class WebAPI : MonoBehaviour
                         if (isLoggingIn)
                         {
                             SceneManager.LoadScene(1);
-                            Debug.Log("Login successful" + id);
+                            Debug.Log("Login successful wiht: " + steamid);
                         }
                         break;
                 }
@@ -157,52 +182,18 @@ public class WebAPI : MonoBehaviour
         {
             Debug.LogError("No Steam connection");
         }
-    }
-
-    public IEnumerator GetPlayer(ulong id, bool isLoggingIn)
-    {
-        if (authTicket != null)
-        {
-            string url = $"{baseUrl}/users/{id}";
-
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
-            {
-                yield return webRequest.SendWebRequest();
-                switch (webRequest.result)
-                {
-                    case UnityWebRequest.Result.ConnectionError:
-                    case UnityWebRequest.Result.DataProcessingError:
-                        Debug.LogError(String.Format("ERROR", webRequest.error));
-                        break;
-                    case UnityWebRequest.Result.Success:
-                        string playerJsonData = webRequest.downloadHandler.text;
-                        player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
-                        if (isLoggingIn)
-                        {
-                            SceneManager.LoadScene(1);
-                            Debug.Log("Login successful" + id);
-                        }
-                        break;
-                }
-            }
-        }
-        else
-        {
-            Debug.LogError("No Steam connection");
-        }
-
     }
 
     /**
      * 
      *  todo muss angepast werden so, dass der Server alle infos bekommt
-     *  die gemacht werden müssen und dann es auf derm Server durchgeführt wird
+     *  die gemacht werden mï¿½ssen und dann es auf derm Server durchgefï¿½hrt wird
      * 
     **/
-    public IEnumerator UpdatePlayer(string playerId)
+    public IEnumerator UpdatePlayer(string steamid)
     {
         string url = baseUrl + "/updatePlayer";
-        byte[] playerData = Encoding.UTF8.GetBytes(playerId);
+        byte[] playerData = Encoding.UTF8.GetBytes(steamid);
 
         UnityWebRequest webRequest = new UnityWebRequest(url, "Put");
         webRequest.uploadHandler = new UploadHandlerRaw(playerData);
@@ -238,15 +229,15 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator PostBuy(string playerId, string rec, int amount)
+    public IEnumerator PostBuy(string steamid, string rec, int amount)
     {
-        MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
+        MarketRequest marketRequest = new MarketRequest(steamid, rec, amount);
         return DoMarketAction("buy", marketRequest);
     }
 
-    public IEnumerator PostSell(string playerId, string rec, int amount)
+    public IEnumerator PostSell(string steamid, string rec, int amount)
     {
-        MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
+        MarketRequest marketRequest = new MarketRequest(steamid, rec, amount);
         return DoMarketAction("sell", marketRequest);
     }
 
@@ -289,7 +280,7 @@ public class WebAPI : MonoBehaviour
                         }
                         break;
                 }
-                Debug.Log(player.cookies);
+                Debug.Log("Player has: " + player.cookies + " Cookies");
                 gameManager.UpdatePlayerData();
             }
         }
@@ -299,8 +290,11 @@ public class WebAPI : MonoBehaviour
     {
         return marketList;
     }
-    private void GetSteamID()
+
+    public ulong GetSteamID()
     {
         SteamId = Steamworks.SteamClient.SteamId;
+        return SteamId;
     }
+
 }

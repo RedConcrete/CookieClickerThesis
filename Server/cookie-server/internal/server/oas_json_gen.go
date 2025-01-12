@@ -238,9 +238,9 @@ func (s *MarketRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *MarketRequest) encodeFields(e *jx.Encoder) {
 	{
-		if s.UserId.Set {
-			e.FieldStart("userId")
-			s.UserId.Encode(e)
+		if s.Steamid.Set {
+			e.FieldStart("steamid")
+			s.Steamid.Encode(e)
 		}
 	}
 	{
@@ -254,7 +254,7 @@ func (s *MarketRequest) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfMarketRequest = [3]string{
-	0: "userId",
+	0: "steamid",
 	1: "amount",
 	2: "recourse",
 }
@@ -268,15 +268,15 @@ func (s *MarketRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "userId":
+		case "steamid":
 			if err := func() error {
-				s.UserId.Reset()
-				if err := s.UserId.Decode(d); err != nil {
+				s.Steamid.Reset()
+				if err := s.Steamid.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
+				return errors.Wrap(err, "decode field \"steamid\"")
 			}
 		case "amount":
 			requiredBitSet[0] |= 1 << 1
@@ -403,8 +403,8 @@ func (s *User) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *User) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		e.Str(s.ID)
+		e.FieldStart("steamid")
+		e.Str(s.Steamid)
 	}
 	{
 		e.FieldStart("cookies")
@@ -437,7 +437,7 @@ func (s *User) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfUser = [8]string{
-	0: "id",
+	0: "steamid",
 	1: "cookies",
 	2: "sugar",
 	3: "flour",
@@ -456,17 +456,17 @@ func (s *User) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
+		case "steamid":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.ID = string(v)
+				s.Steamid = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+				return errors.Wrap(err, "decode field \"steamid\"")
 			}
 		case "cookies":
 			requiredBitSet[0] |= 1 << 1
