@@ -25,6 +25,7 @@ public class WebAPI : MonoBehaviour
     private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
+    private int loginLoadTime = 5;
 
     private void Awake()
     {
@@ -89,7 +90,7 @@ public class WebAPI : MonoBehaviour
             Debug.Log("SteamID: " + GetSteamID());
             
             // Warten für 1 Sekunde
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(loginLoadTime);
             StartCoroutine(WebAPI.Instance.GetPlayer(SteamId.ToString(), true));
         }
         else
@@ -151,12 +152,18 @@ public class WebAPI : MonoBehaviour
                 switch (webRequest.result)
                 {
                     case UnityWebRequest.Result.ConnectionError:
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
+        #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+                        Application.Quit();
+                        break;
                     case UnityWebRequest.Result.ProtocolError:
-                        Debug.LogError(String.Format("ERROR" + webRequest.error));
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
                         
                         break;
                     case UnityWebRequest.Result.DataProcessingError:
-                        Debug.LogError(String.Format("ERROR" + webRequest.error));
+                        Debug.LogError(String.Format("ERROR " + webRequest.error));
                         
                         break;
                     case UnityWebRequest.Result.Success:
@@ -183,10 +190,10 @@ public class WebAPI : MonoBehaviour
      *  die gemacht werden m�ssen und dann es auf derm Server durchgef�hrt wird
      * 
     **/
-    public IEnumerator UpdatePlayer(string playerId)
+    public IEnumerator UpdatePlayer(string steamid)
     {
         string url = baseUrl + "/updatePlayer";
-        byte[] playerData = Encoding.UTF8.GetBytes(playerId);
+        byte[] playerData = Encoding.UTF8.GetBytes(steamid);
 
         UnityWebRequest webRequest = new UnityWebRequest(url, "Put");
         webRequest.uploadHandler = new UploadHandlerRaw(playerData);
@@ -222,15 +229,15 @@ public class WebAPI : MonoBehaviour
         }
     }
 
-    public IEnumerator PostBuy(string playerId, string rec, int amount)
+    public IEnumerator PostBuy(string steamid, string rec, int amount)
     {
-        MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
+        MarketRequest marketRequest = new MarketRequest(steamid, rec, amount);
         return DoMarketAction("buy", marketRequest);
     }
 
-    public IEnumerator PostSell(string playerId, string rec, int amount)
+    public IEnumerator PostSell(string steamid, string rec, int amount)
     {
-        MarketRequest marketRequest = new MarketRequest(playerId, rec, amount);
+        MarketRequest marketRequest = new MarketRequest(steamid, rec, amount);
         return DoMarketAction("sell", marketRequest);
     }
 
