@@ -4,19 +4,39 @@ import (
 	service "cookie-server/internal"
 	"log"
 	"net/http"
+	"strconv"
+
 	"time"
 
 	"cookie-server/internal/database"
 	internal "cookie-server/internal/pipeline"
 	api "cookie-server/internal/server"
+	"os"
 )
 
 func main() {
-	database, err := database.NewPostgresDatabase("localhost", 5460, "postgres", "1234", "CookieData")
+
+	// Umgebungsvariablen für die Datenbankverbindung abrufen
+	dbHost := os.Getenv("DB_HOST")
+	dbPortStr := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("Ungültiger Datenbankport: %v", err)
 		return
 	}
+
+	// Verbindung zur Datenbank herstellen
+	database, err := database.NewPostgresDatabase(dbHost, dbPort, dbUser, dbPassword, dbName)
+	if err != nil {
+		log.Fatalf("Fehler beim Verbinden mit der Datenbank: %v", err)
+		return
+	}
+	defer database.Close()
+
 	if err := database.RunMigrations(); err != nil {
 		log.Fatal(err.Error())
 		return
