@@ -12,6 +12,24 @@ type PostgresTransaction struct {
 	isTransactionActive bool
 }
 
+// Rollback implements Transaction.
+func (p *PostgresTransaction) Rollback() error {
+	if p.isTransactionActive {
+		p.isTransactionActive = false
+		return p.transaction.Rollback()
+	}
+	return nil
+}
+
+// Commit implements Transaction.
+func (p *PostgresTransaction) Commit() error {
+	if p.isTransactionActive {
+		p.isTransactionActive = false
+		return p.transaction.Commit()
+	}
+	return nil
+}
+
 // CreateUserWithID implements Transaction.
 func (p *PostgresTransaction) CreateUserWithID(steamid string) (*api.User, error) {
 	log.Println("POST /users/{" + steamid + "} called")
@@ -37,24 +55,6 @@ func (p *PostgresTransaction) CreateUserWithID(steamid string) (*api.User, error
 	}
 
 	return &user, nil
-}
-
-// Rollback implements Transaction.
-func (p *PostgresTransaction) Rollback() error {
-	if p.isTransactionActive {
-		p.isTransactionActive = false
-		return p.transaction.Rollback()
-	}
-	return nil
-}
-
-// Commit implements Transaction.
-func (p *PostgresTransaction) Commit() error {
-	if p.isTransactionActive {
-		p.isTransactionActive = false
-		return p.transaction.Commit()
-	}
-	return nil
 }
 
 // Nicht in nutzung !!!!!
@@ -219,8 +219,10 @@ func (p *PostgresTransaction) GetMarkets() ([]api.Market, error) {
 
 // GetMarketsByAmount implements Transaction.
 func (p *PostgresTransaction) GetMarketsByAmount(amount int) ([]api.Market, error) {
-	log.Println("getting markets by amount")
+	log.Printf("GET /market/{%d}", amount)
+
 	var marketsByAmount []api.Market
+
 	query := `SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
 	          FROM "markets"
 	          ORDER BY "date" DESC
@@ -410,8 +412,7 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 
 // CreateMarket implements Transaction.
 func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
-
-	//log.Println("creating market")
+	//log.Printf("CREATE /market/")
 
 	query := `INSERT INTO "markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
 			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
@@ -425,6 +426,99 @@ func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
 		market.ChocolatePrice,
 		market.MilkPrice)
 	return nil
+}
+
+func (p *PostgresTransaction) GetUserMarketData(steamid string, marketAmount int) (*api.UserMarketData, error) {
+	log.Printf("GET /update/{%s} and his Marketdata (limit: %d) called", steamid, marketAmount)
+
+	var user api.User
+	var markets []api.Market
+
+	// SQL-Abfrage, um die Benutzerdaten abzurufen
+	userQuery := `
+		SELECT "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"
+		FROM "players"
+		WHERE "steamid" = $1`
+	err := p.transaction.QueryRow(userQuery, steamid).Scan(
+		&user.Steamid,
+		&user.Cookies,
+		&user.Sugar,
+		&user.Flour,
+		&user.Eggs,
+		&user.Butter,
+		&user.Chocolate,
+		&user.Milk)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching user: %w", err)
+	}
+
+	// SQL-Abfrage, um die gewünschte Anzahl an Marktdaten abzurufen
+	marketQuery := `
+		SELECT "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"
+		FROM "markets"
+		ORDER BY "date" DESC
+		LIMIT $1`
+	rows, err := p.transaction.Query(marketQuery, marketAmount)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching markets: %w", err)
+	}
+	defer rows.Close()
+
+	// Marktdaten in eine Liste einfügen
+	for rows.Next() {
+		var market api.Market
+		err := rows.Scan(
+			&market.ID,
+			&market.Date,
+			&market.SugarPrice,
+			&market.FlourPrice,
+			&market.EggsPrice,
+			&market.ButterPrice,
+			&market.ChocolatePrice,
+			&market.MilkPrice)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning market data: %w", err)
+		}
+		markets = append(markets, market)
+	}
+
+	// Überprüfen, ob es Fehler während der Iteration gab
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error processing market rows: %w", err)
+	}
+	var marketItems []api.UserMarketDataMarketsItem
+
+	// Umwandlung der Markets in den richtigen Typ
+	for _, market := range markets {
+		marketItem := api.UserMarketDataMarketsItem{
+			ID:             market.ID,
+			Date:           market.Date,
+			SugarPrice:     market.SugarPrice,
+			FlourPrice:     market.FlourPrice,
+			EggsPrice:      market.EggsPrice,
+			ButterPrice:    market.ButterPrice,
+			ChocolatePrice: market.ChocolatePrice,
+			MilkPrice:      market.MilkPrice,
+		}
+		marketItems = append(marketItems, marketItem)
+	}
+
+	// Erstelle das UserMarketData-Objekt
+	userMarketData := api.UserMarketData{
+		User: api.UserMarketDataUser{
+			Steamid:   user.Steamid,
+			Cookies:   user.Cookies,
+			Sugar:     user.Sugar,
+			Flour:     user.Flour,
+			Eggs:      user.Eggs,
+			Butter:    user.Butter,
+			Chocolate: user.Chocolate,
+			Milk:      user.Milk,
+		},
+		Markets: marketItems, // Umgewandelte Märkte
+	}
+
+	return &userMarketData, nil
 }
 
 var _ Transaction = (*PostgresTransaction)(nil)

@@ -13,20 +13,20 @@ public class AchievementManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Instanz wird nicht zerstört beim Szenenwechsel
+            DontDestroyOnLoad(gameObject); // Instanz wird nicht zerstï¿½rt beim Szenenwechsel
         }
         else
         {
-            Destroy(gameObject); // Doppelte Instanz wird zerstört
+            Destroy(gameObject); // Doppelte Instanz wird zerstï¿½rt
         }
     }
 
     private void Start()
     {
         // Beispiel-Aufruf beim Start
-        if (!IsThisAchievementUnlocked("NEW_ACHIEVEMENT_1_0"))
+        if (!IsThisAchievementUnlocked("Minecraft?"))
         {
-            UnlockAchievement("NEW_ACHIEVEMENT_1_0");
+            UnlockAchievement("Minecraft?");
         }
     }
 

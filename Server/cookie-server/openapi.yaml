@@ -90,6 +90,39 @@ paths:
               schema:
                 type: string
 
+  /update/{userId}:
+    get:
+      summary: Returns a UserMarketData object.
+      description: Fetches a UserMarketData object based on userId and amount of markets.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to return.
+          schema:
+            type: string
+        - name: amount
+          in: query
+          required: false
+          description: The number of market entries to fetch. Defaults to 10.
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: A JSON object containing user and market data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMarketData"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
   /markets:
     get:
       summary: Returns a list of Market Objects.
@@ -222,6 +255,7 @@ components:
         - butter
         - chocolate
         - milk
+
     Market:
       type: object
       properties:
@@ -259,6 +293,89 @@ components:
         - butterPrice
         - chocolatePrice
         - milkPrice
+    
+    UserMarketData:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            steamid:
+              type: string
+              example: "76561198126098129"
+            cookies:
+              type: number
+              example: 1.0
+            sugar:
+              type: number
+              example: 1.0
+            flour:
+              type: number
+              example: 1.0
+            eggs:
+              type: number
+              example: 1.0
+            butter:
+              type: number
+              example: 1.0
+            chocolate:
+              type: number
+              example: 1.0
+            milk:
+              type: number
+              example: 1.0
+          required:
+            - steamid
+            - cookies
+            - sugar
+            - flour
+            - eggs
+            - butter
+            - chocolate
+            - milk
+        markets:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "34a6e957-9c58-4eff-9861-c64b1bf87404"
+              date:
+                type: string
+                format: date-time
+                example: "2024-08-30T14:37:51.41408+02:00"
+              sugarPrice:
+                type: number
+                example: 1.0
+              flourPrice:
+                type: number
+                example: 1.0
+              eggsPrice:
+                type: number
+                example: 1.0
+              butterPrice:
+                type: number
+                example: 1.0
+              chocolatePrice:
+                type: number
+                example: 1.0
+              milkPrice:
+                type: number
+                example: 1.0
+            required:
+              - id
+              - date
+              - sugarPrice
+              - flourPrice
+              - eggsPrice
+              - butterPrice
+              - chocolatePrice
+              - milkPrice
+      required:
+        - user
+        - markets
+
     MarketRequest:
       type: object
       properties:

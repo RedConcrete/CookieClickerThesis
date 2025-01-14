@@ -32,6 +32,12 @@ type Handler interface {
 	//
 	// POST /sell/
 	SellPost(ctx context.Context, req *MarketRequest) (*User, error)
+	// UpdateUserIdGet implements GET /update/{userId} operation.
+	//
+	// Fetches a UserMarketData object based on userId and amount of markets.
+	//
+	// GET /update/{userId}
+	UpdateUserIdGet(ctx context.Context, params UpdateUserIdGetParams) (*UserMarketData, error)
 	// UsersGet implements GET /users operation.
 	//
 	// Optional extended description in CommonMark or HTML.

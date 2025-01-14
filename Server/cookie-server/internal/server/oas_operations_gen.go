@@ -10,6 +10,7 @@ const (
 	MarketsAmountGetOperation OperationName = "MarketsAmountGet"
 	MarketsGetOperation       OperationName = "MarketsGet"
 	SellPostOperation         OperationName = "SellPost"
+	UpdateUserIdGetOperation  OperationName = "UpdateUserIdGet"
 	UsersGetOperation         OperationName = "UsersGet"
 	UsersPostOperation        OperationName = "UsersPost"
 	UsersUserIdGetOperation   OperationName = "UsersUserIdGet"

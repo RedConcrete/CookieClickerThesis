@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Objects:")]
     public GraphManager graphManager;
-    private Player currentPlayer;
+    private User currentUser;
 
     [Header("MarketFields:")]
     private string rec;
@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         scene = SceneManager.GetActiveScene().buildIndex;
-        currentPlayer = WebAPI.player;
+        currentUser = WebAPI.user;
 
         if (scene == idleScene)
         {
@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
                 {
                     // Timer zur�cksetzen und Markt aktualisieren
                     timeRemaining = updateTime;
-                    UpdateMarketData();
+                    UpdateMarketDataAndUserData();
                 }
             }
             else if (timeRemaining >= -1.0f && !timerIsRunning)
@@ -128,17 +128,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void UpdateMarketData()
-    {
-        // Hole die Preise vom Server
-        StartCoroutine(WebAPI.Instance.GetPrices(amountToGetGraph));
+    public void UpdatePlayer(){
+        StartCoroutine(WebAPI.Instance.GetPlayer(currentUser.steamid, false));
+    }
 
+    public void UpdateMarketDataAndUserData()
+    {
+        // Hole die Preise vom Server und den User
+        StartCoroutine(WebAPI.Instance.UpdatePlayerAndMarket(currentUser.steamid, amountToGetGraph));
+        
         // Lade die Marktdaten in die Liste
         List<Market> newMarketList = WebAPI.Instance.GetMarket();
 
         // �berpr�fe, ob sich die Marktdaten ge�ndert haben, bevor du die UI aktualisierst
         if (!AreMarketsEqual(marketList, newMarketList))
         {
+            Debug.Log("The new Marketlist is new");
             marketList = newMarketList;
 
             // Aktualisiere den Graphen, wenn sich die Marktdaten ge�ndert haben
@@ -146,7 +151,9 @@ public class GameManager : MonoBehaviour
 
             // Aktualisiere andere UI-Elemente nur bei �nderungen
             totalCostField.text = calcTotalCost().ToString();
-            UpdatePlayerData(); // Nur bei �nderungen aktualisieren
+        }
+        else{
+            Debug.Log("The new Marketlist isn´t new");
         }
     }
 
@@ -203,30 +210,18 @@ public class GameManager : MonoBehaviour
 
     public void UpdateRecources()
     {
-        cookie_Text.text = currentPlayer.cookies.ToString();
-        sugar_Text.text = currentPlayer.sugar.ToString();
-        flour_Text.text = currentPlayer.flour.ToString();
-        eggs_Text.text = currentPlayer.eggs.ToString();
-        butter_Text.text = currentPlayer.butter.ToString();
-        chocolate_Text.text = currentPlayer.chocolate.ToString();
-        milk_Text.text = currentPlayer.milk.ToString();
+        cookie_Text.text = currentUser.cookies.ToString();
+        sugar_Text.text = currentUser.sugar.ToString();
+        flour_Text.text = currentUser.flour.ToString();
+        eggs_Text.text = currentUser.eggs.ToString();
+        butter_Text.text = currentUser.butter.ToString();
+        chocolate_Text.text = currentUser.chocolate.ToString();
+        milk_Text.text = currentUser.milk.ToString();
     }
 
     public void UpdatePlayerID()
     {
-        playerIDField.text = currentPlayer.steamid;
-    }
-
-    public void UpdatePlayerData()
-    {
-        
-        StartCoroutine(WebAPI.Instance.GetPlayer(currentPlayer.steamid, false));
-    }
-
-    public void OverridePlayerDate()
-    {
-        pData = JsonUtility.ToJson(currentPlayer);
-        StartCoroutine(WebAPI.Instance.UpdatePlayer(pData));
+        playerIDField.text = currentUser.steamid;
     }
 
     public void ProduceCookies() //Todo anpassen das es nur das Rezept senden was verwendet werden soll
@@ -234,9 +229,9 @@ public class GameManager : MonoBehaviour
         int requiredAmount = 10 * currentCreateCookiesAmount;
         if (HasSufficientResources(requiredAmount))
         {
-            currentPlayer.cookies += 100 * currentCreateCookiesAmount; //TODO
+            currentUser.cookies += 100 * currentCreateCookiesAmount; //TODO
             subtracRec(-requiredAmount);
-            UpdatePlayerData();// Todo siehe oben
+            UpdateMarketDataAndUserData();// Todo siehe oben
             UpdateRecources();
         }
         else
@@ -247,57 +242,57 @@ public class GameManager : MonoBehaviour
 
     private bool HasSufficientResources(int requiredAmount)
     {
-        return currentPlayer.sugar >= requiredAmount
-            && currentPlayer.flour >= requiredAmount
-            && currentPlayer.eggs >= requiredAmount
-            && currentPlayer.butter >= requiredAmount
-            && currentPlayer.chocolate >= requiredAmount
-            && currentPlayer.milk >= requiredAmount;
+        return currentUser.sugar >= requiredAmount
+            && currentUser.flour >= requiredAmount
+            && currentUser.eggs >= requiredAmount
+            && currentUser.butter >= requiredAmount
+            && currentUser.chocolate >= requiredAmount
+            && currentUser.milk >= requiredAmount;
     }
 
     private void subtracRec(int amountChange)
     {
-        currentPlayer.sugar += amountChange;
-        currentPlayer.flour += amountChange;
-        currentPlayer.eggs += amountChange;
-        currentPlayer.butter += amountChange;
-        currentPlayer.chocolate += amountChange;
-        currentPlayer.milk += amountChange;
+        currentUser.sugar += amountChange;
+        currentUser.flour += amountChange;
+        currentUser.eggs += amountChange;
+        currentUser.butter += amountChange;
+        currentUser.chocolate += amountChange;
+        currentUser.milk += amountChange;
     }
 
     public void MakeSugar()
     {
-        currentPlayer.sugar = currentPlayer.sugar + sugarIncreaseAmount;
+        currentUser.sugar = currentUser.sugar + sugarIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeFlour()
     {
-        currentPlayer.flour = currentPlayer.flour + flourIncreaseAmount;
+        currentUser.flour = currentUser.flour + flourIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeEggs()
     {
-        currentPlayer.eggs = currentPlayer.eggs + eggsIncreaseAmount;
+        currentUser.eggs = currentUser.eggs + eggsIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeButter()
     {
-        currentPlayer.butter = currentPlayer.butter + butterIncreaseAmount;
+        currentUser.butter = currentUser.butter + butterIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeChocolate()
     {
-        currentPlayer.chocolate = currentPlayer.chocolate + chocolateIncreaseAmount;
+        currentUser.chocolate = currentUser.chocolate + chocolateIncreaseAmount;
         UpdateRecources();
     }
 
     public void MakeMilk()
     {
-        currentPlayer.milk = currentPlayer.milk + milkIncreaseAmount;
+        currentUser.milk = currentUser.milk + milkIncreaseAmount;
         UpdateRecources();
     }
 
@@ -402,13 +397,13 @@ public class GameManager : MonoBehaviour
 
     public void Buy()
     {
-        if (currentPlayer != null)
+        if (currentUser != null)
         {
             if (rec != null)
             {
-                if (currentPlayer.cookies >= totalCost)
+                if (currentUser.cookies >= totalCost)
                 {
-                    StartCoroutine(WebAPI.Instance.PostBuy(currentPlayer.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                    StartCoroutine(WebAPI.Instance.PostBuy(currentUser.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
                 }
                 else
                 {
@@ -426,18 +421,18 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Player: " + currentPlayer + "Recources: " + rec);
+            Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
 
     public void Sell()
     {
-        if (currentPlayer != null)
+        if (currentUser != null)
         {
             if (rec != null)
             {
-                StartCoroutine(WebAPI.Instance.PostSell(currentPlayer.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
-                UpdatePlayerData();
+                StartCoroutine(WebAPI.Instance.PostSell(currentUser.steamid, rec, int.Parse(amountRecBuyAndSell_InputField.text)));
+                UpdateMarketDataAndUserData();
             }
             else
             {
@@ -450,7 +445,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Player: " + currentPlayer + "Recources: " + rec);
+            Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
 

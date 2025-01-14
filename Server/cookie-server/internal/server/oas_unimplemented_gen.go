@@ -49,6 +49,15 @@ func (UnimplementedHandler) SellPost(ctx context.Context, req *MarketRequest) (r
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateUserIdGet implements GET /update/{userId} operation.
+//
+// Fetches a UserMarketData object based on userId and amount of markets.
+//
+// GET /update/{userId}
+func (UnimplementedHandler) UpdateUserIdGet(ctx context.Context, params UpdateUserIdGetParams) (r *UserMarketData, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UsersGet implements GET /users operation.
 //
 // Optional extended description in CommonMark or HTML.

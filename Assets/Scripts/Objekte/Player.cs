@@ -2,7 +2,7 @@
 
 
 [System.Serializable]
-public class Player
+public class User
 {
     public string steamid;
     public int cookies;
