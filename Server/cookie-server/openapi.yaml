@@ -107,7 +107,7 @@ paths:
           description: The number of market entries to fetch. Defaults to 10.
           schema:
             type: integer
-            default: 20
+            default: 21
       responses:
         "200":
           description: A JSON object containing user and market data.

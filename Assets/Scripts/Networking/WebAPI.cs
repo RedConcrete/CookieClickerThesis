@@ -12,6 +12,7 @@ using Unity.VisualScripting;
 using UnityEngine.SocialPlatforms;
 using UnityEditor.PackageManager;
 using System.Security.Cryptography;
+using Unity.Mathematics;
 
 
 public class WebAPI : MonoBehaviour
@@ -144,7 +145,7 @@ public class WebAPI : MonoBehaviour
     {
         if (authTicket != null)
         {
-            string url = $"{baseUrl}/users/{steamid + 1}" ;
+            string url = $"{baseUrl}/users/{steamid}" ;
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
