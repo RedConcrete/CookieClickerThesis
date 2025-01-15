@@ -81,6 +81,130 @@ func decodeMarketsAmountGetParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// UpdateUserIdGetParams is parameters of GET /update/{userId} operation.
+type UpdateUserIdGetParams struct {
+	// The ID of the user to return.
+	UserId string
+	// The number of market entries to fetch. Defaults to 10.
+	Amount OptInt
+}
+
+func unpackUpdateUserIdGetParams(packed middleware.Parameters) (params UpdateUserIdGetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "userId",
+			In:   "path",
+		}
+		params.UserId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "amount",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Amount = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeUpdateUserIdGetParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateUserIdGetParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: userId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "userId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for query: amount.
+	{
+		val := int(20)
+		params.Amount.SetTo(val)
+	}
+	// Decode query: amount.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "amount",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAmountVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAmountVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Amount.SetTo(paramsDotAmountVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "amount",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UsersUserIdGetParams is parameters of GET /users/{userId} operation.
 type UsersUserIdGetParams struct {
 	// The ID of the user to return.

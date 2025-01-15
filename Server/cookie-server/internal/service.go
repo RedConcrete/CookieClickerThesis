@@ -197,4 +197,23 @@ func (c *CookieService) UsersUserIdGet(ctx context.Context, params api.UsersUser
 	return user, nil
 }
 
+// UsersUserIdGet implements api.Handler.
+func (c *CookieService) UpdateUserIdGet(ctx context.Context, params api.UpdateUserIdGetParams) (*api.UserMarketData, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	transaction, err := c.database.NewTransaction()
+	if err != nil {
+		return nil, err
+	}
+
+	updateUser, err := transaction.GetUserMarketData(params.UserId, params.Amount.Value)
+	if err != nil {
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
+		return nil, err
+	}
+	return updateUser, nil
+}
+
 var _ api.Handler = (*CookieService)(nil)

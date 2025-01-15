@@ -166,6 +166,52 @@ func (s *MarketRequest) SetRecourse(val string) {
 	s.Recourse = val
 }
 
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -301,5 +347,213 @@ func (s *User) SetChocolate(val float64) {
 
 // SetMilk sets the value of Milk.
 func (s *User) SetMilk(val float64) {
+	s.Milk = val
+}
+
+// Ref: #/components/schemas/UserMarketData
+type UserMarketData struct {
+	User    UserMarketDataUser          `json:"user"`
+	Markets []UserMarketDataMarketsItem `json:"markets"`
+}
+
+// GetUser returns the value of User.
+func (s *UserMarketData) GetUser() UserMarketDataUser {
+	return s.User
+}
+
+// GetMarkets returns the value of Markets.
+func (s *UserMarketData) GetMarkets() []UserMarketDataMarketsItem {
+	return s.Markets
+}
+
+// SetUser sets the value of User.
+func (s *UserMarketData) SetUser(val UserMarketDataUser) {
+	s.User = val
+}
+
+// SetMarkets sets the value of Markets.
+func (s *UserMarketData) SetMarkets(val []UserMarketDataMarketsItem) {
+	s.Markets = val
+}
+
+type UserMarketDataMarketsItem struct {
+	ID             string    `json:"id"`
+	Date           time.Time `json:"date"`
+	SugarPrice     float64   `json:"sugarPrice"`
+	FlourPrice     float64   `json:"flourPrice"`
+	EggsPrice      float64   `json:"eggsPrice"`
+	ButterPrice    float64   `json:"butterPrice"`
+	ChocolatePrice float64   `json:"chocolatePrice"`
+	MilkPrice      float64   `json:"milkPrice"`
+}
+
+// GetID returns the value of ID.
+func (s *UserMarketDataMarketsItem) GetID() string {
+	return s.ID
+}
+
+// GetDate returns the value of Date.
+func (s *UserMarketDataMarketsItem) GetDate() time.Time {
+	return s.Date
+}
+
+// GetSugarPrice returns the value of SugarPrice.
+func (s *UserMarketDataMarketsItem) GetSugarPrice() float64 {
+	return s.SugarPrice
+}
+
+// GetFlourPrice returns the value of FlourPrice.
+func (s *UserMarketDataMarketsItem) GetFlourPrice() float64 {
+	return s.FlourPrice
+}
+
+// GetEggsPrice returns the value of EggsPrice.
+func (s *UserMarketDataMarketsItem) GetEggsPrice() float64 {
+	return s.EggsPrice
+}
+
+// GetButterPrice returns the value of ButterPrice.
+func (s *UserMarketDataMarketsItem) GetButterPrice() float64 {
+	return s.ButterPrice
+}
+
+// GetChocolatePrice returns the value of ChocolatePrice.
+func (s *UserMarketDataMarketsItem) GetChocolatePrice() float64 {
+	return s.ChocolatePrice
+}
+
+// GetMilkPrice returns the value of MilkPrice.
+func (s *UserMarketDataMarketsItem) GetMilkPrice() float64 {
+	return s.MilkPrice
+}
+
+// SetID sets the value of ID.
+func (s *UserMarketDataMarketsItem) SetID(val string) {
+	s.ID = val
+}
+
+// SetDate sets the value of Date.
+func (s *UserMarketDataMarketsItem) SetDate(val time.Time) {
+	s.Date = val
+}
+
+// SetSugarPrice sets the value of SugarPrice.
+func (s *UserMarketDataMarketsItem) SetSugarPrice(val float64) {
+	s.SugarPrice = val
+}
+
+// SetFlourPrice sets the value of FlourPrice.
+func (s *UserMarketDataMarketsItem) SetFlourPrice(val float64) {
+	s.FlourPrice = val
+}
+
+// SetEggsPrice sets the value of EggsPrice.
+func (s *UserMarketDataMarketsItem) SetEggsPrice(val float64) {
+	s.EggsPrice = val
+}
+
+// SetButterPrice sets the value of ButterPrice.
+func (s *UserMarketDataMarketsItem) SetButterPrice(val float64) {
+	s.ButterPrice = val
+}
+
+// SetChocolatePrice sets the value of ChocolatePrice.
+func (s *UserMarketDataMarketsItem) SetChocolatePrice(val float64) {
+	s.ChocolatePrice = val
+}
+
+// SetMilkPrice sets the value of MilkPrice.
+func (s *UserMarketDataMarketsItem) SetMilkPrice(val float64) {
+	s.MilkPrice = val
+}
+
+type UserMarketDataUser struct {
+	Steamid   string  `json:"steamid"`
+	Cookies   float64 `json:"cookies"`
+	Sugar     float64 `json:"sugar"`
+	Flour     float64 `json:"flour"`
+	Eggs      float64 `json:"eggs"`
+	Butter    float64 `json:"butter"`
+	Chocolate float64 `json:"chocolate"`
+	Milk      float64 `json:"milk"`
+}
+
+// GetSteamid returns the value of Steamid.
+func (s *UserMarketDataUser) GetSteamid() string {
+	return s.Steamid
+}
+
+// GetCookies returns the value of Cookies.
+func (s *UserMarketDataUser) GetCookies() float64 {
+	return s.Cookies
+}
+
+// GetSugar returns the value of Sugar.
+func (s *UserMarketDataUser) GetSugar() float64 {
+	return s.Sugar
+}
+
+// GetFlour returns the value of Flour.
+func (s *UserMarketDataUser) GetFlour() float64 {
+	return s.Flour
+}
+
+// GetEggs returns the value of Eggs.
+func (s *UserMarketDataUser) GetEggs() float64 {
+	return s.Eggs
+}
+
+// GetButter returns the value of Butter.
+func (s *UserMarketDataUser) GetButter() float64 {
+	return s.Butter
+}
+
+// GetChocolate returns the value of Chocolate.
+func (s *UserMarketDataUser) GetChocolate() float64 {
+	return s.Chocolate
+}
+
+// GetMilk returns the value of Milk.
+func (s *UserMarketDataUser) GetMilk() float64 {
+	return s.Milk
+}
+
+// SetSteamid sets the value of Steamid.
+func (s *UserMarketDataUser) SetSteamid(val string) {
+	s.Steamid = val
+}
+
+// SetCookies sets the value of Cookies.
+func (s *UserMarketDataUser) SetCookies(val float64) {
+	s.Cookies = val
+}
+
+// SetSugar sets the value of Sugar.
+func (s *UserMarketDataUser) SetSugar(val float64) {
+	s.Sugar = val
+}
+
+// SetFlour sets the value of Flour.
+func (s *UserMarketDataUser) SetFlour(val float64) {
+	s.Flour = val
+}
+
+// SetEggs sets the value of Eggs.
+func (s *UserMarketDataUser) SetEggs(val float64) {
+	s.Eggs = val
+}
+
+// SetButter sets the value of Butter.
+func (s *UserMarketDataUser) SetButter(val float64) {
+	s.Butter = val
+}
+
+// SetChocolate sets the value of Chocolate.
+func (s *UserMarketDataUser) SetChocolate(val float64) {
+	s.Chocolate = val
+}
+
+// SetMilk sets the value of Milk.
+func (s *UserMarketDataUser) SetMilk(val float64) {
 	s.Milk = val
 }

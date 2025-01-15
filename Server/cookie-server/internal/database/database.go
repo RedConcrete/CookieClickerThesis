@@ -22,5 +22,6 @@ type Transaction interface {
 	DoBuyTransaction(steamid string, recourse string, amount int) (*api.User, error)
 	DoSellTransaction(steamid string, recourse string, amount int) (*api.User, error)
 	UpdateUser(user *api.User) error
+	GetUserMarketData(steamid string, amount int) (*api.UserMarketData, error)
 	CreateMarket(market *api.Market) error
 }

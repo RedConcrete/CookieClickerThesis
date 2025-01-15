@@ -153,30 +153,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'u': // Prefix: "users"
+			case 'u': // Prefix: "u"
 				origElem := elem
-				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+				if l := len("u"); len(elem) >= l && elem[0:l] == "u" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleUsersGetRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleUsersPostRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'p': // Prefix: "pdate/"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("pdate/"); len(elem) >= l && elem[0:l] == "pdate/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -191,18 +182,70 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleUsersUserIdGetRequest([1]string{
+							s.handleUpdateUserIdGetRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 's': // Prefix: "sers"
+					origElem := elem
+					if l := len("sers"); len(elem) >= l && elem[0:l] == "sers" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleUsersGetRequest([0]string{}, elemIsEscaped, w, r)
 						case "POST":
-							s.handleUsersUserIdPostRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
+							s.handleUsersPostRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET,POST")
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "userId"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleUsersUserIdGetRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleUsersUserIdPostRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -410,40 +453,21 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'u': // Prefix: "users"
+			case 'u': // Prefix: "u"
 				origElem := elem
-				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+				if l := len("u"); len(elem) >= l && elem[0:l] == "u" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = UsersGetOperation
-						r.summary = "Returns a list of users."
-						r.operationID = ""
-						r.pathPattern = "/users"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = UsersPostOperation
-						r.summary = "Creates a new user."
-						r.operationID = ""
-						r.pathPattern = "/users"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'p': // Prefix: "pdate/"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("pdate/"); len(elem) >= l && elem[0:l] == "pdate/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -458,24 +482,88 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "GET":
-							r.name = UsersUserIdGetOperation
-							r.summary = "Returns a user."
+							r.name = UpdateUserIdGetOperation
+							r.summary = "Returns a UserMarketData object."
 							r.operationID = ""
-							r.pathPattern = "/users/{userId}"
-							r.args = args
-							r.count = 1
-							return r, true
-						case "POST":
-							r.name = UsersUserIdPostOperation
-							r.summary = "Creates a new user."
-							r.operationID = ""
-							r.pathPattern = "/users/{userId}"
+							r.pathPattern = "/update/{userId}"
 							r.args = args
 							r.count = 1
 							return r, true
 						default:
 							return
 						}
+					}
+
+					elem = origElem
+				case 's': // Prefix: "sers"
+					origElem := elem
+					if l := len("sers"); len(elem) >= l && elem[0:l] == "sers" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = UsersGetOperation
+							r.summary = "Returns a list of users."
+							r.operationID = ""
+							r.pathPattern = "/users"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = UsersPostOperation
+							r.summary = "Creates a new user."
+							r.operationID = ""
+							r.pathPattern = "/users"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "userId"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = UsersUserIdGetOperation
+								r.summary = "Returns a user."
+								r.operationID = ""
+								r.pathPattern = "/users/{userId}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "POST":
+								r.name = UsersUserIdPostOperation
+								r.summary = "Creates a new user."
+								r.operationID = ""
+								r.pathPattern = "/users/{userId}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
