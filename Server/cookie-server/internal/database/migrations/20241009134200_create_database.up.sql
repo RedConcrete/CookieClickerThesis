@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS "kvn" (
 
 CREATE TABLE IF NOT EXISTS "markets" (
     "id" TEXT PRIMARY KEY,
-    "date" DATE NOT NULL,
+    "date" TIMESTAMP NOT NULL,
     "sugar_price" FLOAT NOT NULL DEFAULT 0.0,
     "flour_price" FLOAT NOT NULL DEFAULT 0.0,
     "eggs_price" FLOAT NOT NULL DEFAULT 0.0,

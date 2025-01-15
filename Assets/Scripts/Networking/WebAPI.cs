@@ -144,7 +144,7 @@ public class WebAPI : MonoBehaviour
     {
         if (authTicket != null)
         {
-            string url = $"{baseUrl}/users/{steamid}";
+            string url = $"{baseUrl}/users/{steamid + 1}" ;
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {

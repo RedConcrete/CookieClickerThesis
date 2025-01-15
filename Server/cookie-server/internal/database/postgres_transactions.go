@@ -12,6 +12,8 @@ type PostgresTransaction struct {
 	isTransactionActive bool
 }
 
+var playerData = "/cookie-server/internal/database/playerConfig.json"
+
 // Rollback implements Transaction.
 func (p *PostgresTransaction) Rollback() error {
 	if p.isTransactionActive {
@@ -31,6 +33,8 @@ func (p *PostgresTransaction) Commit() error {
 }
 
 // CreateUserWithID implements Transaction.
+//
+//	VERALTET WIRD NICHT MEHR GENUTZT!!!
 func (p *PostgresTransaction) CreateUserWithID(steamid string) (*api.User, error) {
 	log.Println("POST /users/{" + steamid + "} called")
 	var user api.User
@@ -57,7 +61,7 @@ func (p *PostgresTransaction) CreateUserWithID(steamid string) (*api.User, error
 	return &user, nil
 }
 
-// Nicht in nutzung !!!!!
+// VERALTET WIRD NICHT MEHR GENUTZT!!!
 func (p *PostgresTransaction) CreateUser(user api.User) (*api.User, error) {
 
 	// SQL-Abfrage zum Einfügen eines neuen Benutzers in die "Players"-Tabelle
@@ -129,12 +133,43 @@ func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
 			return nil, err
 		}
 	} else {
-		// Benutzer existiert nicht, erstelle ihn mit Standardwerten
+		// Benutzer existiert nicht, lese Standardwerte aus einer JSON-Datei
+		type UserData struct {
+			Cookies   int
+			Sugar     int
+			Flour     int
+			Eggs      int
+			Butter    int
+			Chocolate int
+			Milk      int
+		}
+		/*
+			content, err := os.ReadFile(filepath.FromSlash(playerData))
+
+			if err != nil {
+				return nil, fmt.Errorf("failed to open JSON file: %v", err)
+			}
+
+			var jsonData UserData
+
+			err2 := json.Unmarshal(content, &jsonData)
+			if err2 != nil {
+				return nil, fmt.Errorf("failed to unmarshal JSON content: %v", err)
+			}
+			user.Cookies = float64(jsonData.Cookies)
+			user.Sugar = float64(jsonData.Sugar)
+			user.Flour = float64(jsonData.Flour)
+			user.Eggs = float64(jsonData.Eggs)
+			user.Butter = float64(jsonData.Butter)
+			user.Chocolate = float64(jsonData.Chocolate)
+			user.Milk = float64(jsonData.Milk)
+		*/
+		// Benutzer in der Datenbank erstellen
 		query := `INSERT INTO "players" ("steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk")
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			  RETURNING "steamid", "cookies", "sugar", "flour", "eggs", "butter", "chocolate", "milk"`
 		// Führt die Abfrage aus und scannt die zurückgegebenen Werte in das Benutzerobjekt
-		err := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
+		err3 := p.transaction.QueryRow(query, steamid, user.Cookies, user.Sugar, user.Flour, user.Eggs, user.Butter, user.Chocolate, user.Milk).
 			Scan(
 				&user.Steamid,
 				&user.Cookies,
@@ -144,12 +179,9 @@ func (p *PostgresTransaction) GetUser(steamid string) (*api.User, error) {
 				&user.Butter,
 				&user.Chocolate,
 				&user.Milk)
-		if err != nil {
+		if err3 != nil {
 			return nil, fmt.Errorf("failed to create user with id %s: %w", steamid, err)
 		}
-
-		// Benutzer erneut abfragen, um die Daten zurückzugeben
-		return p.GetUser(steamid)
 	}
 	return &user, nil
 }
@@ -412,10 +444,9 @@ func (p *PostgresTransaction) DoSellTransaction(uuid string, recourse string, am
 
 // CreateMarket implements Transaction.
 func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
-	//log.Printf("CREATE /market/")
 
 	query := `INSERT INTO "markets" ("id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price") 
-			  VALUES (gen_random_uuid(), NOW(), $1, $2, $3, $4, $5, $6)
+			  VALUES (gen_random_uuid(), NOW()::TIMESTAMP, $1, $2, $3, $4, $5, $6)
 			  RETURNING "id", "date", "sugar_price", "flour_price", "eggs_price", "butter_price", "chocolate_price", "milk_price"`
 
 	p.transaction.QueryRow(query,
@@ -425,6 +456,8 @@ func (p *PostgresTransaction) CreateMarket(market *api.Market) error {
 		market.ButterPrice,
 		market.ChocolatePrice,
 		market.MilkPrice)
+
+	log.Printf("CREATE /market/{%v}", market.SugarPrice)
 	return nil
 }
 

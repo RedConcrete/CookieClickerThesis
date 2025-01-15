@@ -143,7 +143,7 @@ public class GameManager : MonoBehaviour
         // �berpr�fe, ob sich die Marktdaten ge�ndert haben, bevor du die UI aktualisierst
         if (!AreMarketsEqual(marketList, newMarketList))
         {
-            Debug.Log("The new Marketlist is new");
+            //Debug.Log("The new Marketlist is new");
             marketList = newMarketList;
 
             // Aktualisiere den Graphen, wenn sich die Marktdaten ge�ndert haben
