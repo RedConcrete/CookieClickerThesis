@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 
 public class GameManager : MonoBehaviour
@@ -48,11 +49,16 @@ public class GameManager : MonoBehaviour
     [Header("Objects:")]
     public GraphManager graphManager;
     private User currentUser;
+    public RectTransform createRecList;
 
     [Header("MarketFields:")]
     private string rec;
     private GameObject[] recTag;
 
+
+    public float moveSpeed = 500f; // Geschwindigkeit der Bewegung (Pixel pro Sekunde)
+    private bool isOffScreen = false; // Status, ob die Liste aus dem Screen ist
+    private Coroutine moveCoroutine; // Speichert die aktuelle Coroutine
     private string pData;
     private int initialAmount = 1;
     private int currentCreateCookiesAmount = 1;
@@ -128,7 +134,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void UpdatePlayer(){
+    public void UpdatePlayer()
+    {
         StartCoroutine(WebAPI.Instance.GetPlayer(currentUser.steamid, false));
     }
 
@@ -136,7 +143,7 @@ public class GameManager : MonoBehaviour
     {
         // Hole die Preise vom Server und den User
         StartCoroutine(WebAPI.Instance.UpdatePlayerAndMarket(currentUser.steamid, amountToGetGraph));
-        
+
         // Lade die Marktdaten in die Liste
         List<Market> newMarketList = WebAPI.Instance.GetMarket();
 
@@ -152,7 +159,8 @@ public class GameManager : MonoBehaviour
             // Aktualisiere andere UI-Elemente nur bei �nderungen
             totalCostField.text = calcTotalCost().ToString();
         }
-        else{
+        else
+        {
             Debug.Log("The new Marketlist isn´t new");
         }
     }
@@ -309,13 +317,76 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SwitchToOtherGamemode(int mode)
+    {
+        switch (mode)
+        {
+            case 1:
+                //Idelmode
+
+                ToggleListPosition();
+
+                break;
+            default:
+                //Marketmode
+
+
+
+
+                break;
+        }
+
+
+    }
+    private void ToggleListPosition()
+    {
+        // Hole die Breite des Bildschirms
+        float screenWidth = Screen.width;
+
+        // Berechne die Zielposition basierend auf der Bildschirmgröße
+        Vector2 targetPosition = isOffScreen
+            ? new Vector2(0, createRecList.anchoredPosition.y) // Position innerhalb des Screens
+            : new Vector2(screenWidth - (screenWidth * .75f), createRecList.anchoredPosition.y); // Position außerhalb des Screens
+
+        // Stoppe laufende Coroutine, wenn eine existiert
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+        }
+
+        // Starte die Bewegung zur Zielposition
+        moveCoroutine = StartCoroutine(MoveList(targetPosition));
+        isOffScreen = !isOffScreen; // Status umschalten
+    }
+
+    private IEnumerator MoveList(Vector2 targetPosition)
+    {
+        // Solange die aktuelle Position nicht das Ziel erreicht hat
+        while (Vector2.Distance(createRecList.anchoredPosition, targetPosition) > 0.1f)
+        {
+            // Bewege die Position näher zum Ziel
+            createRecList.anchoredPosition = Vector2.MoveTowards(
+                createRecList.anchoredPosition,
+                targetPosition,
+                moveSpeed * Time.deltaTime
+            );
+
+            yield return null; // Warte bis zum nächsten Frame
+        }
+
+        // Setze die exakte Zielposition am Ende (um Rundungsfehler zu vermeiden)
+        createRecList.anchoredPosition = targetPosition;
+    }
+
+
+
     public void Logout()
     {
         //Todo �berpr�fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler �bernehemen
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-    #endif
+#endif
         Application.Quit();
     }
 
