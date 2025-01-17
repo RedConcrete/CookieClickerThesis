@@ -34,16 +34,16 @@ public class WebAPI : MonoBehaviour
         try
         {
             Steamworks.SteamClient.Init(2816100);
-            
+
             StartCoroutine(AuthenticateUser());
-            
+
         }
         catch (System.Exception e)
         {
             Debug.LogError(e + " Steam connection ERROR! ");
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
             Application.Quit();
         }
 
@@ -90,7 +90,7 @@ public class WebAPI : MonoBehaviour
             string base64Ticket = Convert.ToBase64String(ticketData);
 
             Debug.Log("SteamID: " + GetSteamID());
-            
+
             // Warten für 1 Sekunde
             yield return new WaitForSeconds(loginLoadTime);
             StartCoroutine(WebAPI.Instance.GetPlayer(SteamId.ToString(), true));
@@ -146,7 +146,7 @@ public class WebAPI : MonoBehaviour
     {
         if (authTicket != null)
         {
-            string url = $"{baseUrl}/users/{steamid}" ;
+            string url = $"{baseUrl}/users/{steamid}";
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
@@ -155,18 +155,18 @@ public class WebAPI : MonoBehaviour
                 {
                     case UnityWebRequest.Result.ConnectionError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
                         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
                         Application.Quit();
                         break;
                     case UnityWebRequest.Result.ProtocolError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-                        
+
                         break;
                     case UnityWebRequest.Result.DataProcessingError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-                        
+
                         break;
                     case UnityWebRequest.Result.Success:
                         string playerJsonData = webRequest.downloadHandler.text;
