@@ -23,6 +23,7 @@ public class WebAPI : MonoBehaviour
     private AuthTicket authTicket;
 
     List<Market> marketList;
+    //private string baseUrl = "http://cookie-server.r3dconcrete.de:3000";
     private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;

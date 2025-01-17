@@ -11,6 +11,11 @@ services:
       - 5460:5432
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s       # Zeit zwischen den Checks
+      timeout: 5s         # Timeout für jeden Check
+      retries: 5          # Anzahl der Wiederholungen vor Fehlerstatus
 
   server:
     build:
@@ -19,7 +24,8 @@ services:
     ports:
       - 3000:3000
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432
