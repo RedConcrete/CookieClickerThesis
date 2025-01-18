@@ -50,15 +50,19 @@ public class GameManager : MonoBehaviour
     public GraphManager graphManager;
     private User currentUser;
     public RectTransform createRecList;
+    public RectTransform graph;
 
     [Header("MarketFields:")]
     private string rec;
     private GameObject[] recTag;
 
 
-    public float moveSpeed = 500f; // Geschwindigkeit der Bewegung (Pixel pro Sekunde)
-    private bool isOffScreen = false; // Status, ob die Liste aus dem Screen ist
-    private Coroutine moveCoroutine; // Speichert die aktuelle Coroutine
+    public float moveSpeed; // Geschwindigkeit der Bewegung (Pixel pro Sekunde)
+    private bool isOffScreen = true; // Status, ob die Liste aus dem Screen ist
+    private Coroutine horizontalMoveCoroutineNegeativ;
+    private Coroutine horizontalMoveCoroutinePositiv; // Speichert die aktuelle Coroutine
+    private Coroutine verticalMoveCoroutineNegativ;
+    private Coroutine verticalMoveCoroutinePositiv;
     private string pData;
     private int initialAmount = 1;
     private int currentCreateCookiesAmount = 1;
@@ -70,19 +74,21 @@ public class GameManager : MonoBehaviour
     private List<Market> marketList;
     int totalCost = 0;
 
+    float screenWidth = Screen.width;
+    float screenHeight = Screen.height;
+
     private void Start()
     {
         scene = SceneManager.GetActiveScene().buildIndex;
         currentUser = WebAPI.user;
 
-        if (scene == idleScene)
+        if (isOffScreen)
         {
             MusicManager.Instance.MuffleCurrentTrack(0f);
             Debug.Log("Idle loaded");
             amountCookies_InputField.text = initialAmount.ToString();
         }
-
-        if (scene == marketScene)
+        else
         {
             UpdateRecources();
             Debug.Log("Market loaded");
@@ -138,7 +144,6 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(WebAPI.Instance.GetPlayer(currentUser.steamid, false));
     }
-
     public void UpdateMarketDataAndUserData()
     {
         // Hole die Preise vom Server und den User
@@ -164,7 +169,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("The new Marketlist isn´t new");
         }
     }
-
     private bool AreMarketsEqual(List<Market> oldList, List<Market> newList)
     {
         if (oldList == null || newList == null || oldList.Count != newList.Count)
@@ -181,8 +185,6 @@ public class GameManager : MonoBehaviour
         }
         return true;
     }
-
-
     async void SyncTimer()
     {
         if (!timerIsRunning)  // Verhindern, dass der Timer erneut gestartet wird
@@ -199,8 +201,6 @@ public class GameManager : MonoBehaviour
             timerIsRunning = true;
         }
     }
-
-
     void DisplayTime(float timeToDisplay)
     {
         if (timeToDisplay < 0)
@@ -214,10 +214,9 @@ public class GameManager : MonoBehaviour
         // Zeit im Format mm:ss anzeigen
         updateTime_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
-
-
     public void UpdateRecources()
     {
+        Debug.Log(currentUser.sugar);
         cookie_Text.text = currentUser.cookies.ToString();
         sugar_Text.text = currentUser.sugar.ToString();
         flour_Text.text = currentUser.flour.ToString();
@@ -268,52 +267,43 @@ public class GameManager : MonoBehaviour
         currentUser.milk += amountChange;
     }
 
-    public void MakeSugar()
+    public void MakeSelectedRec(string rec)
     {
-        currentUser.sugar = currentUser.sugar + sugarIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeFlour()
-    {
-        currentUser.flour = currentUser.flour + flourIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeEggs()
-    {
-        currentUser.eggs = currentUser.eggs + eggsIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeButter()
-    {
-        currentUser.butter = currentUser.butter + butterIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeChocolate()
-    {
-        currentUser.chocolate = currentUser.chocolate + chocolateIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeMilk()
-    {
-        currentUser.milk = currentUser.milk + milkIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void SwitchScreen(int sceneIndex)
-    {
-        if (scene != sceneIndex)
+        switch (rec)
         {
+            case "sugar":
 
-            if (scene == marketScene)
-            {
-                graphManager.UpdateGraph();
-            }
-            SceneManager.LoadScene(sceneIndex);
+                currentUser.sugar += sugarIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "flour":
+                // 
+                currentUser.flour += flourIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "eggs":
+                // 
+                currentUser.eggs += eggsIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "butter":
+                // 
+                currentUser.butter += butterIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "chocolate":
+                // 
+                currentUser.chocolate += chocolateIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "milk":
+                // 
+                currentUser.milk += milkIncreaseAmount;
+                UpdateRecources();
+                break;
+            default:
+                Debug.LogError("Iwas ist falsch!");
+                break;
         }
     }
 
@@ -322,73 +312,100 @@ public class GameManager : MonoBehaviour
         switch (mode)
         {
             case 1:
-                //Idelmode
-
-                ToggleListPosition();
-
+                // Idlemode
+                ToggleListPosition(createRecList, false, true);
+                ToggleListPosition(graph, false, false);
                 break;
             default:
-                //Marketmode
-
-
-
-
+                // Marketmode
+                ToggleListPosition(graph, false, false);
+                ToggleListPosition(createRecList, false, true);
                 break;
         }
-
-
     }
-    private void ToggleListPosition()
+
+    private void ToggleListPosition(RectTransform rect, bool horizontal, bool positiv)
     {
-        // Hole die Breite des Bildschirms
-        float screenWidth = Screen.width;
 
-        // Berechne die Zielposition basierend auf der Bildschirmgröße
-        Vector2 targetPosition = isOffScreen
-            ? new Vector2(0, createRecList.anchoredPosition.y) // Position innerhalb des Screens
-            : new Vector2(screenWidth - (screenWidth * .75f), createRecList.anchoredPosition.y); // Position außerhalb des Screens
-
-        // Stoppe laufende Coroutine, wenn eine existiert
-        if (moveCoroutine != null)
+        if (horizontal)
         {
-            StopCoroutine(moveCoroutine);
+            // Berechnung der Zielposition für horizontale Bewegung
+            Vector2 targetPosition = isOffScreen
+                ? new Vector2(0, rect.anchoredPosition.y)
+                : new Vector2(screenWidth - (screenWidth - rect.sizeDelta.x * 1.25f), rect.anchoredPosition.y);
+
+            // Stoppe laufende Coroutine, wenn eine existiert
+            if (horizontalMoveCoroutinePositiv != null)
+            {
+                StopCoroutine(horizontalMoveCoroutinePositiv);
+            }
+
+            // Starte die Bewegung zur Zielposition
+            horizontalMoveCoroutinePositiv = StartCoroutine(MoveList(targetPosition, rect));
+            isOffScreen = !isOffScreen; // Status umschalten
+        }
+        else
+        {
+            
+            if (positiv)
+            {
+
+                // Berechnung der Zielposition für vertikale Bewegung
+                Vector2 targetPosition = isOffScreen
+                    ? new Vector2(rect.anchoredPosition.x, 0) // Position über dem Bildschirm
+                    : new Vector2(rect.anchoredPosition.x, rect.sizeDelta.y * 1.25f); // Position unter dem Bildschirm
+
+                // Stoppe laufende Coroutine, wenn eine existiert
+                if (verticalMoveCoroutinePositiv != null)
+                {
+                    StopCoroutine(verticalMoveCoroutinePositiv);
+                }
+
+                // Starte die Bewegung zur Zielposition
+                verticalMoveCoroutinePositiv = StartCoroutine(MoveList(targetPosition, rect));
+                isOffScreen = !isOffScreen; // Status umschalten
+            }
+            else
+            {
+                // Berechnung der Zielposition für vertikale Bewegung
+                Vector2 targetPosition = isOffScreen
+                    ? new Vector2(rect.anchoredPosition.x, 0) // Position über dem Bildschirm
+                    : new Vector2(rect.anchoredPosition.x, -rect.sizeDelta.y * 1.25f); // Position unter dem Bildschirm
+
+                // Stoppe laufende Coroutine, wenn eine existiert
+                if (verticalMoveCoroutineNegativ != null)
+                {
+                    StopCoroutine(verticalMoveCoroutineNegativ);
+                }
+
+                // Starte die Bewegung zur Zielposition
+                verticalMoveCoroutineNegativ = StartCoroutine(MoveList(targetPosition, rect));
+                isOffScreen = !isOffScreen; // Status umschalten
+            }
+
         }
 
-        // Starte die Bewegung zur Zielposition
-        moveCoroutine = StartCoroutine(MoveList(targetPosition));
-        isOffScreen = !isOffScreen; // Status umschalten
     }
 
-    private IEnumerator MoveList(Vector2 targetPosition)
+    private IEnumerator MoveList(Vector2 targetPosition, RectTransform rect)
     {
         // Solange die aktuelle Position nicht das Ziel erreicht hat
-        while (Vector2.Distance(createRecList.anchoredPosition, targetPosition) > 0.1f)
+        while (Vector2.Distance(rect.anchoredPosition, targetPosition) > 0.1f)
         {
             // Bewege die Position näher zum Ziel
-            createRecList.anchoredPosition = Vector2.MoveTowards(
-                createRecList.anchoredPosition,
+            rect.anchoredPosition = Vector2.MoveTowards(
+                rect.anchoredPosition,
                 targetPosition,
                 moveSpeed * Time.deltaTime
             );
 
             yield return null; // Warte bis zum nächsten Frame
         }
-
         // Setze die exakte Zielposition am Ende (um Rundungsfehler zu vermeiden)
-        createRecList.anchoredPosition = targetPosition;
+        rect.anchoredPosition = targetPosition;
     }
 
 
-
-    public void Logout()
-    {
-        //Todo �berpr�fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler �bernehemen
-
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
-        Application.Quit();
-    }
 
     public void AddAmountCreateCookies(int amount)
     {
@@ -466,6 +483,33 @@ public class GameManager : MonoBehaviour
         return totalCost;
     }
 
+    private IEnumerator ResetTagsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        for (int i = 0; i < this.recTag.Length; i++)
+        {
+            recTag[i].GetComponent<Image>().color = Color.gray;
+        }
+    }
+
+    //---------------------------- Button Methodes ----------------------------
+    public void setRec(string rec)
+    {
+        GameObject gameObject = GameObject.Find(rec);
+        if (rec != this.rec)
+        {
+            for (int i = 0; i < this.recTag.Length; i++)
+            {
+                recTag[i].GetComponent<Image>().color = Color.gray;
+            }
+            gameObject.GetComponent<Image>().color = Color.white;
+            this.rec = rec;
+        }
+        else
+        {
+            this.rec = rec;
+        }
+    }
     public void Buy()
     {
         if (currentUser != null)
@@ -495,7 +539,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
-
     public void Sell()
     {
         if (currentUser != null)
@@ -519,36 +562,31 @@ public class GameManager : MonoBehaviour
             Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
-
-    public void setRec(string rec)
+    //---------------------------- Not in use ----------------------------
+    public void SwitchScreen(int sceneIndex)
     {
-        GameObject gameObject = GameObject.Find(rec);
-        if (rec != this.rec)
+        if (scene != sceneIndex)
         {
-            for (int i = 0; i < this.recTag.Length; i++)
+
+            if (scene == marketScene)
             {
-                recTag[i].GetComponent<Image>().color = Color.gray;
+                graphManager.UpdateGraph();
             }
-            gameObject.GetComponent<Image>().color = Color.white;
-            this.rec = rec;
-        }
-        else
-        {
-            this.rec = rec;
+            SceneManager.LoadScene(sceneIndex);
         }
     }
-
-    private IEnumerator ResetTagsAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        for (int i = 0; i < this.recTag.Length; i++)
-        {
-            recTag[i].GetComponent<Image>().color = Color.gray;
-        }
-    }
-
     public void CopyToClip()
     {
         GUIUtility.systemCopyBuffer = playerIDField.text;
+    }
+
+    public void Logout()
+    {
+        //Todo �berpr�fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler �bernehemen
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        Application.Quit();
     }
 }

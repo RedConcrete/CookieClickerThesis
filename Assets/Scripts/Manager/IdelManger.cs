@@ -42,7 +42,7 @@ public class IdelManger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdateUserRec();
+        //UpdateUserRec();
     }
 
     private void UpdateUserRec()

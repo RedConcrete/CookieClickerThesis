@@ -170,8 +170,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -144.1, y: 488}
-  m_SizeDelta: {x: 182, y: 40}
+  m_AnchoredPosition: {x: -83, y: 0}
+  m_SizeDelta: {x: 182, y: 40.752}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &7070609606101094846
 CanvasRenderer:
@@ -257,12 +257,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: SwitchScreen
+        m_MethodName: SwitchToOtherGamemode
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -474,8 +474,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 48.6, y: 488}
-  m_SizeDelta: {x: 182.6, y: 40}
+  m_AnchoredPosition: {x: 108.77014, y: 0}
+  m_SizeDelta: {x: 184.1403, y: 40.752}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &5278689466902028065
 CanvasRenderer:
@@ -561,12 +561,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: SwitchScreen
+        m_MethodName: SwitchToOtherGamemode
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
