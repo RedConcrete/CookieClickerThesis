@@ -33,7 +33,11 @@ public class AchievementManager : MonoBehaviour
     public bool IsThisAchievementUnlocked(string id)
     {
         var ach = new Steamworks.Data.Achievement(id);
-        Debug.Log($"Achievement {id} status: " + ach.State);
+        if(ach.State){
+            Debug.Log($"Achievement {id} ist aktiviert worden");
+        }else{
+            Debug.Log($"Achievement {id} ist noch nicht aktiviert worden");
+        }
         return ach.State;
     }
 

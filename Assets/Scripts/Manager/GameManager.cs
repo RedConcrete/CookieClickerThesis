@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 
 public class GameManager : MonoBehaviour
@@ -48,11 +49,20 @@ public class GameManager : MonoBehaviour
     [Header("Objects:")]
     public GraphManager graphManager;
     private User currentUser;
+    public RectTransform createRecList;
+    public RectTransform graph;
 
     [Header("MarketFields:")]
     private string rec;
     private GameObject[] recTag;
 
+
+    public float moveSpeed; // Geschwindigkeit der Bewegung (Pixel pro Sekunde)
+    private bool isOffScreen = true; // Status, ob die Liste aus dem Screen ist
+    private Coroutine horizontalMoveCoroutineNegeativ;
+    private Coroutine horizontalMoveCoroutinePositiv; // Speichert die aktuelle Coroutine
+    private Coroutine verticalMoveCoroutineNegativ;
+    private Coroutine verticalMoveCoroutinePositiv;
     private string pData;
     private int initialAmount = 1;
     private int currentCreateCookiesAmount = 1;
@@ -64,39 +74,23 @@ public class GameManager : MonoBehaviour
     private List<Market> marketList;
     int totalCost = 0;
 
+    float screenWidth = Screen.width;
+    float screenHeight = Screen.height;
+
     private void Start()
     {
         scene = SceneManager.GetActiveScene().buildIndex;
         currentUser = WebAPI.user;
 
-        if (scene == idleScene)
-        {
-            MusicManager.Instance.MuffleCurrentTrack(0f);
-            Debug.Log("Idle loaded");
-            amountCookies_InputField.text = initialAmount.ToString();
-        }
+        MusicManager.Instance.PlayRandomMusic();
+        UpdateRecources();
+        Debug.Log("Market loaded");
 
-        if (scene == marketScene)
-        {
-            UpdateRecources();
-            Debug.Log("Market loaded");
-
-            if (!MusicManager.Instance.IsTrackPlaying("ElevatorMusic"))
-            {
-                MusicManager.Instance.PlayMusic("Markt");
-            }
-
-            if (MusicManager.Instance.IsTrackMuffled())
-            {
-                MusicManager.Instance.UnmuffleCurrentTrack(0f);
-            }
-
-            recTag = GameObject.FindGameObjectsWithTag("RecTag");
-            GameObject graph = GameObject.Find("Graph");
-            graphManager = graph.GetComponent<GraphManager>();
-            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
-            UpdatePlayerID();
-        }
+        recTag = GameObject.FindGameObjectsWithTag("RecTag");
+        GameObject graph = GameObject.Find("Graph");
+        graphManager = graph.GetComponent<GraphManager>();
+        amountRecBuyAndSell_InputField.text = initialAmount.ToString();
+        UpdatePlayerID();
     }
 
     private void Update()
@@ -128,15 +122,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void UpdatePlayer(){
+    public void UpdatePlayer()
+    {
         StartCoroutine(WebAPI.Instance.GetPlayer(currentUser.steamid, false));
     }
-
     public void UpdateMarketDataAndUserData()
     {
         // Hole die Preise vom Server und den User
         StartCoroutine(WebAPI.Instance.UpdatePlayerAndMarket(currentUser.steamid, amountToGetGraph));
-        
+
         // Lade die Marktdaten in die Liste
         List<Market> newMarketList = WebAPI.Instance.GetMarket();
 
@@ -152,11 +146,11 @@ public class GameManager : MonoBehaviour
             // Aktualisiere andere UI-Elemente nur bei �nderungen
             totalCostField.text = calcTotalCost().ToString();
         }
-        else{
+        else
+        {
             Debug.Log("The new Marketlist isn´t new");
         }
     }
-
     private bool AreMarketsEqual(List<Market> oldList, List<Market> newList)
     {
         if (oldList == null || newList == null || oldList.Count != newList.Count)
@@ -173,8 +167,6 @@ public class GameManager : MonoBehaviour
         }
         return true;
     }
-
-
     async void SyncTimer()
     {
         if (!timerIsRunning)  // Verhindern, dass der Timer erneut gestartet wird
@@ -191,8 +183,6 @@ public class GameManager : MonoBehaviour
             timerIsRunning = true;
         }
     }
-
-
     void DisplayTime(float timeToDisplay)
     {
         if (timeToDisplay < 0)
@@ -206,8 +196,6 @@ public class GameManager : MonoBehaviour
         // Zeit im Format mm:ss anzeigen
         updateTime_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
-
-
     public void UpdateRecources()
     {
         cookie_Text.text = currentUser.cookies.ToString();
@@ -260,110 +248,85 @@ public class GameManager : MonoBehaviour
         currentUser.milk += amountChange;
     }
 
-    public void MakeSugar()
+    private void ToggleListPosition(RectTransform rect, bool horizontal, bool positiv)
     {
-        currentUser.sugar = currentUser.sugar + sugarIncreaseAmount;
-        UpdateRecources();
-    }
 
-    public void MakeFlour()
-    {
-        currentUser.flour = currentUser.flour + flourIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeEggs()
-    {
-        currentUser.eggs = currentUser.eggs + eggsIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeButter()
-    {
-        currentUser.butter = currentUser.butter + butterIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeChocolate()
-    {
-        currentUser.chocolate = currentUser.chocolate + chocolateIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void MakeMilk()
-    {
-        currentUser.milk = currentUser.milk + milkIncreaseAmount;
-        UpdateRecources();
-    }
-
-    public void SwitchScreen(int sceneIndex)
-    {
-        if (scene != sceneIndex)
+        if (horizontal)
         {
+            // Berechnung der Zielposition für horizontale Bewegung
+            Vector2 targetPosition = isOffScreen
+                ? new Vector2(0, rect.anchoredPosition.y)
+                : new Vector2(screenWidth - (screenWidth - rect.sizeDelta.x * 1.25f), rect.anchoredPosition.y);
 
-            if (scene == marketScene)
+            // Stoppe laufende Coroutine, wenn eine existiert
+            if (horizontalMoveCoroutinePositiv != null)
             {
-                graphManager.UpdateGraph();
+                StopCoroutine(horizontalMoveCoroutinePositiv);
             }
-            SceneManager.LoadScene(sceneIndex);
-        }
-    }
 
-    public void Logout()
-    {
-        //Todo �berpr�fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler �bernehemen
-
-    #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-    #endif
-        Application.Quit();
-    }
-
-    public void AddAmountCreateCookies(int amount)
-    {
-        if (currentCreateCookiesAmount >= 0 && currentCreateCookiesAmount + amount >= 0)
-        {
-            currentCreateCookiesAmount += amount;
-            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+            // Starte die Bewegung zur Zielposition
+            horizontalMoveCoroutinePositiv = StartCoroutine(MoveList(targetPosition, rect));
+            isOffScreen = !isOffScreen; // Status umschalten
         }
         else
         {
-            currentCreateCookiesAmount = 0;
-            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+
+            if (positiv)
+            {
+
+                // Berechnung der Zielposition für vertikale Bewegung
+                Vector2 targetPosition = isOffScreen
+                    ? new Vector2(rect.anchoredPosition.x, 0) // Position über dem Bildschirm
+                    : new Vector2(rect.anchoredPosition.x, rect.sizeDelta.y * 1.25f); // Position unter dem Bildschirm
+
+                // Stoppe laufende Coroutine, wenn eine existiert
+                if (verticalMoveCoroutinePositiv != null)
+                {
+                    StopCoroutine(verticalMoveCoroutinePositiv);
+                }
+
+                // Starte die Bewegung zur Zielposition
+                verticalMoveCoroutinePositiv = StartCoroutine(MoveList(targetPosition, rect));
+                isOffScreen = !isOffScreen; // Status umschalten
+            }
+            else
+            {
+                // Berechnung der Zielposition für vertikale Bewegung
+                Vector2 targetPosition = isOffScreen
+                    ? new Vector2(rect.anchoredPosition.x, 0) // Position über dem Bildschirm
+                    : new Vector2(rect.anchoredPosition.x, -rect.sizeDelta.y * 1.25f); // Position unter dem Bildschirm
+
+                // Stoppe laufende Coroutine, wenn eine existiert
+                if (verticalMoveCoroutineNegativ != null)
+                {
+                    StopCoroutine(verticalMoveCoroutineNegativ);
+                }
+
+                // Starte die Bewegung zur Zielposition
+                verticalMoveCoroutineNegativ = StartCoroutine(MoveList(targetPosition, rect));
+                isOffScreen = !isOffScreen; // Status umschalten
+            }
+
         }
+
     }
 
-    public void AddAmountBuyAndSellCookies(int amount)
+    private IEnumerator MoveList(Vector2 targetPosition, RectTransform rect)
     {
-        if (currentBuyAndSellCookiesAmount >= 0 && currentBuyAndSellCookiesAmount + amount >= 0)
+        // Solange die aktuelle Position nicht das Ziel erreicht hat
+        while (Vector2.Distance(rect.anchoredPosition, targetPosition) > 0.1f)
         {
-            currentBuyAndSellCookiesAmount += amount;
-            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+            // Bewege die Position näher zum Ziel
+            rect.anchoredPosition = Vector2.MoveTowards(
+                rect.anchoredPosition,
+                targetPosition,
+                moveSpeed * Time.deltaTime
+            );
 
+            yield return null; // Warte bis zum nächsten Frame
         }
-        else
-        {
-            currentBuyAndSellCookiesAmount = 0;
-            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
-        }
-
-    }
-
-    public void AddAmountBuyAndSellRec(int amount)
-    {
-        if (currentBuyAndSellRecAmount + amount < 0)
-        {
-            totalCost = 0;
-            currentBuyAndSellRecAmount = 0;
-            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
-            totalCostField.text = totalCost.ToString();
-        }
-        else
-        {
-            currentBuyAndSellRecAmount += amount;
-            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
-            totalCostField.text = calcTotalCost().ToString();
-        }
+        // Setze die exakte Zielposition am Ende (um Rundungsfehler zu vermeiden)
+        rect.anchoredPosition = targetPosition;
     }
 
     private int calcTotalCost()
@@ -395,6 +358,35 @@ public class GameManager : MonoBehaviour
         return totalCost;
     }
 
+    private IEnumerator ResetTagsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        for (int i = 0; i < this.recTag.Length; i++)
+        {
+            recTag[i].GetComponent<Image>().color = Color.gray;
+        }
+    }
+
+    //---------------------------- Button Methodes ----------------------------
+
+    // Brocken muss gefixed werden !!
+    public void setRec(string rec)
+    {
+        GameObject gameObject = GameObject.Find("MarketRecSetter");
+        if (rec != this.rec)
+        {
+            for (int i = 0; i < this.recTag.Length; i++)
+            {
+                recTag[i].GetComponent<Image>().color = Color.gray;
+            }
+            gameObject.GetComponent<Image>().color = Color.white;
+            this.rec = rec;
+        }
+        else
+        {
+            this.rec = rec;
+        }
+    }
     public void Buy()
     {
         if (currentUser != null)
@@ -424,7 +416,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
-
     public void Sell()
     {
         if (currentUser != null)
@@ -448,36 +439,164 @@ public class GameManager : MonoBehaviour
             Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
-
-    public void setRec(string rec)
+    public void MakeSelectedRec(string rec)
     {
-        GameObject gameObject = GameObject.Find(rec);
-        if (rec != this.rec)
+        switch (rec)
         {
-            for (int i = 0; i < this.recTag.Length; i++)
-            {
-                recTag[i].GetComponent<Image>().color = Color.gray;
-            }
-            gameObject.GetComponent<Image>().color = Color.white;
-            this.rec = rec;
+            case "sugar":
+
+                currentUser.sugar += sugarIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "flour":
+                // 
+                currentUser.flour += flourIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "eggs":
+                // 
+                currentUser.eggs += eggsIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "butter":
+                // 
+                currentUser.butter += butterIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "chocolate":
+                // 
+                currentUser.chocolate += chocolateIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "milk":
+                // 
+                currentUser.milk += milkIncreaseAmount;
+                UpdateRecources();
+                break;
+            default:
+                Debug.LogError("Iwas ist falsch!");
+                break;
+        }
+    }
+
+    public void UpgradeIncreaseAmountOfRec(string rec)
+    {
+        switch (rec)
+        {
+            case "sugar":
+                // 
+                sugarIncreaseAmount += 1;
+                break;
+            case "flour":
+                // 
+                flourIncreaseAmount += 1;
+                break;
+            case "eggs":
+                // 
+                eggsIncreaseAmount += 1;
+                break;
+            case "butter":
+                // 
+                butterIncreaseAmount += 1;
+                break;
+            case "chocolate":
+                // 
+                chocolateIncreaseAmount += 1;
+                break;
+            case "milk":
+                // 
+                milkIncreaseAmount += 1;
+                break;
+            default:
+                Debug.LogError("Iwas ist falsch!");
+                break;
+        }
+    }
+
+    public void Logout()
+    {
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        Application.Quit();
+    }
+    public void AddAmountCreateCookies(int amount)
+    {
+        if (currentCreateCookiesAmount >= 0 && currentCreateCookiesAmount + amount >= 0)
+        {
+            currentCreateCookiesAmount += amount;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
         }
         else
         {
-            this.rec = rec;
+            currentCreateCookiesAmount = 0;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
         }
     }
-
-    private IEnumerator ResetTagsAfterDelay(float delay)
+    public void AddAmountBuyAndSellCookies(int amount)
     {
-        yield return new WaitForSeconds(delay);
-        for (int i = 0; i < this.recTag.Length; i++)
+        if (currentBuyAndSellCookiesAmount >= 0 && currentBuyAndSellCookiesAmount + amount >= 0)
         {
-            recTag[i].GetComponent<Image>().color = Color.gray;
+            currentBuyAndSellCookiesAmount += amount;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+
+        }
+        else
+        {
+            currentBuyAndSellCookiesAmount = 0;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+        }
+
+    }
+    public void AddAmountBuyAndSellRec(int amount)
+    {
+        if (currentBuyAndSellRecAmount + amount < 0)
+        {
+            totalCost = 0;
+            currentBuyAndSellRecAmount = 0;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = totalCost.ToString();
+        }
+        else
+        {
+            currentBuyAndSellRecAmount += amount;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = calcTotalCost().ToString();
         }
     }
+    public void SwitchToOtherGamemode(int mode)
+    {
+        switch (mode)
+        {
+            case 1:
+                // Idlemode
+                ToggleListPosition(createRecList, false, true);
+                ToggleListPosition(graph, false, false);
+                break;
+            default:
+                // Marketmode
+                ToggleListPosition(graph, false, false);
+                ToggleListPosition(createRecList, false, true);
+                break;
+        }
+    }
+    //---------------------------- Not in use ----------------------------
+    public void SwitchScreen(int sceneIndex)
+    {
+        if (scene != sceneIndex)
+        {
 
+            if (scene == marketScene)
+            {
+                graphManager.UpdateGraph();
+            }
+            SceneManager.LoadScene(sceneIndex);
+        }
+    }
     public void CopyToClip()
     {
         GUIUtility.systemCopyBuffer = playerIDField.text;
     }
+
 }
