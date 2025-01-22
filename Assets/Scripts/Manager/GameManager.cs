@@ -581,6 +581,21 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+
+    public void OpenPopup(string popup)
+    {
+        GameObject gameObject = null;
+        switch (popup)
+        {
+            case "settings":
+                gameObject = GameObject.Find("UiScreen_Popup_Settings");
+                gameObject.transform.position = new Vector2(0,0);
+                break;
+            default:
+                
+                break;
+        }
+    }
     //---------------------------- Not in use ----------------------------
     public void SwitchScreen(int sceneIndex)
     {

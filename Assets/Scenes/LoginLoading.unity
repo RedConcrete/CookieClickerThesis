@@ -613,7 +613,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee55fee9d1c1a6e4e9fb5f35106309d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTextField: {fileID: 0}
 --- !u!4 &1024038772
 Transform:
   m_ObjectHideFlags: 0
@@ -957,7 +956,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 356b44b2075d9254fab71bc8778f36ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundLibrary: {fileID: 1509224195}
+  soundLibrary: {fileID: 0}
   soundSource: {fileID: 844104813}
 --- !u!114 &1509224198
 MonoBehaviour:
@@ -1278,7 +1277,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -24.999756, y: 25}
-  m_SizeDelta: {x: 76.47986, y: 69.74182}
+  m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 1, y: 0}
 --- !u!95 &2012012424
 Animator:
