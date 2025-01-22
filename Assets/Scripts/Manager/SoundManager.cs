@@ -6,7 +6,7 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance;
 
     [SerializeField]
-    private MusicLibrary soundLibrary;
+    private SoundLibary soundLibrary;
     [SerializeField]
     private AudioSource soundSource;
 
