@@ -82,33 +82,15 @@ public class GameManager : MonoBehaviour
         scene = SceneManager.GetActiveScene().buildIndex;
         currentUser = WebAPI.user;
 
-        if (isOffScreen)
-        {
-            MusicManager.Instance.MuffleCurrentTrack(0f);
-            Debug.Log("Idle loaded");
-            amountCookies_InputField.text = initialAmount.ToString();
-        }
-        else
-        {
-            UpdateRecources();
-            Debug.Log("Market loaded");
+        MusicManager.Instance.PlayRandomMusic();
+        UpdateRecources();
+        Debug.Log("Market loaded");
 
-            if (!MusicManager.Instance.IsTrackPlaying("ElevatorMusic"))
-            {
-                MusicManager.Instance.PlayMusic("Markt");
-            }
-
-            if (MusicManager.Instance.IsTrackMuffled())
-            {
-                MusicManager.Instance.UnmuffleCurrentTrack(0f);
-            }
-
-            recTag = GameObject.FindGameObjectsWithTag("RecTag");
-            GameObject graph = GameObject.Find("Graph");
-            graphManager = graph.GetComponent<GraphManager>();
-            amountRecBuyAndSell_InputField.text = initialAmount.ToString();
-            UpdatePlayerID();
-        }
+        recTag = GameObject.FindGameObjectsWithTag("RecTag");
+        GameObject graph = GameObject.Find("Graph");
+        graphManager = graph.GetComponent<GraphManager>();
+        amountRecBuyAndSell_InputField.text = initialAmount.ToString();
+        UpdatePlayerID();
     }
 
     private void Update()
@@ -216,7 +198,6 @@ public class GameManager : MonoBehaviour
     }
     public void UpdateRecources()
     {
-        Debug.Log(currentUser.sugar);
         cookie_Text.text = currentUser.cookies.ToString();
         sugar_Text.text = currentUser.sugar.ToString();
         flour_Text.text = currentUser.flour.ToString();
@@ -267,63 +248,6 @@ public class GameManager : MonoBehaviour
         currentUser.milk += amountChange;
     }
 
-    public void MakeSelectedRec(string rec)
-    {
-        switch (rec)
-        {
-            case "sugar":
-
-                currentUser.sugar += sugarIncreaseAmount;
-                UpdateRecources();
-                break;
-            case "flour":
-                // 
-                currentUser.flour += flourIncreaseAmount;
-                UpdateRecources();
-                break;
-            case "eggs":
-                // 
-                currentUser.eggs += eggsIncreaseAmount;
-                UpdateRecources();
-                break;
-            case "butter":
-                // 
-                currentUser.butter += butterIncreaseAmount;
-                UpdateRecources();
-                break;
-            case "chocolate":
-                // 
-                currentUser.chocolate += chocolateIncreaseAmount;
-                UpdateRecources();
-                break;
-            case "milk":
-                // 
-                currentUser.milk += milkIncreaseAmount;
-                UpdateRecources();
-                break;
-            default:
-                Debug.LogError("Iwas ist falsch!");
-                break;
-        }
-    }
-
-    public void SwitchToOtherGamemode(int mode)
-    {
-        switch (mode)
-        {
-            case 1:
-                // Idlemode
-                ToggleListPosition(createRecList, false, true);
-                ToggleListPosition(graph, false, false);
-                break;
-            default:
-                // Marketmode
-                ToggleListPosition(graph, false, false);
-                ToggleListPosition(createRecList, false, true);
-                break;
-        }
-    }
-
     private void ToggleListPosition(RectTransform rect, bool horizontal, bool positiv)
     {
 
@@ -346,7 +270,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            
+
             if (positiv)
             {
 
@@ -405,55 +329,6 @@ public class GameManager : MonoBehaviour
         rect.anchoredPosition = targetPosition;
     }
 
-
-
-    public void AddAmountCreateCookies(int amount)
-    {
-        if (currentCreateCookiesAmount >= 0 && currentCreateCookiesAmount + amount >= 0)
-        {
-            currentCreateCookiesAmount += amount;
-            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
-        }
-        else
-        {
-            currentCreateCookiesAmount = 0;
-            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
-        }
-    }
-
-    public void AddAmountBuyAndSellCookies(int amount)
-    {
-        if (currentBuyAndSellCookiesAmount >= 0 && currentBuyAndSellCookiesAmount + amount >= 0)
-        {
-            currentBuyAndSellCookiesAmount += amount;
-            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
-
-        }
-        else
-        {
-            currentBuyAndSellCookiesAmount = 0;
-            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
-        }
-
-    }
-
-    public void AddAmountBuyAndSellRec(int amount)
-    {
-        if (currentBuyAndSellRecAmount + amount < 0)
-        {
-            totalCost = 0;
-            currentBuyAndSellRecAmount = 0;
-            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
-            totalCostField.text = totalCost.ToString();
-        }
-        else
-        {
-            currentBuyAndSellRecAmount += amount;
-            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
-            totalCostField.text = calcTotalCost().ToString();
-        }
-    }
-
     private int calcTotalCost()
     {
         totalCost = 0;
@@ -493,9 +368,11 @@ public class GameManager : MonoBehaviour
     }
 
     //---------------------------- Button Methodes ----------------------------
+
+    // Brocken muss gefixed werden !!
     public void setRec(string rec)
     {
-        GameObject gameObject = GameObject.Find(rec);
+        GameObject gameObject = GameObject.Find("MarketRecSetter");
         if (rec != this.rec)
         {
             for (int i = 0; i < this.recTag.Length; i++)
@@ -562,6 +439,148 @@ public class GameManager : MonoBehaviour
             Debug.Log("Player: " + currentUser + "Recources: " + rec);
         }
     }
+    public void MakeSelectedRec(string rec)
+    {
+        switch (rec)
+        {
+            case "sugar":
+
+                currentUser.sugar += sugarIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "flour":
+                // 
+                currentUser.flour += flourIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "eggs":
+                // 
+                currentUser.eggs += eggsIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "butter":
+                // 
+                currentUser.butter += butterIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "chocolate":
+                // 
+                currentUser.chocolate += chocolateIncreaseAmount;
+                UpdateRecources();
+                break;
+            case "milk":
+                // 
+                currentUser.milk += milkIncreaseAmount;
+                UpdateRecources();
+                break;
+            default:
+                Debug.LogError("Iwas ist falsch!");
+                break;
+        }
+    }
+
+    public void UpgradeIncreaseAmountOfRec(string rec)
+    {
+        switch (rec)
+        {
+            case "sugar":
+                // 
+                sugarIncreaseAmount += 1;
+                break;
+            case "flour":
+                // 
+                flourIncreaseAmount += 1;
+                break;
+            case "eggs":
+                // 
+                eggsIncreaseAmount += 1;
+                break;
+            case "butter":
+                // 
+                butterIncreaseAmount += 1;
+                break;
+            case "chocolate":
+                // 
+                chocolateIncreaseAmount += 1;
+                break;
+            case "milk":
+                // 
+                milkIncreaseAmount += 1;
+                break;
+            default:
+                Debug.LogError("Iwas ist falsch!");
+                break;
+        }
+    }
+
+    public void Logout()
+    {
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        Application.Quit();
+    }
+    public void AddAmountCreateCookies(int amount)
+    {
+        if (currentCreateCookiesAmount >= 0 && currentCreateCookiesAmount + amount >= 0)
+        {
+            currentCreateCookiesAmount += amount;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+        }
+        else
+        {
+            currentCreateCookiesAmount = 0;
+            amountCookies_InputField.text = currentCreateCookiesAmount.ToString();
+        }
+    }
+    public void AddAmountBuyAndSellCookies(int amount)
+    {
+        if (currentBuyAndSellCookiesAmount >= 0 && currentBuyAndSellCookiesAmount + amount >= 0)
+        {
+            currentBuyAndSellCookiesAmount += amount;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+
+        }
+        else
+        {
+            currentBuyAndSellCookiesAmount = 0;
+            amountCookiesBuyAndSell_InputField.text = currentBuyAndSellCookiesAmount.ToString();
+        }
+
+    }
+    public void AddAmountBuyAndSellRec(int amount)
+    {
+        if (currentBuyAndSellRecAmount + amount < 0)
+        {
+            totalCost = 0;
+            currentBuyAndSellRecAmount = 0;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = totalCost.ToString();
+        }
+        else
+        {
+            currentBuyAndSellRecAmount += amount;
+            amountRecBuyAndSell_InputField.text = currentBuyAndSellRecAmount.ToString();
+            totalCostField.text = calcTotalCost().ToString();
+        }
+    }
+    public void SwitchToOtherGamemode(int mode)
+    {
+        switch (mode)
+        {
+            case 1:
+                // Idlemode
+                ToggleListPosition(createRecList, false, true);
+                ToggleListPosition(graph, false, false);
+                break;
+            default:
+                // Marketmode
+                ToggleListPosition(graph, false, false);
+                ToggleListPosition(createRecList, false, true);
+                break;
+        }
+    }
     //---------------------------- Not in use ----------------------------
     public void SwitchScreen(int sceneIndex)
     {
@@ -580,13 +599,4 @@ public class GameManager : MonoBehaviour
         GUIUtility.systemCopyBuffer = playerIDField.text;
     }
 
-    public void Logout()
-    {
-        //Todo �berpr�fen ob Server und Client gleich sind wenn nein dann ist etwas falsch und Spieler �bernehemen
-
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
-        Application.Quit();
-    }
 }
