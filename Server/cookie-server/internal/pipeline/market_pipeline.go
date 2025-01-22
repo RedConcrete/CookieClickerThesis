@@ -19,16 +19,17 @@ func NewMarketGenerator(database database.Database, interval time.Duration) *Mar
 	}
 }
 
+// TODO muss aus kvn gemacht werden
 func (mg *MarketGenerator) StartGenerator() error {
 	for {
 		// generate market
 		newMarket := api.Market{
-			SugarPrice:     float64(rand.Intn(1000) + 1),
-			FlourPrice:     float64(rand.Intn(1000) + 1),
-			EggsPrice:      float64(rand.Intn(1000) + 1),
-			ButterPrice:    float64(rand.Intn(1000) + 1),
-			ChocolatePrice: float64(rand.Intn(1000) + 1),
-			MilkPrice:      float64(rand.Intn(1000) + 1),
+			SugarPrice:     float64(200 + rand.Intn(150)),
+			FlourPrice:     float64(300 + rand.Intn(150)),
+			EggsPrice:      float64(100 + rand.Intn(150)),
+			ButterPrice:    float64(400 + rand.Intn(150)),
+			ChocolatePrice: float64(500 + rand.Intn(50)),
+			MilkPrice:      float64(200 + rand.Intn(150)),
 		}
 
 		// save to database

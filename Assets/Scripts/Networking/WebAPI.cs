@@ -8,16 +8,22 @@ using Newtonsoft.Json;
 using Server.Data;
 using UnityEngine.SceneManagement;
 using Steamworks;
+using Unity.VisualScripting;
+using UnityEngine.SocialPlatforms;
+using UnityEditor.PackageManager;
+using System.Security.Cryptography;
+using Unity.Mathematics;
 
 
 public class WebAPI : MonoBehaviour
 {
     public static WebAPI Instance { get; private set; }
-    public static Player player;  // Statische Variable f�r den Player
+    public static User user;  // Statische Variable f�r den Player
     public static ulong SteamId;  // Statische Steam-ID des Players
     private AuthTicket authTicket;
 
     List<Market> marketList;
+    //private string baseUrl = "http://cookie-server.r3dconcrete.de:3000";
     private string baseUrl = "http://localhost:3000";
     private GameManager gameManager;
     private int loginScene = 0;
@@ -28,16 +34,16 @@ public class WebAPI : MonoBehaviour
         try
         {
             Steamworks.SteamClient.Init(2816100);
-            
+
             StartCoroutine(AuthenticateUser());
-            
+
         }
         catch (System.Exception e)
         {
             Debug.LogError(e + " Steam connection ERROR! ");
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
             Application.Quit();
         }
 
@@ -84,7 +90,7 @@ public class WebAPI : MonoBehaviour
             string base64Ticket = Convert.ToBase64String(ticketData);
 
             Debug.Log("SteamID: " + GetSteamID());
-            
+
             // Warten für 1 Sekunde
             yield return new WaitForSeconds(loginLoadTime);
             StartCoroutine(WebAPI.Instance.GetPlayer(SteamId.ToString(), true));
@@ -120,7 +126,7 @@ public class WebAPI : MonoBehaviour
                 string playerJsonData = webRequest.downloadHandler.text;
                 if (!string.IsNullOrEmpty(playerJsonData))
                 {
-                    player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                    user = JsonConvert.DeserializeObject<User>(playerJsonData);  // Zuweisung zur statischen Variable
                     SceneManager.LoadScene(1);
                 }
                 else
@@ -149,26 +155,26 @@ public class WebAPI : MonoBehaviour
                 {
                     case UnityWebRequest.Result.ConnectionError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
                         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
                         Application.Quit();
                         break;
                     case UnityWebRequest.Result.ProtocolError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-                        
+
                         break;
                     case UnityWebRequest.Result.DataProcessingError:
                         Debug.LogError(String.Format("ERROR " + webRequest.error));
-                        
+
                         break;
                     case UnityWebRequest.Result.Success:
                         string playerJsonData = webRequest.downloadHandler.text;
-                        player = JsonConvert.DeserializeObject<Player>(playerJsonData);  // Zuweisung zur statischen Variable
+                        user = JsonConvert.DeserializeObject<User>(playerJsonData);  // Zuweisung zur statischen Variable
                         if (isLoggingIn)
                         {
                             SceneManager.LoadScene(1);
-                            Debug.Log("Login successful wiht: " + steamid);
+                            Debug.Log("Login successful with: " + steamid);
                         }
                         break;
                 }
@@ -181,27 +187,69 @@ public class WebAPI : MonoBehaviour
     }
 
     /**
-     * 
-     *  todo muss angepast werden so, dass der Server alle infos bekommt
-     *  die gemacht werden m�ssen und dann es auf derm Server durchgef�hrt wird
+     *
      * 
     **/
-    public IEnumerator UpdatePlayer(string steamid)
+    public IEnumerator UpdatePlayerAndMarket(string steamid, int amount)
     {
-        string url = baseUrl + "/updatePlayer";
+        string url = baseUrl + "/update/" + steamid + "?amount=" + amount;
         byte[] playerData = Encoding.UTF8.GetBytes(steamid);
 
-        UnityWebRequest webRequest = new UnityWebRequest(url, "Put");
-        webRequest.uploadHandler = new UploadHandlerRaw(playerData);
-        webRequest.SetRequestHeader("Content-Type", "application/json");
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
-            Debug.LogError(webRequest.error + " while updating Player");
+            yield return webRequest.SendWebRequest();
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                    Debug.LogError("ERROR: " + webRequest.error);
+                    break;
+                case UnityWebRequest.Result.Success:
+                    string marketJsonData = webRequest.downloadHandler.text;
+
+                    // Deserialisiere das UserMarketData-Objekt
+                    UserMarketData userMarketData = JsonConvert.DeserializeObject<UserMarketData>(marketJsonData);
+
+                    user = new User
+                    {
+                        steamid = userMarketData.user.steamid,
+                        cookies = (int)userMarketData.user.cookies,
+                        sugar = (int)userMarketData.user.sugar,
+                        flour = (int)userMarketData.user.flour,
+                        eggs = (int)userMarketData.user.eggs,
+                        butter = (int)userMarketData.user.butter,
+                        chocolate = (int)userMarketData.user.chocolate,
+                        milk = (int)userMarketData.user.milk,
+                    };
+
+                    // Benutze die neue Markt-Liste
+                    List<Market> newMarketList = new List<Market>();
+
+                    // Märkte in die newMarketList konvertieren
+                    foreach (var userMarket in userMarketData.markets)
+                    {
+                        Market market = new Market
+                        {
+                            Id = userMarket.id,
+                            date = userMarket.date,
+                            sugarPrice = userMarket.sugarPrice,
+                            flourPrice = userMarket.flourPrice,
+                            eggsPrice = userMarket.eggsPrice,
+                            butterPrice = userMarket.butterPrice,
+                            chocolatePrice = userMarket.chocolatePrice,
+                            milkPrice = userMarket.milkPrice
+                        };
+
+                        newMarketList.Add(market);
+                    }
+
+                    // Weise newMarketList zu marketList zu
+                    marketList = newMarketList;
+                    break;
+            }
         }
-        webRequest.Dispose();
     }
+
 
     public IEnumerator GetPrices(int amount)
     {
@@ -271,13 +319,13 @@ public class WebAPI : MonoBehaviour
                         else
                         {
                             Debug.Log(playerJsonData);
-                            JsonUtility.FromJsonOverwrite(playerJsonData, player);
+                            JsonUtility.FromJsonOverwrite(playerJsonData, user);
                             gameManager.UpdateRecources();
                         }
                         break;
                 }
-                Debug.Log("Player has: " + player.cookies + " Cookies");
-                gameManager.UpdatePlayerData();
+                Debug.Log("Player has: " + user.cookies + " Cookies");
+                gameManager.UpdateMarketDataAndUserData();
             }
         }
     }

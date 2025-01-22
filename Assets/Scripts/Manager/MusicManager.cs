@@ -25,9 +25,44 @@ public class MusicManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // Sicherstellen, dass beim Start ein zufälliger Song gespielt wird
+        PlayRandomMusic();
+    }
+
+    private void Update()
+    {
+        // Check if the current track has finished playing
+        if (!musicSource.isPlaying && musicSource.clip != null)
+        {
+            PlayRandomMusic(); // Play a random track when the current one ends
+        }
+    }
+
     public void PlayMusic(string trackName, float fadeDuration = 0.5f, bool isMuffled = false)
     {
         StartCoroutine(AnimateMusicCrossfade(musicLibrary.GetClipFromName(trackName), fadeDuration, isMuffled));
+    }
+
+    public void PlayRandomMusic(float fadeDuration = 0.5f, bool isMuffled = false)
+    {
+        AudioClip randomTrack = musicLibrary.GetRandomClip();
+        if (randomTrack != null)
+        {
+            // Überprüfe, ob das aktuelle Lied nicht schon das gleiche wie das zufällige ist
+            if (musicSource.clip == randomTrack)
+            {
+                PlayRandomMusic(fadeDuration, isMuffled); // Rekursive Aufruf, falls das gleiche Lied wieder gewählt wird
+                return;
+            }
+
+            StartCoroutine(AnimateMusicCrossfade(randomTrack, fadeDuration, isMuffled));
+        }
+        else
+        {
+            Debug.LogWarning("MusicLibrary is empty or no tracks available!");
+        }
     }
 
     IEnumerator AnimateMusicCrossfade(AudioClip nextTrack, float fadeDuration = 0.5f, bool isMuffled = false)
@@ -71,7 +106,6 @@ public class MusicManager : MonoBehaviour
         return musicSource.isPlaying && musicSource.clip != null && musicSource.clip.name == trackName;
     }
 
-    // Muffle the currently playing track
     public void MuffleCurrentTrack(float fadeDuration = 0f)
     {
         if (musicSource.isPlaying)
@@ -80,7 +114,6 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    // Unmuffle the currently playing track
     public void UnmuffleCurrentTrack(float fadeDuration = 1f)
     {
         if (musicSource.isPlaying)
@@ -89,7 +122,6 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    // Coroutine to smoothly apply or remove the muffling effect
     private IEnumerator AnimateMuffling(bool muffle, float fadeDuration)
     {
         float startValue = lowPassFilter.cutoffFrequency;
@@ -108,8 +140,7 @@ public class MusicManager : MonoBehaviour
 
     public bool IsTrackMuffled()
     {
-        // Pr�ft, ob der LowPassFilter auf einen dumpfen Wert gesetzt ist (z.B. 800 Hz)
+        // Prüft, ob der LowPassFilter auf einen dumpfen Wert gesetzt ist (z.B. 800 Hz)
         return lowPassFilter.cutoffFrequency <= 800f;
     }
-
 }
