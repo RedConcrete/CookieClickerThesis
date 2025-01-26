@@ -17,7 +17,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning/data_sources
+      - ./grafana/provisioning:/etc/grafana/provisioning/datasources
     profiles:
       - analysis
   # backend for logs
