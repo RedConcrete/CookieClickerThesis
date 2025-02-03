@@ -582,6 +582,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SwitchFullscreen(GameObject gameObject)
+    {
+        // Hole die Toggle-Komponente vom GameObject
+        Toggle toggle = gameObject.GetComponent<Toggle>();
+
+        // Wenn die Toggle-Komponente existiert, setze den Fullscreen-Modus entsprechend
+        if (toggle != null)
+        {
+            Screen.fullScreen = toggle.isOn;
+        }
+        else
+        {
+            Debug.LogError("Das angegebene GameObject hat keine Toggle-Komponente!");
+        }
+    }
+
     public void OpenPopup(string popup)
     {
         GameObject gameObject = null;
@@ -589,10 +605,17 @@ public class GameManager : MonoBehaviour
         {
             case "settings":
                 gameObject = GameObject.Find("UiScreen_Popup_Settings");
-                gameObject.transform.position = new Vector2(0,0);
+                gameObject.transform.position = new Vector2(screenWidth / 2, screenHeight / 2);
+                break;
+            case "close":
+                gameObject = GameObject.Find("UiScreen_Popup_Exit");
+                gameObject.transform.position = new Vector2(screenWidth / 2, screenHeight / 2);
                 break;
             default:
-                
+                GameObject gameObjectSettings = GameObject.Find("UiScreen_Popup_Settings");
+                GameObject gameObjectExit = GameObject.Find("UiScreen_Popup_Exit");
+                gameObjectSettings.transform.position = new Vector2(-screenWidth / 2, screenHeight / 2);
+                gameObjectExit.transform.position = new Vector2(-screenWidth / 2, screenHeight / 2);
                 break;
         }
     }
