@@ -6,10 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"time"
-
 	"cookie-server/internal/database"
-	internal "cookie-server/internal/pipeline"
 	api "cookie-server/internal/server"
 	"os"
 )
@@ -29,6 +26,12 @@ func main() {
 		return
 	}
 
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Aktuelles Arbeitsverzeichnis:", dir)
+
 	// Verbindung zur Datenbank herstellen
 	database, err := database.NewPostgresDatabase(dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
@@ -43,16 +46,6 @@ func main() {
 	}
 	cookieService := service.NewCookieService(database)
 
-	// Erstelle einen neuen Kontext mit Abbruch
-	// ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel() // Stelle sicher, dass der Kontext bei Beendigung abgebrochen wird
-
-	// Starte die Pipeline für die Marktobjekte
-	// go internal.StartPipeline(ctx, database, 10*time.Second)
-
-	mg := internal.NewMarketGenerator(database, 10*time.Second)
-	go mg.StartGenerator()
-
 	// Erstelle den API-Server mit dem Service
 	srv, err := api.NewServer(cookieService)
 	if err != nil {
@@ -62,8 +55,12 @@ func main() {
 
 	log.Println("starting server")
 
-	// Starte den HTTP-Server
-	if err := http.ListenAndServe(":3000", srv); err != nil {
+	// Starte den HTTPS-Server auf Port 3000
+	certFile := "/etc/letsencrypt/live/r3dconcrete.de-0001/fullchain.pem"
+	keyFile := "/etc/letsencrypt/live/r3dconcrete.de-0001/privkey.pem"
+
+	// Starte den HTTPS-Server
+	if err := http.ListenAndServeTLS(":3000", certFile, keyFile, srv); err != nil {
 		log.Fatal(err)
 		return
 	}
