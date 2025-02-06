@@ -33,9 +33,8 @@ services:
       DB_PASSWORD: 1234
       DB_NAME: CookieData
     volumes:
-      - cert:etc/letsencrypt/r3dconcrete.de/
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 
 volumes:
   db_data:
-  cert:
 

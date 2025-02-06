@@ -56,8 +56,8 @@ func main() {
 	log.Println("starting server")
 
 	// Starte den HTTPS-Server auf Port 3000
-	certFile := "/etc/letsencrypt/live/r3dconcrete.de-0001/fullchain.pem"
-	keyFile := "/etc/letsencrypt/live/r3dconcrete.de-0001/privkey.pem"
+	certFile := "/etc/letsencrypt/live/r3dconcrete.de/fullchain.pem"
+	keyFile := "/etc/letsencrypt/live/r3dconcrete.de/privkey.pem"
 
 	// Starte den HTTPS-Server
 	if err := http.ListenAndServeTLS(":3000", certFile, keyFile, srv); err != nil {
