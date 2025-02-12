@@ -15,7 +15,7 @@ services:
     image: grafana/grafana
     restart: always
     ports:
-      - 3000:3000
+      - 3001:3000
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning/datasources
     profiles:
@@ -46,7 +46,22 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     profiles:
       - analysis
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector
+    restart: always
+    ports:
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4318:4318 # OTLP http receiver
+      - 3003:3003 # OTLP http exporter
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    command:
+      --config /etc/otel-collector-config.yml
+    profiles:
+      - analysis
+
 
 volumes:
   grafana_config: {}
-# todo: connect backend with frontend and setup default dashboard

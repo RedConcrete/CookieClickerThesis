@@ -158,7 +158,7 @@ func decodeUpdateUserIdGetParams(args [1]string, argsEscaped bool, r *http.Reque
 	}
 	// Set default value for query: amount.
 	{
-		val := int(20)
+		val := int(21)
 		params.Amount.SetTo(val)
 	}
 	// Decode query: amount.
