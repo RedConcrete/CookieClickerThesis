@@ -7,6 +7,8 @@ import (
 	"cookie-server/internal/middleware"
 	internal "cookie-server/internal/pipeline"
 	api "cookie-server/internal/server"
+	"crypto/tls"
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,6 +18,9 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
+
+//go:embed certs/server.crt certs/server.key
+var certFS embed.FS
 
 var dbHost string
 var dbPort int
@@ -30,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		_, err := middleware.SetupOTelSDK(context.Background())
 		if err != nil {
-			log.Fatalf("could not initialize optp setup %v", err)
+			log.Fatalf("could not initialize otl	p setup %v", err)
 		}
 
 		database, err := database.NewPostgresDatabase(dbHost, dbPort, dbUser, dbPassword, dbName)
@@ -55,9 +60,37 @@ var rootCmd = &cobra.Command{
 		}
 
 		log.Println("starting server on port: 3000")
+		// Load the embedded certificates
 
-		// Starte den HTTP-Server
-		if err := http.ListenAndServe(":3000", srv); err != nil {
+		certData, err := certFS.ReadFile("certs/server.crt")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		keyData, err := certFS.ReadFile("certs/server.key")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		// Create a TLS certificate
+		cert, err := tls.X509KeyPair(certData, keyData)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		// Configure the HTTPS server
+		server := &http.Server{
+			Addr:    ":3000",
+			Handler: srv,
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		}
+
+		// Starte den HTTPS-Server
+		if err := server.ListenAndServeTLS("", ""); err != nil {
 			log.Fatal(err)
 			return
 		}

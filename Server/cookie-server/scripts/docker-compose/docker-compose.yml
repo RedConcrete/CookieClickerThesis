@@ -10,6 +10,20 @@ services:
       - 5460:5432
     profiles:
       - basic
+  server:
+    build:
+      context: ../..
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: CookieData
+    profiles:
+      - core
   # for visualisation
   grafana:
     image: grafana/grafana
@@ -57,11 +71,9 @@ services:
       - 3003:3003 # OTLP http exporter
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml
-    command:
-      --config /etc/otel-collector-config.yml
+    command: --config /etc/otel-collector-config.yml
     profiles:
       - analysis
-
 
 volumes:
   grafana_config: {}
