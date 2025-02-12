@@ -38,11 +38,11 @@ run-observed-local: environment-up observability-up
 .PHONY: all-down
 all-down: environment-down observability-down
 	docker-compose -f ./scripts/docker-compose/docker-compose.yml --profile core down
+	docker rmi docker-compose-server:latest
 
 .PHONY: run-all-docker
 run-all-docker: environment-up observability-up
 	docker-compose -f ./scripts/docker-compose/docker-compose.yml --profile core up
-
 
 .PHONY: docker-build
 docker-build:

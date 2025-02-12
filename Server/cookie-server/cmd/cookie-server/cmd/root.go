@@ -35,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		_, err := middleware.SetupOTelSDK(context.Background())
 		if err != nil {
-			log.Fatalf("could not initialize otl	p setup %v", err)
+			log.Fatalf("could not initialize otlp setup %v", err)
 		}
 
 		database, err := database.NewPostgresDatabase(dbHost, dbPort, dbUser, dbPassword, dbName)
@@ -60,8 +60,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		log.Println("starting server on port: 3000")
+		
 		// Load the embedded certificates
-
 		certData, err := certFS.ReadFile("certs/server.crt")
 		if err != nil {
 			log.Fatal(err)
@@ -86,6 +86,7 @@ var rootCmd = &cobra.Command{
 			Handler: srv,
 			TLSConfig: &tls.Config{
 				Certificates: []tls.Certificate{cert},
+				MinVersion:   tls.VersionTLS12,
 			},
 		}
 
